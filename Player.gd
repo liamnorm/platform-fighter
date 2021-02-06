@@ -2,7 +2,8 @@ extends KinematicBody2D
 
 var LEDGES
 
-var character = "Fock"
+var playernumber = 0
+var character = "Fox"
 var skin = 0
 var controller = 0
 
@@ -44,7 +45,7 @@ var frames_since_ledge = 0
 
 var motion = Vector2()
 
-var facing_right = true
+var d = 1
 var has_double_jump = true
 var in_fast_fall = false
 var shield_size = SHIELDTIME
@@ -59,11 +60,11 @@ var input_lengths = [0,0,0,0,0,0,0,0]
 func _ready():
 	LEDGES = get_tree().get_root().get_node("World").get("LEDGES")
 	
-func _physics_process(delta):
+func _physics_process(_delta):
 	
 	get_input()
 	
-	if self.position.y > 1024:
+	if self.position.y > 1080:
 		respawn(Vector2(0,-512))
 	
 	if !state == "ledge":
@@ -82,10 +83,10 @@ func _physics_process(delta):
 			movement()
 			if input[0]:
 				motion.x += ACCEL
-				facing_right = true
+				d = 1
 			elif input[1]:
 				motion.x -= ACCEL
-				facing_right = false
+				d = -1
 			elif !(input[0] || input[1]):
 				be("idle")
 			groundoptions()
@@ -151,7 +152,7 @@ func _physics_process(delta):
 			has_double_jump = true
 			frames_since_ledge = 0
 			first_time_at_ledge = false
-			facing_right = current_ledge[1] == 1
+			d = current_ledge[1]
 			motion = Vector2(0,0)
 			var ledge_x = current_ledge[0].x + current_ledge[1] * -64
 			var ledge_y = current_ledge[0].y + 64
@@ -191,12 +192,15 @@ func _physics_process(delta):
 			movement()
 			shield_size -= 2
 			if frame > 8:
-				if input[0] || input[1]:
-					facing_right = input[0]
+				if input[0]:
+					d = 1
 					be("roll")
-				if input[3]:
+				elif input[1]:
+					d = -1
+					be("roll")
+				elif input[3]:
 					be("spotdodge")
-				if !input[6]:
+				elif !input[6]:
 					be("outofshield")
 		"outofshield":
 			movement()
@@ -207,10 +211,7 @@ func _physics_process(delta):
 			movement()
 		"roll":
 			var speedmodifier = pow(ROLLFRAMES - abs(frame-(ROLLFRAMES/4)),2)/50
-			if facing_right:
-				motion.x = ROLLSPEED * speedmodifier
-			else:
-				motion.x = -ROLLSPEED * speedmodifier
+			motion.x = -ROLLSPEED * d * speedmodifier
 			if frame > ROLLFRAMES:
 				motion.x = 0
 				buffer(true)
@@ -256,9 +257,9 @@ func be(get):
 			else:
 				nextstate = bufferedstate
 			if buffereddirection == "right":
-				facing_right = true
+				d = 1
 			if buffereddirection == "left":
-				facing_right = false
+				d = -1
 		else:
 			nextstate = get
 		frame = 0
@@ -266,9 +267,9 @@ func be(get):
 		
 		if !nextstate == "jump":
 			if input[0]:
-				facing_right = true
+				d = 1
 			elif input[1]:
-				facing_right = false
+				d = -1
 		bufferedstate = "none"
 		buffereddirection = "none"
 	
@@ -420,7 +421,6 @@ func respawn(place):
 
 func get_input():
 	if controller == 0:
-		var prev_input = input
 		for i in range(6):
 			#input_lengths[i]+= 1
 			#if i==1:
@@ -460,7 +460,7 @@ func beFrame(aframe):
 	$Sprite.frame = aframe
 
 func updateDirection():
-	if facing_right:
+	if d == 1:
 		$Sprite.scale.x = 1
 	else:
 		$Sprite.scale.x = -1

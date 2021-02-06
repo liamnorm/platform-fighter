@@ -1,11 +1,13 @@
 extends "res://Player.gd"
 
+onready var LASER = preload("res://projectiles/laser/Projectile.tscn")
+
 func _ready():
 	GRAVITY = 70
 	MAXFALLSPEED = 1200
-	JUMPFORCE = 1500
-	DOUBLEJUMPFORCE = 1500
-	SHORTJUMPFORCE = 1100
+	JUMPFORCE = 1300
+	DOUBLEJUMPFORCE = 1300
+	SHORTJUMPFORCE = 1000
 
 	MAXGROUNDSPEED = 1200
 	ACCEL = 256
@@ -15,6 +17,8 @@ func _ready():
 	AIRACCEL = 64
 	AIRFRICTION = 0.5
 	FASTFALLSPEED = 1400
+	
+var laser
 
 func neutralspecial():
 	movement()
@@ -24,6 +28,14 @@ func neutralspecial():
 				stage+= 1
 				frame = 0
 		1:
+			if frame%12 == 2:
+				laser = LASER.instance()
+				laser.position = get_position() + Vector2(d*140,-14)
+				laser.d = d
+				laser.frame = 0
+				laser.player = playernumber
+				get_tree().get_root().add_child(laser)
+				laser.start()
 			if (frame > 0 && frame%16 == 0) && !input[4]:
 				stage+= 1
 				frame = 0
@@ -45,17 +57,11 @@ func sidespecial():
 			motion.y = 0
 			motion.x = 0
 		1:
-			if facing_right:
-				motion.x = 7000
-			else:
-				motion.x = -7000
+			motion.x = d * 7000
 			motion.y = 0
 			
 			if frame > 4:
-				if facing_right:
-					motion.x = 1000
-				else:
-					motion.x = -1000
+				motion.x = d * 1000
 				stage+= 1
 				frame = 0
 		2:

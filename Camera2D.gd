@@ -17,7 +17,7 @@ var NUM_OF_PLAYERS = 2
 func _ready():
 	NUM_OF_PLAYERS = get_tree().get_root().get_node("World").get("NUM_OF_PLAYERS")
 
-func _process(delta):
+func _process(_delta):
 	for i in range(NUM_OF_PLAYERS):
 		var node_name = "../Player" + str(i+1)
 		var pxpos = get_node(node_name).get_position().x
