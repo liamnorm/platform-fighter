@@ -1,0 +1,136 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://characters/fock/spritesheetalpha.png" type="Texture" id=1]
+[ext_resource path="res://characters/fock/foxpalette.png" type="Texture" id=2]
+[ext_resource path="res://Fock.gd" type="Script" id=3]
+[ext_resource path="res://shield.png" type="Texture" id=4]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+uniform sampler2D palette_tex; //Palette to reference, this should be a 1-pixel tall texture containing your palette info
+uniform vec4 outline_col : hint_color; //Outline color
+uniform float skin;
+uniform int invincibility;
+
+void fragment() {
+    
+    //Get red value and sample palette based on it
+    float pal_sample = texture(TEXTURE,UV).r;
+	float yval = skin/8f;
+    vec4 col = texture(palette_tex,vec2(pal_sample,yval));
+    
+    //Get alpha val of adjacent pixels
+    vec2 p = TEXTURE_PIXEL_SIZE;
+    
+    float a = texture(TEXTURE,UV+vec2(p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(-p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(0,p.y)).a;
+    a += texture(TEXTURE,UV+vec2(0,-p.y)).a;
+    
+    //Using found alpha value, determine the opacity of the outline
+    
+    a = step(a,.5);//Clamp the a value
+    col.rgb = mix(outline_col.xyz, col.rgb, col.a);
+    col.a = step(a, col.a);
+	
+	float w = 0.0;
+	
+	if (invincibility > 0) {
+		vec2 position = POINT_COORD;
+		w = sin((position.x+TIME/2.0) * 16.0)/50.0 + 0.15;
+	}
+	col += vec4(w,w,w,0);
+    
+    //Get palette color
+    COLOR = col;
+
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+resource_local_to_scene = true
+shader = SubResource( 1 )
+shader_param/outline_col = Color( 0, 0, 0, 1 )
+shader_param/skin = 0.0
+shader_param/invincibility = 10
+shader_param/palette_tex = ExtResource( 2 )
+
+[sub_resource type="RectangleShape2D" id=3]
+extents = Vector2( 64, 56 )
+
+[sub_resource type="Animation" id=4]
+length = 0.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ 0, 1 ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "NeutralSpecial"
+length = 0.266667
+loop = true
+step = 0.0666667
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.0666667, 0.133333, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 9, 10, 11, 12 ]
+}
+
+[sub_resource type="Animation" id=6]
+length = 0.266667
+loop = true
+step = 0.0666667
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.0666667, 0.133333, 0.2 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ 2, 3, 4, 5 ]
+}
+
+[node name="Fock" type="KinematicBody2D"]
+collision_mask = 0
+script = ExtResource( 3 )
+
+[node name="Sprite" type="Sprite" parent="."]
+material = SubResource( 2 )
+texture = ExtResource( 1 )
+vframes = 2
+hframes = 8
+frame = 9
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2( 0, 8 )
+shape = SubResource( 3 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/Idle = SubResource( 4 )
+anims/NeutralSpecial = SubResource( 5 )
+anims/Walk = SubResource( 6 )
+
+[node name="Shield" type="Sprite" parent="."]
+visible = false
+position = Vector2( 0, 16 )
+texture = ExtResource( 4 )
