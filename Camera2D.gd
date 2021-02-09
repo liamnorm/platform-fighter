@@ -1,15 +1,19 @@
 extends Camera2D
 
 
-var minx
-var maxx
-var miny
-var maxy
-var x_offset
-var y_offset
-const XBOUNDS = 0
-const SCREENX = 500
-const SCREENY = 500
+var minx = 0
+var maxx = 0
+var miny = 0
+var maxy = 0
+var x_offset = 0
+var y_offset = 0
+const XBOUNDS = 200
+const YBOUNDS = 200
+const SCREENX = 200
+const SCREENY = 200
+var do_rumble = 0
+var rumblex = 0
+var rumbley = 0
 
 var NUM_OF_PLAYERS = 2
 
@@ -18,34 +22,41 @@ func _ready():
 	NUM_OF_PLAYERS = get_tree().get_root().get_node("World").get("NUM_OF_PLAYERS")
 
 func _process(_delta):
-	for i in range(NUM_OF_PLAYERS):
-		var node_name = "../Player" + str(i+1)
-		var pxpos = get_node(node_name).get_position().x
-		var pypos = get_node(node_name).get_position().y
-		if i == 0:
-			minx = pxpos
-			miny = pypos
-			maxx = pxpos
-			maxy = pypos
-		else:
-			minx = min(minx, pxpos)
-			maxx = max(maxx, pxpos)
-			miny = min(miny, pypos)
-			maxy = max(maxy, pypos)
-	
-	var finalmax = max(abs(maxx-minx), abs(maxy-miny)*2)
-	var zoomo = finalmax/600
-	zoomo = lerp(zoomo,zoom.x,0.9)
-	zoomo = clamp(zoomo, 1, 2)
-	zoom = Vector2(zoomo, zoomo) 
-	
-	x_offset = (maxx+minx)/2
-	y_offset = (maxy+miny)/2
-	
-	x_offset = clamp(x_offset,-XBOUNDS-SCREENX/zoomo,XBOUNDS+SCREENX/zoomo)
-	y_offset = clamp(y_offset,-SCREENY/zoomo, SCREENY/zoomo)
-	
-	x_offset = lerp(x_offset, position.x, 0.9)
-	y_offset = lerp(y_offset, position.y, 0.9)
-	
-	set_position(Vector2(x_offset,y_offset))
+		
+	do_rumble = get_tree().get_root().get_node("World").get("IMPACTFRAME")
+	if !get_tree().get_root().get_node("World").get("PAUSED"):
+
+		for i in range(NUM_OF_PLAYERS):
+			var node_name = "../Player" + str(i+1)
+			var pxpos = get_node(node_name).get_position().x
+			var pypos = get_node(node_name).get_position().y
+			if i == 0:
+				minx = pxpos
+				miny = pypos
+				maxx = pxpos
+				maxy = pypos
+			else:
+				minx = min(minx, pxpos)
+				maxx = max(maxx, pxpos)
+				miny = min(miny, pypos)
+				maxy = max(maxy, pypos)
+		
+		var finalmax = max(abs(maxx-minx), abs(maxy-miny)*2)
+		var zoomo = finalmax/600
+		zoomo = lerp(zoomo,zoom.x,0.9)
+		zoomo = clamp(zoomo, 0.5, 1.5)
+		zoom = Vector2(zoomo, zoomo) 
+		
+		x_offset = (maxx+minx)/2
+		y_offset = (maxy+miny)/2
+		
+		x_offset = clamp(x_offset,-XBOUNDS-SCREENX/zoomo,XBOUNDS+SCREENX/zoomo)
+		y_offset = clamp(y_offset,-YBOUNDS-SCREENY/zoomo, YBOUNDS+SCREENY/zoomo)
+		
+		x_offset = lerp(x_offset, position.x, 0.9)
+		y_offset = lerp(y_offset, position.y, 0.9)
+		
+		
+		rumblex = do_rumble * randi()%10
+		rumbley = do_rumble * randi()%10
+		set_position(Vector2(x_offset+rumblex, y_offset+rumbley))

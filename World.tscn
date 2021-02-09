@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://stage/stage.png" type="Texture" id=1]
 [ext_resource path="res://World.gd" type="Script" id=2]
@@ -6,14 +6,32 @@
 [ext_resource path="res://stage/background.png" type="Texture" id=4]
 [ext_resource path="res://stage/Platform.tscn" type="PackedScene" id=5]
 [ext_resource path="res://FPS.gd" type="Script" id=6]
+[ext_resource path="res://CheckBox.gd" type="Script" id=7]
 
 [node name="World" type="Node2D"]
 script = ExtResource( 2 )
 
-[node name="Camera2D" type="Camera2D" parent="."]
-current = true
-smoothing_enabled = true
-script = ExtResource( 3 )
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer"]
+margin_right = 664.0
+margin_bottom = 344.0
+text = "FPS"
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckBox" type="CheckBox" parent="CanvasLayer"]
+margin_left = 8.0
+margin_top = 32.0
+margin_right = 32.0
+margin_bottom = 56.0
+text = "Show hitboxes"
+script = ExtResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 
@@ -25,30 +43,25 @@ scale = Vector2( 4, 4 )
 texture = ExtResource( 4 )
 
 [node name="Platform" parent="." instance=ExtResource( 5 )]
-position = Vector2( 0, -64 )
+position = Vector2( 0, -128 )
 
 [node name="Platform2" parent="." instance=ExtResource( 5 )]
-position = Vector2( -320, 96 )
+position = Vector2( -384, 64 )
 
 [node name="Platform3" parent="." instance=ExtResource( 5 )]
-position = Vector2( 320, 96 )
+position = Vector2( 384, 64 )
 
 [node name="Stage" type="StaticBody2D" parent="."]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Stage"]
-position = Vector2( -117.5, 205.522 )
-scale = Vector2( 0.715777, 0.797682 )
-polygon = PoolVector2Array( -729.977, 63.2804, 1058.29, 63.2804, 1058.29, 143.513, 790.051, 384.21, -461.736, 384.21, -729.977, 143.513 )
+position = Vector2( -144, 208 )
+scale = Vector2( 0.852781, 0.797682 )
+polygon = PoolVector2Array( -581.626, 60.1743, 919.345, 60.1743, 919.345, 140.407, 694.199, 381.104, -356.481, 381.104, -581.626, 140.407 )
 
 [node name="Sprite" type="Sprite" parent="Stage"]
-position = Vector2( 0, 384 )
+position = Vector2( -2.28882e-05, 384 )
 texture = ExtResource( 1 )
 
-[node name="RichTextLabel" type="RichTextLabel" parent="."]
-margin_right = 192.0
-margin_bottom = 208.0
-text = "FPS"
-script = ExtResource( 6 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="Camera2D" type="Camera2D" parent="."]
+current = true
+script = ExtResource( 3 )

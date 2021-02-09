@@ -4,7 +4,7 @@
 [ext_resource path="res://projectiles/Projectile.gd" type="Script" id=2]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 32, 8 )
+extents = Vector2( 0, 0 )
 
 [node name="Laser" type="KinematicBody2D"]
 collision_mask = 0
