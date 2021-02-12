@@ -43,6 +43,11 @@ func _ready():
 func _process(_delta):
 	if Input.is_action_just_pressed("pause"):
 		PAUSED = !PAUSED
+		
+	if Input.is_action_just_pressed("select"):
+		SHOWHITBOXES = !SHOWHITBOXES
 	
 	if IMPACTFRAME > 0:
 		IMPACTFRAME -= 1
+		
+	

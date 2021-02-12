@@ -1,34 +1,24 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://stage/stage.png" type="Texture" id=1]
-[ext_resource path="res://World.gd" type="Script" id=2]
-[ext_resource path="res://Camera2D.gd" type="Script" id=3]
-[ext_resource path="res://stage/background.png" type="Texture" id=4]
-[ext_resource path="res://stage/Platform.tscn" type="PackedScene" id=5]
-[ext_resource path="res://FPS.gd" type="Script" id=6]
-[ext_resource path="res://CheckBox.gd" type="Script" id=7]
+[ext_resource path="res://stage/stage.png" type="Texture" id=2]
+[ext_resource path="res://scenes/supportscenes/Camera2D.gd" type="Script" id=3]
+[ext_resource path="res://ui/FPS.gd" type="Script" id=4]
+[ext_resource path="res://stage/background.png" type="Texture" id=5]
+[ext_resource path="res://scenes/mainscene/World.gd" type="Script" id=6]
+[ext_resource path="res://stage/Platform.tscn" type="PackedScene" id=7]
 
 [node name="World" type="Node2D"]
-script = ExtResource( 2 )
+script = ExtResource( 6 )
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer"]
-margin_right = 664.0
-margin_bottom = 344.0
+margin_left = 48.0
+margin_top = 48.0
+margin_right = 1072.0
+margin_bottom = 672.0
 text = "FPS"
-script = ExtResource( 6 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="CheckBox" type="CheckBox" parent="CanvasLayer"]
-margin_left = 8.0
-margin_top = 32.0
-margin_right = 32.0
-margin_bottom = 56.0
-text = "Show hitboxes"
-script = ExtResource( 7 )
+script = ExtResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -40,15 +30,15 @@ visible = false
 
 [node name="Sprite" type="Sprite" parent="ParallaxBackground/ParallaxLayer"]
 scale = Vector2( 4, 4 )
-texture = ExtResource( 4 )
+texture = ExtResource( 5 )
 
-[node name="Platform" parent="." instance=ExtResource( 5 )]
+[node name="Platform" parent="." instance=ExtResource( 7 )]
 position = Vector2( 0, -128 )
 
-[node name="Platform2" parent="." instance=ExtResource( 5 )]
+[node name="Platform2" parent="." instance=ExtResource( 7 )]
 position = Vector2( -384, 64 )
 
-[node name="Platform3" parent="." instance=ExtResource( 5 )]
+[node name="Platform3" parent="." instance=ExtResource( 7 )]
 position = Vector2( 384, 64 )
 
 [node name="Stage" type="StaticBody2D" parent="."]
@@ -60,7 +50,7 @@ polygon = PoolVector2Array( -581.626, 60.1743, 919.345, 60.1743, 919.345, 140.40
 
 [node name="Sprite" type="Sprite" parent="Stage"]
 position = Vector2( -2.28882e-05, 384 )
-texture = ExtResource( 1 )
+texture = ExtResource( 2 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true

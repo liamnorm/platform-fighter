@@ -4,7 +4,7 @@ var FPS
 var DAMAGE
 
 func _ready():
-	set("custom_fonts/normal_font",load("res://ui/font.tres"))
+	set("custom_fonts/normal_font",load("res://ui/fonts/font.tres"))
 
 func _process(_delta):
 	FPS = Engine.get_frames_per_second()
@@ -13,6 +13,7 @@ func _process(_delta):
 	var i = 1
 	for player in get_tree().get_root().get_node("World").players:
 		DAMAGE += "P" + str(i) + ": " + str(player.damage) + "%\n  "
+		#DAMAGE += str(player.input[1] && player.input[2]) + "\n  "
 		i += 1
 	
 	

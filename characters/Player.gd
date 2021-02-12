@@ -1,6 +1,6 @@
 extends KinematicBody2D
 
-onready var HITBOX = preload("res://Hitbox.tscn")
+onready var HITBOX = preload("res://characters/Hitbox.tscn")
 var hitboxes = []
 
 var LEDGES
@@ -81,6 +81,9 @@ var input_lengths = [0,0,0,0,0,0,0,0]
 var ref = 0
 
 func _ready():
+	
+	Server.fetchMovementData("GRAVITY", get_instance_id())
+		
 	LEDGES = get_tree().get_root().get_node("World").get("LEDGES")
 	drawhurtbox()
 	
@@ -143,14 +146,31 @@ func statebasedaction():
 		"run":
 			movement()
 			if input[0]:
-				motion.x += ACCEL
 				d = 1
+				if frame < 4:
+					if motion.x < 0:
+						frame = 0
+					motion.x = MAXGROUNDSPEED
+				else:
+					motion.x += ACCEL
+					d = 1
 			elif input[1]:
-				motion.x -= ACCEL
 				d = -1
+				if frame < 4:
+					if motion.x > 0:
+						frame = 0
+					motion.x = -MAXGROUNDSPEED
+				else:
+					motion.x -= ACCEL
 			elif !(input[0] || input[1]):
-				be("idle")
+				be("runend")
 			groundoptions()
+		
+		"runend":
+			movement()
+			buffer(true)
+			if frame > 6:
+				be("idle")
 		
 		"jumpstart":
 			movement()
@@ -170,7 +190,7 @@ func statebasedaction():
 		"land":
 			movement()
 			buffer(true)
-			if frame > 4:
+			if frame > 7:
 				if input[3]:
 					be("crouch")
 				else:
@@ -286,9 +306,9 @@ func statebasedaction():
 					if input[1]:
 						motion = Vector2(-1000,1400)
 				elif input[0]:
-					motion = Vector2(1400,-200)
+					motion = Vector2(1100,-200)
 				elif input[1]:
-					motion = Vector2(-1400,-200)
+					motion = Vector2(-1100,-200)
 				else:
 					pass
 			motion.x = lerp(motion.x, 0, .05)
@@ -532,7 +552,7 @@ func ledgesnap():
 func fallcap(on_ground):
 	updatefloorstate()
 	if on_ground:
-		if !(state == "run" || state == "jumpstart" || state == "land"):
+		if !(state == "run" || state == "jumpstart"):
 			motion.x = lerp(motion.x,0,FRICTION)
 		motion.x = clamp(motion.x,-MAXGROUNDSPEED,MAXGROUNDSPEED)
 	else:
@@ -623,9 +643,11 @@ func get_input():
 			false,
 			false
 		]
-		input[0] = get_position().x < LEDGES[0][0].x
-		input[1] = get_position().x > LEDGES[1][0].x
-		input[2] = abs(get_position().x) > LEDGES[1][0].x && frame % 8 == 0
+		#input[0] = randi()%2 == 61 || get_position().x < LEDGES[0][0].x
+		#input[1] = randi()%2 == 60 || get_position().x > LEDGES[1][0].x
+		#input[2] = randi()%30 == 0 || abs(get_position().x) > LEDGES[1][0].x && frame % 8 == 0
+		#input[4] = randi()%31 == 0
+		#input[5] = randi()%31 == 0
 
 	else:
 		input = [
@@ -688,7 +710,7 @@ func interact():
 						damage += h.damage
 						has_airdodge = true
 						motion = Vector2(0,0)
-						launch_knockback = damage * 30 * h.knockback + h.constknockback
+						launch_knockback = damage * 25 * h.knockback + h.constknockback
 						if launch_direction%360 < 90 || launch_direction%360 > 270:
 							d = -1
 						else:

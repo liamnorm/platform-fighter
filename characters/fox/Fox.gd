@@ -1,4 +1,4 @@
-extends "res://Player.gd"
+extends "res://characters/Player.gd"
 
 onready var LASER = preload("res://projectiles/laser/Projectile.tscn")
 
@@ -15,7 +15,7 @@ func _ready():
 
 	MAXGROUNDSPEED = 1200
 	ACCEL = 128
-	FRICTION = 0.5
+	FRICTION = 0.2
 
 	MAXAIRSPEED = 500
 	AIRACCEL = 32
@@ -191,7 +191,7 @@ func drawPlayer():
 		"idle":
 			beFrame(0+(frame/12)%2)
 		"run":
-			beFrame(2+(frame/4)%4)
+			beFrame(2+((frame-1)/3)%4)
 		"jumpstart":
 			beFrame(7)
 		"jump":

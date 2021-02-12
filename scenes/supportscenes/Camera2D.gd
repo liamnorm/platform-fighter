@@ -42,9 +42,9 @@ func _process(_delta):
 				maxy = max(maxy, pypos)
 		
 		var finalmax = max(abs(maxx-minx), abs(maxy-miny)*2)
-		var zoomo = finalmax/600
-		zoomo = lerp(zoomo,zoom.x,0.9)
-		zoomo = clamp(zoomo, 0.5, 1.5)
+		var zoomo = finalmax/400
+		zoomo = lerp(zoomo,zoom.x,0.99)
+		zoomo = clamp(zoomo, 0.75, 1.5)
 		zoom = Vector2(zoomo, zoomo) 
 		
 		x_offset = (maxx+minx)/2
@@ -53,8 +53,8 @@ func _process(_delta):
 		x_offset = clamp(x_offset,-XBOUNDS-SCREENX/zoomo,XBOUNDS+SCREENX/zoomo)
 		y_offset = clamp(y_offset,-YBOUNDS-SCREENY/zoomo, YBOUNDS+SCREENY/zoomo)
 		
-		x_offset = lerp(x_offset, position.x, 0.9)
-		y_offset = lerp(y_offset, position.y, 0.9)
+		x_offset = lerp(x_offset, position.x, 0.95)
+		y_offset = lerp(y_offset, position.y, 0.95)
 		
 		
 		rumblex = do_rumble * randi()%10
