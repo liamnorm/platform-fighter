@@ -6,4 +6,4 @@ func _ready():
 
 
 func _process(_delta):
-	get_tree().get_root().get_node("World").SHOWHITBOXES = is_pressed()
+	Globals.SHOWHITBOXES = is_pressed()

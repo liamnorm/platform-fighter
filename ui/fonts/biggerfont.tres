@@ -3,7 +3,5 @@
 [ext_resource path="res://ui/fonts/Retro Gaming.ttf" type="DynamicFontData" id=1]
 
 [resource]
-size = 66
-outline_size = 5
-outline_color = Color( 0, 0, 0, 1 )
+size = 132
 font_data = ExtResource( 1 )

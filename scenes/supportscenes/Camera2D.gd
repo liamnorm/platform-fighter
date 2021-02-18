@@ -19,12 +19,12 @@ var NUM_OF_PLAYERS = 2
 
 
 func _ready():
-	NUM_OF_PLAYERS = get_tree().get_root().get_node("World").get("NUM_OF_PLAYERS")
+	NUM_OF_PLAYERS = Globals.NUM_OF_PLAYERS
 
 func _process(_delta):
 		
-	do_rumble = get_tree().get_root().get_node("World").get("IMPACTFRAME")
-	if !get_tree().get_root().get_node("World").get("PAUSED"):
+	do_rumble = Globals.IMPACTFRAME
+	if !Globals.PAUSED:
 
 		for i in range(NUM_OF_PLAYERS):
 			var node_name = "../Player" + str(i+1)

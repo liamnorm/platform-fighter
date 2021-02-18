@@ -1,12 +1,16 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://stage/platform.png" type="Texture" id=1]
+[ext_resource path="res://stage/Platform.gd" type="Script" id=2]
 
 [sub_resource type="SegmentShape2D" id=1]
 a = Vector2( -160, 0 )
 b = Vector2( 160, 0 )
 
 [node name="Platform" type="StaticBody2D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource( 2 )
 
 [node name="Collision" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
