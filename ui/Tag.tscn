@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=1]
+[ext_resource path="res://ui/Tag.gd" type="Script" id=2]
+
+[node name="Tag" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="Name" type="RichTextLabel" parent="."]
+margin_left = -24.0
+margin_right = 80.0
+margin_bottom = 72.0
+rect_pivot_offset = Vector2( -24, -88 )
+custom_fonts/normal_font = ExtResource( 1 )
+text = "CPU"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}

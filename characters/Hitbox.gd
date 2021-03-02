@@ -1,48 +1,61 @@
-extends ColorRect
+extends Node2D
 
 const SPEED = 3000
 
 var life = 0
 var player = 0
-var topleft
-var bottomright
+var topleft = []
+var bottomright = []
 var d = 1
-var damage = 0
-var hitdirection = Vector2(0,0)
-var knockback = 1
-var constknockback = 0
-var stun = 0
+var damage = []
+var hitdirection = []
+var knockback = []
+var constknockback = []
+var stun = []
+var shieldstun = []
+var hitstun = []
+var startframe = []
+var boxlengths = []
+
 var players_to_ignore = []
-var hitstun = false
-var startframe = 0
 
 var impact_frame = 0
 
 
 func _ready():
-	pass # Replace with function body.
+	pass
 
 
 func _process(_delta):
+	
 	
 	var paused = Globals.PAUSED
 	var framechange = Input.is_action_just_pressed("nextframe")
 	if ((!paused) || framechange) && impact_frame == 0:
 		d = get_parent().d
 		
-		if d == 1:
-			margin_left = topleft.x * d
-			margin_right = bottomright.x * d
-		else:
-			margin_right = topleft.x * d
-			margin_left = bottomright.x * d
 		
-		margin_top = topleft.y
-		margin_bottom = bottomright.y
+		for b in range(len(topleft)):
+			var boxname = "Box" + str(b)
+			var box = get_node(boxname)
+			if d == 1:
+				box.margin_left = topleft[b].x * d
+				box.margin_right = bottomright[b].x * d
+			else:
+				box.margin_right = topleft[b].x * d
+				box.margin_left = bottomright[b].x * d
+			
+			box.margin_top = topleft[b].y
+			box.margin_bottom = bottomright[b].y
+			
+			if Globals.FRAME >= startframe[b] && Globals.FRAME <= startframe[b] + boxlengths[b]:
+				box.visible = true
+			else:
+				box.visible = false
 		
 		life -= 1
 		
-		if get_parent().state == "land":
+		if ["land", "hit", "mildstun", "hitstun", "knockeddown"].has(get_parent().state):
 			get_parent().hitboxes.erase(self)
 			queue_free()
 

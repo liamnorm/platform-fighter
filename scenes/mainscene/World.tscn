@@ -1,5 +1,6 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=10 format=2]
 
+[ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
 [ext_resource path="res://stage/stage.png" type="Texture" id=2]
 [ext_resource path="res://scenes/supportscenes/Camera2D.gd" type="Script" id=3]
 [ext_resource path="res://ui/FPS.gd" type="Script" id=4]
@@ -7,12 +8,39 @@
 [ext_resource path="res://scenes/mainscene/World.gd" type="Script" id=6]
 [ext_resource path="res://stage/Platform.tscn" type="PackedScene" id=7]
 
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+
+void fragment(){
+	vec2 choppyUV = vec2(floor(UV.x*256.)/256., floor(UV.y*256.)/256.);
+	vec4 col;
+	vec4 inside = vec4(0,0,0,1);
+	vec4 white = vec4(1,1,1,1);
+	vec4 black = vec4(0,0,0,1);
+	vec4 empty = vec4(1,1,1,0);
+	col = inside;
+			col.a = 0.2;
+			col.a += float(
+				int(
+					((int(choppyUV.x*32.+TIME*4.)%2)+
+					(int(choppyUV.y*32.+TIME*4.)%2)
+					)%2)
+					
+					)*.45;
+	COLOR = col;
+}
+"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+
 [node name="World" type="Node2D"]
 script = ExtResource( 6 )
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer"]
+[node name="Info" type="RichTextLabel" parent="CanvasLayer"]
 margin_left = 48.0
 margin_top = 48.0
 margin_right = 1072.0
@@ -25,14 +53,56 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="BottomBar" type="ColorRect" parent="CanvasLayer"]
+modulate = Color( 0, 0, 0, 1 )
+margin_top = 768.0
+margin_right = 1440.0
+margin_bottom = 900.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Pause" type="RichTextLabel" parent="CanvasLayer"]
+margin_left = 48.0
+margin_top = 812.0
+margin_right = 384.0
+margin_bottom = 869.0
+custom_fonts/normal_font = ExtResource( 1 )
+text = "PAUSED"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PauseEffect" type="ColorRect" parent="CanvasLayer"]
+modulate = Color( 0, 0, 0, 0.298039 )
+material = SubResource( 2 )
+margin_right = 1440.0
+margin_bottom = 768.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 
 [node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
-visible = false
 
 [node name="Sprite" type="Sprite" parent="ParallaxBackground/ParallaxLayer"]
+visible = false
 scale = Vector2( 4, 4 )
 texture = ExtResource( 5 )
+
+[node name="Background" type="ColorRect" parent="ParallaxBackground"]
+modulate = Color( 0, 0.192157, 0.4, 1 )
+anchor_top = 0.00468886
+anchor_bottom = 0.00468886
+margin_left = -3000.0
+margin_top = -1300.0
+margin_right = 3000.0
+margin_bottom = 1500.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Platform" parent="." instance=ExtResource( 7 )]
 position = Vector2( 0, -128 )
@@ -54,8 +124,49 @@ polygon = PoolVector2Array( -581.626, 60.1743, 919.345, 60.1743, 919.345, 140.40
 
 [node name="Sprite" type="Sprite" parent="Stage"]
 position = Vector2( -2.28882e-05, 384 )
+scale = Vector2( 2, 2 )
 texture = ExtResource( 2 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true
 script = ExtResource( 3 )
+
+[node name="DoubleZone" type="ColorRect" parent="."]
+modulate = Color( 0, 0.133333, 1, 0.25098 )
+margin_left = -3000.0
+margin_top = -1300.0
+margin_right = -1152.0
+margin_bottom = 1500.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TripleZone" type="ColorRect" parent="."]
+modulate = Color( 1, 0, 0.133333, 0.25098 )
+margin_left = -3000.0
+margin_top = -1295.78
+margin_right = -2048.0
+margin_bottom = 1504.22
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DoubleZone2" type="ColorRect" parent="."]
+modulate = Color( 0, 0.133333, 1, 0.25098 )
+margin_left = 1152.0
+margin_top = -1300.0
+margin_right = 3000.0
+margin_bottom = 1500.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TripleZone2" type="ColorRect" parent="."]
+modulate = Color( 1, 0, 0.133333, 0.25098 )
+margin_left = 2048.0
+margin_top = -1300.0
+margin_right = 3000.0
+margin_bottom = 1500.0
+__meta__ = {
+"_edit_use_anchors_": false
+}

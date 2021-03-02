@@ -5,47 +5,11 @@
 [ext_resource path="res://characters/fox/foxpalette.png" type="Texture" id=3]
 [ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=4]
 [ext_resource path="res://ui/Damage.gd" type="Script" id=5]
+[ext_resource path="res://ui/PlayerIcon.shader" type="Shader" id=6]
 
-[sub_resource type="Shader" id=1]
-code = "shader_type canvas_item;
-
-uniform sampler2D palette_tex; //Palette to reference, this should be a 1-pixel tall texture containing your palette info
-uniform vec4 outline_col : hint_color; //Outline color
-uniform float skin;
-
-void fragment() {
-    
-    //Get red value and sample palette based on it
-    float pal_sample = texture(TEXTURE,UV).r;
-	float yval = skin/8f;
-    vec4 col = texture(palette_tex,vec2(pal_sample,yval));
-    
-    //Get alpha val of adjacent pixels
-    vec2 p = TEXTURE_PIXEL_SIZE;
-    
-    float a = texture(TEXTURE,UV+vec2(p.x,0)).a;
-    a += texture(TEXTURE,UV+vec2(-p.x,0)).a;
-    a += texture(TEXTURE,UV+vec2(0,p.y)).a;
-    a += texture(TEXTURE,UV+vec2(0,-p.y)).a;
-    
-    //Using found alpha value, determine the opacity of the outline
-    
-    a = step(a,.5);//Clamp the a value
-    col.rgb = mix(outline_col.xyz, col.rgb, col.a);
-    col.a = step(a, col.a);
-	
-	float w = 0.0;
-	
-	col += vec4(w,w,w,0);
-    
-    //Get palette color
-    COLOR = col;
-
-}"
-
-[sub_resource type="ShaderMaterial" id=2]
+[sub_resource type="ShaderMaterial" id=1]
 resource_local_to_scene = true
-shader = SubResource( 1 )
+shader = ExtResource( 6 )
 shader_param/outline_col = null
 shader_param/skin = 0.0
 shader_param/palette_tex = ExtResource( 3 )
@@ -55,9 +19,9 @@ script = ExtResource( 5 )
 
 [node name="Name" type="RichTextLabel" parent="."]
 margin_left = -64.0
-margin_top = 69.8039
-margin_right = 492.0
-margin_bottom = 164.804
+margin_top = 70.0
+margin_right = 228.0
+margin_bottom = 119.0
 custom_fonts/normal_font = ExtResource( 4 )
 text = "FOX"
 scroll_active = false
@@ -66,14 +30,13 @@ __meta__ = {
 }
 
 [node name="Portrait" type="Sprite" parent="."]
-material = SubResource( 2 )
-scale = Vector2( 0.5, 0.5 )
+material = SubResource( 1 )
 texture = ExtResource( 2 )
 
 [node name="Damage" type="RichTextLabel" parent="."]
 margin_left = 64.0
 margin_top = -16.0
-margin_right = 315.0
+margin_right = 228.0
 margin_bottom = 60.0
 custom_fonts/normal_font = ExtResource( 1 )
 meta_underlined = false

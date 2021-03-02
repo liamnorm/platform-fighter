@@ -10,13 +10,20 @@ var damage
 func _ready():
 	pass
 	
-func _process(delta):
+func _process(_delta):
 	Mat = $Portrait.get_material()
 	Mat.set_shader_param("skin", Globals.players[playernumber-1].skin%8)
 	damage = floor(Globals.players[playernumber-1].damage)
 	$Damage.text = str(damage) + "%"
 	$Damage.set("custom_colors/default_color", getdamagecolor(damage))
 	$Name.text = "FOX"
+	
+	visible = !Globals.PAUSED
+	
+	position = Vector2(
+		(playernumber-1-(Globals.NUM_OF_PLAYERS-1.0)/2.0)*Globals.SCREENX/
+		(Globals.NUM_OF_PLAYERS)+(Globals.SCREENX/2.0), 
+		Globals.SCREENY - 100)
 	
 func getdamagecolor(d):
 	var r = 1
