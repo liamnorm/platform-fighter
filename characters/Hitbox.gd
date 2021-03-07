@@ -31,7 +31,9 @@ func _process(_delta):
 	
 	var paused = Globals.PAUSED
 	var framechange = Input.is_action_just_pressed("nextframe")
-	if ((!paused) || framechange) && impact_frame == 0:
+	var intro = Globals.FRAME < 0
+	var slowmo = Globals.SLOMOFRAME % 2 == 1
+	if ((!paused) || framechange) && impact_frame == 0 && !intro && !slowmo:
 		d = get_parent().d
 		
 		

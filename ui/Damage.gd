@@ -5,6 +5,7 @@ var playernumber = 0
 var character = ""
 var Mat
 var damage
+var playername = "SPACEDOG"
 
 
 func _ready():
@@ -16,7 +17,17 @@ func _process(_delta):
 	damage = floor(Globals.players[playernumber-1].damage)
 	$Damage.text = str(damage) + "%"
 	$Damage.set("custom_colors/default_color", getdamagecolor(damage))
-	$Name.text = "FOX"
+	$Damage.visible =  !Globals.players[playernumber-1].defeated
+	
+	var stock = Globals.players[playernumber-1].stock
+	playername = "SPACEDOG"
+	if Globals.GAMEMODE == "STOCK":
+		$Name.text = " " + playername + " x" + str(stock)
+	else:
+		$Name.text = " " + playername
+	
+	$Color.modulate = Globals.CONTROLLERCOLORS[Globals.players[playernumber-1].controller]
+	
 	
 	visible = !Globals.PAUSED
 	

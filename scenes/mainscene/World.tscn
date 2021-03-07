@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
 [ext_resource path="res://stage/stage.png" type="Texture" id=2]
@@ -7,6 +7,55 @@
 [ext_resource path="res://stage/background.png" type="Texture" id=5]
 [ext_resource path="res://scenes/mainscene/World.gd" type="Script" id=6]
 [ext_resource path="res://stage/Platform.tscn" type="PackedScene" id=7]
+[ext_resource path="res://ui/fonts/hugefont.tres" type="DynamicFont" id=8]
+[ext_resource path="res://ui/fonts/biggerfont.tres" type="DynamicFont" id=9]
+[ext_resource path="res://stage/static.png" type="Texture" id=10]
+
+[sub_resource type="Shader" id=3]
+code = "shader_type canvas_item;
+
+void fragment(){
+	float s = 480.;
+	vec2 choppyUV = vec2(floor(UV.x*s)/s, floor(UV.y*s)/s);
+	float radius = distance(vec2(.5,.5), choppyUV);
+	vec2 midvector = vec2(.5,.5) - choppyUV;
+	
+	vec4 lightblue = vec4(0.1, 0.12, 0.45, 1);
+	vec4 dependent = vec4(radius,radius,radius,1);
+	vec4 darkblue = vec4(0.1,0.1,0.4,1);
+	vec4 white = vec4(1,1,1,1);
+	vec4 col;
+	int x = int(choppyUV.x*s);
+	int y = int(choppyUV.y*s);
+	float xf = float(x);
+	float yf = float(y);
+	float movingUVx = float((x+int(TIME*2.))%480)/480.;
+	vec2 movingUV = vec2(movingUVx, choppyUV.y);
+	float w = texture(TEXTURE, movingUV).r;
+	bool cloud = int(yf+
+		sin(TIME*0.5)*10.*sin(xf*0.1+TIME*.05)+(TIME*3.)+
+		sin(TIME*0.1)*100.*sin((xf+yf)*0.005+TIME*.5)+
+		sin(TIME*0.1)*28.*sin((xf+20.)*3.+TIME*5.)
+		)%130 > 70;
+	if (cloud) {
+		col = darkblue;
+	} else {
+		col = lightblue;
+	}
+	if ((x+y)%2 == 0) {
+		col += vec4(0.01,0.01,0.01,1);
+	}
+	
+	float whiteness = pow(w, 20);
+	col.r += whiteness*0.5;
+	col.g += whiteness*1.;
+	col.b += whiteness*1.5;
+	COLOR = col;
+}
+"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
 
 [sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
@@ -20,7 +69,7 @@ void fragment(){
 	vec4 black = vec4(0,0,0,1);
 	vec4 empty = vec4(1,1,1,0);
 	col = inside;
-			col.a = 0.2;
+			col.a = 0.8;
 			col.a += float(
 				int(
 					((int(choppyUV.x*32.+TIME*4.)%2)+
@@ -37,6 +86,19 @@ shader = SubResource( 1 )
 
 [node name="World" type="Node2D"]
 script = ExtResource( 6 )
+
+[node name="Background" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Background" type="TextureRect" parent="Background"]
+material = SubResource( 4 )
+margin_right = 480.0
+margin_bottom = 480.0
+rect_scale = Vector2( 4, 4 )
+texture = ExtResource( 10 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -83,6 +145,28 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Message" type="Label" parent="CanvasLayer"]
+margin_right = 1440.0
+margin_bottom = 768.0
+custom_fonts/font = ExtResource( 1 )
+text = "DOUBLE K.O."
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Score" type="Label" parent="CanvasLayer"]
+margin_top = 747.0
+margin_right = 1440.0
+margin_bottom = 978.0
+custom_fonts/font = ExtResource( 9 )
+text = "0-0"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 
 [node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
@@ -93,6 +177,7 @@ scale = Vector2( 4, 4 )
 texture = ExtResource( 5 )
 
 [node name="Background" type="ColorRect" parent="ParallaxBackground"]
+visible = false
 modulate = Color( 0, 0.192157, 0.4, 1 )
 anchor_top = 0.00468886
 anchor_bottom = 0.00468886
@@ -131,42 +216,101 @@ texture = ExtResource( 2 )
 current = true
 script = ExtResource( 3 )
 
-[node name="DoubleZone" type="ColorRect" parent="."]
-modulate = Color( 0, 0.133333, 1, 0.25098 )
+[node name="LeftDoubleZone" type="ColorRect" parent="."]
 margin_left = -3000.0
 margin_top = -1300.0
 margin_right = -1152.0
 margin_bottom = 1500.0
+color = Color( 0, 0.788235, 1, 0.25098 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="TripleZone" type="ColorRect" parent="."]
-modulate = Color( 1, 0, 0.133333, 0.25098 )
+[node name="Label" type="Label" parent="LeftDoubleZone"]
+margin_left = 952.0
+margin_top = 4.0
+margin_right = 1848.0
+margin_bottom = 2800.0
+custom_fonts/font = ExtResource( 8 )
+text = "-2"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LeftTripleZone" type="ColorRect" parent="."]
 margin_left = -3000.0
 margin_top = -1295.78
 margin_right = -2048.0
 margin_bottom = 1504.22
+color = Color( 0.0117647, 0.992157, 0.211765, 0.25098 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="DoubleZone2" type="ColorRect" parent="."]
-modulate = Color( 0, 0.133333, 1, 0.25098 )
-margin_left = 1152.0
+[node name="Label" type="Label" parent="LeftTripleZone"]
+anchor_left = 0.00555625
+anchor_top = 0.00142857
+anchor_right = 0.00555625
+anchor_bottom = 0.00142857
+margin_left = 476.0
+margin_top = -4.0
+margin_right = 952.0
+margin_bottom = 2792.0
+custom_fonts/font = ExtResource( 8 )
+text = "-3"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RightDoubleZone" type="ColorRect" parent="."]
+margin_left = 1156.47
 margin_top = -1300.0
-margin_right = 3000.0
+margin_right = 3004.47
 margin_bottom = 1500.0
+color = Color( 0, 0.788235, 1, 0.25098 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="TripleZone2" type="ColorRect" parent="."]
-modulate = Color( 1, 0, 0.133333, 0.25098 )
+[node name="Label" type="Label" parent="RightDoubleZone"]
+margin_top = 4.21997
+margin_right = 896.0
+margin_bottom = 2800.22
+custom_fonts/font = ExtResource( 8 )
+text = "-2"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RightTripleZone" type="ColorRect" parent="."]
 margin_left = 2048.0
 margin_top = -1300.0
 margin_right = 3000.0
 margin_bottom = 1500.0
+color = Color( 0.0117647, 0.992157, 0.211765, 0.25098 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="RightTripleZone"]
+anchor_left = 0.00555625
+anchor_top = 0.00142857
+anchor_right = 0.00555625
+anchor_bottom = 0.00142857
+margin_left = -5.28955
+margin_top = -4.0
+margin_right = 470.71
+margin_bottom = 2792.0
+custom_fonts/font = ExtResource( 8 )
+text = "-3"
+align = 1
+valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -1,0 +1,112 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
+[ext_resource path="res://ui/fonts/biggerfont.tres" type="DynamicFont" id=2]
+[ext_resource path="res://scenes/supportscenes/Results.gd" type="Script" id=3]
+[ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=4]
+[ext_resource path="res://characters/fox/foxportrait.png" type="Texture" id=5]
+[ext_resource path="res://characters/fox/foxpalette.png" type="Texture" id=6]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+uniform sampler2D palette_tex; //Palette to reference, this should be a 1-pixel tall texture containing your palette info
+uniform vec4 outline_col : hint_color; //Outline color
+uniform float skin;
+
+void fragment() {
+    
+    //Get red value and sample palette based on it
+    float pal_sample = texture(TEXTURE,UV).r;
+	float yval = skin/8f;
+    vec4 col = texture(palette_tex,vec2(pal_sample,yval));
+    
+    //Get alpha val of adjacent pixels
+    vec2 p = TEXTURE_PIXEL_SIZE;
+    
+    float a = texture(TEXTURE,UV+vec2(p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(-p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(0,p.y)).a;
+    a += texture(TEXTURE,UV+vec2(0,-p.y)).a;
+    
+    //Using found alpha value, determine the opacity of the outline
+    
+    a = step(a,.5);//Clamp the a value
+    col.rgb = mix(outline_col.xyz, col.rgb, col.a);
+    col.a = step(a, col.a);
+	
+	float w = 0.0;
+	
+	col += vec4(w,w,w,0);
+    
+    //Get palette color
+    COLOR = col;
+
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+shader_param/outline_col = null
+shader_param/skin = null
+shader_param/palette_tex = ExtResource( 6 )
+
+[node name="Results" type="Node2D"]
+script = ExtResource( 3 )
+
+[node name="Background" type="ColorRect" parent="."]
+margin_right = 1440.0
+margin_bottom = 931.0
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="The_Winner" type="Label" parent="."]
+margin_top = 85.0
+margin_right = 1440.0
+margin_bottom = 141.0
+custom_fonts/font = ExtResource( 1 )
+text = "THE WINNER IS..."
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Winner" type="Label" parent="."]
+margin_top = 141.484
+margin_right = 1440.0
+margin_bottom = 309.484
+custom_fonts/font = ExtResource( 2 )
+text = "SPACEDOG"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Quote" type="Label" parent="."]
+margin_left = 683.488
+margin_top = 392.768
+margin_right = 933.488
+margin_bottom = 420.768
+custom_fonts/font = ExtResource( 4 )
+text = "
+
+"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Banner" type="ColorRect" parent="."]
+margin_top = 496.0
+margin_right = 1440.0
+margin_bottom = 832.0
+color = Color( 1, 0.00784314, 0.00784314, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Sprite" type="Sprite" parent="."]
+material = SubResource( 2 )
+position = Vector2( 320, 576 )
+scale = Vector2( 4, 4 )
+texture = ExtResource( 5 )

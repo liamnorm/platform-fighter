@@ -1,75 +1,73 @@
 extends KinematicBody2D
 
 onready var HITBOX = preload("res://characters/Hitbox.tscn")
+onready var EFFECT = preload("res://resources/ImpactEffect.tscn")
 
-const SPEED = 3000
-const LIFESPAN = 60
+var LIFESPAN = 60
 
 var frame = 0
-var player = 0
+var stage = 0
+var playernumber = 0
 var motion = Vector2(0,0)
 var d = 1
 var hitboxes = []
-var state = "projectile"
+var state = "idle"
+var nextstate = "idle"
 var projectiletype = "laser"
+var important_to_camera = true
+var spawnposition = Vector2(0,-512)
+var bounceoffshield = true
+var shieldstun = 0
+var hitter_motion = Vector2(0,0)
 
+#variables that are required to exist for 
+#interaction, but optional
+var intangibility_frame = 0
+var invincibility_frame = 0
+var damage = 0
+var launch_direction = 0
+var player_who_last_hit_me = 0
+var launch_knockback = 0
+var LAUNCH_THRESHOLD = 0
+var combo = 0
+var stun_length = 0
+
+const is_projectile = true
+
+var has_hurtbox = false
 var connected = false
 var impact_frame = 0
+
+var hurtboxsize = Vector2(0,0)
+var hurtboxoffset = Vector2(0,0)
 
 var players_to_ignore = []
 
 var UP = Vector2(0,-1)
 
 func _ready():
-	pass # Replace with function body.
+	pass
 
 
 func _physics_process(_delta):
 	
 	var paused = Globals.PAUSED
 	var framechange = Input.is_action_just_pressed("nextframe")
-	if ((!paused) || framechange) && impact_frame == 0:
+	var intro = Globals.FRAME < 0
+	var slowmo = Globals.SLOMOFRAME % 2 == 1
+	if ((!paused) || framechange) && impact_frame == 0 && !intro && !slowmo:
 		
-
-		match projectiletype:
-			"laser":
-				motion = Vector2(d*SPEED, 0)
+		if player_who_last_hit_me > 0:
+			if !(["shield", "shieldstun"].has(Globals.players[player_who_last_hit_me-1].state)):
+				player_who_last_hit_me = 0
+		
+		projectilemovement()
+		drawprojectile()
+		drawhurtbox()
 			
-				if frame == 0:
-					#hitbox(40, Vector2(-110, -10), Vector2(110, 10), 1, 0, 0, 0, 0, false)
-					hitbox([
-						{"del":0, 
-						"len":40, 
-						"t":-10, 
-						"b":10, 
-						"l":-110, 
-						"r":110, 
-						"dam":2, 
-						"dir":0, 
-						"kb":0, 
-						"ckb":0, 
-						"dohs":0,
-						"hs":0, 
-						"ss":0}
-						])
-			
-				$CollisionShape2D.disabled = true
-				motion = move_and_slide(motion, UP)
-				
-				if connected:
-					Globals.projectiles.erase(self)
-					queue_free()
-				
-				
-				
 		frame += 1
-		
-		if frame == LIFESPAN:
-			Globals.projectiles.erase(self)
-		if frame > LIFESPAN:
-			queue_free()
-			
-			
+		state = nextstate
+
 	impact_frame -= 1
 	if impact_frame < 0:
 		impact_frame = 0
@@ -80,7 +78,6 @@ func start():
 
 
 func hitbox(boxes):
-	var i = 0
 	var hbox = HITBOX.instance()
 	hbox.startframe = []
 	hbox.life = 0
@@ -126,6 +123,23 @@ func hitbox(boxes):
 			hbox.startframe.append(Globals.FRAME)
 			if hbox.life < b["len"]:
 				hbox.life = b["len"]
-		i += 1
 	hitboxes.append(hbox)
 	add_child(hbox)
+	
+	
+func drawhurtbox():
+	$Hurtbox.visible = Globals.SHOWHITBOXES
+	$Hurtbox.margin_left = -hurtboxsize.x + hurtboxoffset.x
+	$Hurtbox.margin_right = hurtboxsize.x + hurtboxoffset.x
+	$Hurtbox.margin_top = -hurtboxsize.y + hurtboxoffset.y
+	$Hurtbox.margin_bottom = hurtboxsize.y + hurtboxoffset.y
+	
+func projectilemovement():
+	pass
+	
+func drawprojectile():
+	pass
+
+func respawn(_place):
+	Globals.projectiles.erase(self)
+	queue_free()

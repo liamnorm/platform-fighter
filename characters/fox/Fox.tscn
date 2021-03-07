@@ -1,9 +1,10 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://characters/fox/Fox.gd" type="Script" id=1]
 [ext_resource path="res://characters/fox/spritesheetalpha.png" type="Texture" id=2]
 [ext_resource path="res://characters/fox/foxpalette.png" type="Texture" id=3]
 [ext_resource path="res://resources/shield.png" type="Texture" id=4]
+[ext_resource path="res://characters/Hurtbox.tscn" type="PackedScene" id=5]
 
 [sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
@@ -82,9 +83,9 @@ void fragment(){
 	int modangle = angle%60;
 	float hexeffect;
 	if (modangle < 30) {
-		hexeffect = sqrt(float(modangle));
+		hexeffect = sqrt(float(modangle))*(float(size)+100.)/150.;
 	} else {
-		hexeffect = sqrt(float(60-modangle));
+		hexeffect = sqrt(float(60-modangle))*(float(size)+100.)/150.;
 	}
 	radius += float(hexeffect)/400.-.02;
 	
@@ -152,25 +153,8 @@ resource_local_to_scene = true
 shader = SubResource( 4 )
 shader_param/stun = false
 shader_param/size = 300
-shader_param/prevsize = 300
+shader_param/prevsize = 100
 shader_param/color = Color( 0, 1, 0.831373, 1 )
-
-[sub_resource type="Shader" id=6]
-code = "shader_type canvas_item;
-
-uniform vec4 color : hint_color;
-
-void fragment(){
-	vec4 col = color;
-		if (col.a > 0.) {
-		    col.a=0.5;
-		}
-	COLOR=col;
-}"
-
-[sub_resource type="ShaderMaterial" id=7]
-shader = SubResource( 6 )
-shader_param/color = Color( 0, 0.529412, 1, 1 )
 
 [node name="Fock" type="KinematicBody2D"]
 collision_layer = 3
@@ -179,6 +163,7 @@ script = ExtResource( 1 )
 
 [node name="Sprite" type="Sprite" parent="."]
 material = SubResource( 2 )
+position = Vector2( 0, 8 )
 texture = ExtResource( 2 )
 vframes = 15
 hframes = 8
@@ -191,17 +176,9 @@ shape = SubResource( 3 )
 [node name="Shield" type="Sprite" parent="."]
 visible = false
 material = SubResource( 5 )
-position = Vector2( -144, 160 )
+position = Vector2( -144, 152 )
 texture = ExtResource( 4 )
 offset = Vector2( 144, -152 )
 
-[node name="Hurtbox" type="ColorRect" parent="."]
+[node name="Hurtbox" parent="." instance=ExtResource( 5 )]
 visible = false
-material = SubResource( 7 )
-margin_left = -64.0
-margin_top = -64.0
-margin_right = 64.0
-margin_bottom = 64.0
-__meta__ = {
-"_edit_use_anchors_": false
-}

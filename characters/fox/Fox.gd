@@ -1,6 +1,6 @@
 extends "res://characters/Player.gd"
 
-onready var LASER = preload("res://projectiles/laser/Projectile.tscn")
+onready var LASER = preload("res://projectiles/laser/Laser.tscn")
 
 var new_laser
 
@@ -22,11 +22,12 @@ func _ready():
 	AIRFRICTION = 0.01
 	FASTFALLSPEED = 1600
 	
-	hurtboxsize = Vector2(40,58)
-	hurtboxoffset = Vector2(0,12)
+	SHIELDOFFSET = Vector2(0,8)
+	
+	hurtbox(40,58,0,12)
 	
 
-func laser():
+func neutralspecial():
 	fallcap(on_floor)
 	match stage:
 		0:
@@ -42,12 +43,28 @@ func laser():
 				stage+= 1
 				frame = 0
 		1:
+			if frame == 1:
+				hitbox([
+					{"del":0, 
+					"len":1, 
+					"t":-30, 
+					"b":30, 
+					"l":30, 
+					"r":180, 
+					"dam":2, 
+					"dir":0, 
+					"kb":0, 
+					"ckb":0, 
+					"dohs":0,
+					"hs":0, 
+					"ss":4}
+				])
 			if frame == 2:
 				var laser = LASER.instance()
 				laser.position = get_position() + Vector2(d*220,-14)
 				laser.d = d
 				laser.frame = 0
-				laser.player = playernumber
+				laser.playernumber = playernumber
 				get_tree().get_root().add_child(laser)
 				Globals.projectiles.append(laser)
 				laser.start()
@@ -60,18 +77,18 @@ func laser():
 				stage = 1
 				frame = 0
 				
-			if frame > 16:
+			if frame > 12:
 				stage+= 1
 				frame = 0
 		2:
 			buffer(on_floor)
-			if frame > 5:
+			if frame > 4:
 				if (on_floor):
 					be("idle")
 				else:
 					be("jump")
 					
-func neutralspecial():
+func floating():
 	in_fast_fall = false
 	match stage:
 		0:
@@ -212,7 +229,7 @@ func upspecial():
 						launchd = -180 + int(direction.angle()/3.14*180)
 				hitbox([
 					{"del":0, 
-					"len":10, 
+					"len":13, 
 					"t":-48, 
 					"b":48, 
 					"l":-48, 
@@ -237,7 +254,7 @@ func upspecial():
 			if updatefloorstate():
 				be("land")
 
-func downspecial():
+func unuseddownspecial():
 	in_fast_fall = false
 	match stage:
 		0:
@@ -272,7 +289,7 @@ func neutralground():
 					"l":20, 
 					"r":100, 
 					"dam":1, 
-					"dir":-35, 
+					"dir":15, 
 					"kb":0.05, 
 					"ckb":100, 
 					"hs":1, 
@@ -335,6 +352,14 @@ func sideground():
 	if frame > 24:
 		buffer(true)
 	if frame > 29:
+		if input[0] || input[1]:
+			be("run")
+		else:
+			be("idle")
+
+func downground():
+	movement()
+	if frame > 3:
 		if input[0] || input[1]:
 			be("run")
 		else:
@@ -459,7 +484,7 @@ func upair():
 			"r":90, 
 			"dam":7, 
 			"dir":-88, 
-			"kb":.9, 
+			"kb":.5, 
 			"ckb":300, 
 			"hs":4, 
 			"ss":7},
@@ -472,12 +497,12 @@ func upair():
 			"r":70, 
 			"dam":7, 
 			"dir":-88, 
-			"kb":.9, 
+			"kb":.5, 
 			"ckb":300, 
 			"hs":4, 
 			"ss":7}
 			])
-	if frame > 28:
+	if frame > 23:
 		if updatefloorstate():
 			be("land")
 		else:
@@ -497,7 +522,7 @@ func downair():
 			"r":50, 
 			"dam":1, 
 			"dir":75, 
-			"kb":0, 
+			"kb":.5, 
 			"ckb":-3,
 			"hs":1, 
 			"ss":2}
@@ -513,21 +538,50 @@ func drawPlayer():
 	match state:
 		"idle":
 			beFrame(0+(frame/12)%2)
+			hurtbox(40,58,0,12)
 		"run":
 			beFrame(2+((frame-1)/3)%4)
+			hurtbox(40,58,0,12)
 		"runend":
-			beFrame(6)
+			beFrame(0)
+			hurtbox(40,58,0,12)
 		"turnaround":
 			beFrame(4)
+			hurtbox(40,58,0,12)
 		"jumpstart":
 			beFrame(7)
+			hurtbox(40,54,0,14)
 		"jump":
-			beFrame(8)
+			if double_jump_frame > 0:
+				beFrame(9+(frame/3)%4)
+				hurtbox(40,40,0,0)
+			else:
+				beFrame(8)
+				hurtbox(50,44,0,6)
 		"land":
 			beFrame(7)
+			hurtbox(40,54,0,14)
 		"crouch":
-			beFrame(6)
-		"laser":
+			ref = 115
+			match stage:
+				0:
+					if frame < 4:
+						beFrame(ref)
+						hurtbox(64,32,0,32)
+					else:
+						beFrame(ref+1)
+						hurtbox(64,32,0,32)
+				1:
+					beFrame(6)
+					hurtbox(64,32,0,32)
+				2:
+					if frame < 4:
+						beFrame(ref+1)
+						hurtbox(64,32,0,32)
+					else:
+						beFrame(ref)
+						hurtbox(64,32,0,32)
+		"neutralspecial":
 			ref = 35
 			match stage:
 				0:
@@ -543,7 +597,7 @@ func drawPlayer():
 						beFrame(6)
 				2:
 					beFrame(6)
-		"neutralspecial":
+		"floating":
 			ref = 90
 			match stage:
 				0:
@@ -564,6 +618,7 @@ func drawPlayer():
 				beFrame(ref+3)
 		"upspecial":
 			beFrame(9+(frame/3)%4)
+			hurtbox(40,40,0,0)
 		
 		"neutralground":
 			ref = 40
@@ -642,6 +697,7 @@ func drawPlayer():
 				beFrame(ref+7)
 		"hitstun":
 			beFrame(28)
+			hurtbox(44,54,0,8)
 		"hit":
 			ref = 21
 			match stage:
@@ -650,8 +706,10 @@ func drawPlayer():
 						beFrame(29)
 					else:
 						beFrame(30)
+					hurtbox(54,40,0,12)
 				1:
 					beFrame(9+(frame/3)%4)
+					hurtbox(40,40,0,0)
 		"knockeddown":
 			ref = 31
 			match stage:
@@ -659,6 +717,7 @@ func drawPlayer():
 					beFrame(ref+(frame-1)/6)
 				1:
 					beFrame(ref+3)
+			hurtbox(64,24,0,40)
 		"shield":
 			beFrame(13)
 		"roll":
@@ -686,3 +745,6 @@ func drawPlayer():
 		"ledge":
 			ref = 53
 			beFrame(ref+(frame/12)%2)
+		
+		"respawn":
+			beFrame(0)

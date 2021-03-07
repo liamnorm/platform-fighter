@@ -1,18 +1,9 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://characters/fox/foxpalette.png" type="Texture" id=1]
 [ext_resource path="res://scenes/supportscenes/Menu.gd" type="Script" id=2]
-[ext_resource path="res://characters/fox/foxportrait.png" type="Texture" id=3]
-[ext_resource path="res://ui/PlayerIcon.shader" type="Shader" id=4]
-[ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=5]
 [ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=6]
 [ext_resource path="res://ui/fonts/biggerfont.tres" type="DynamicFont" id=7]
-
-[sub_resource type="ShaderMaterial" id=1]
-shader = ExtResource( 4 )
-shader_param/outline_col = null
-shader_param/skin = null
-shader_param/palette_tex = ExtResource( 1 )
+[ext_resource path="res://ui/MenuOption.tscn" type="PackedScene" id=8]
 
 [node name="Menu" type="Node2D"]
 script = ExtResource( 2 )
@@ -25,28 +16,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Sprite" type="Sprite" parent="."]
-material = SubResource( 1 )
-position = Vector2( 431.252, 315.296 )
-texture = ExtResource( 3 )
-
-[node name="Num_of_players" type="RichTextLabel" parent="."]
-margin_left = 638.0
-margin_top = 292.0
-margin_right = 1459.0
-margin_bottom = 584.0
-custom_fonts/normal_font = ExtResource( 5 )
-text = "number of players"
-scroll_active = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="Info" type="RichTextLabel" parent="."]
-margin_left = 553.0
-margin_top = 461.0
-margin_right = 899.0
-margin_bottom = 753.0
+margin_left = 17.1767
+margin_top = 617.334
+margin_right = 363.177
+margin_bottom = 909.334
 custom_fonts/normal_font = ExtResource( 6 )
 text = "ARROW KEYS TO MOVE
 Z, X TO ATTACK
@@ -73,3 +47,18 @@ scroll_active = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="StockButton" parent="." instance=ExtResource( 8 )]
+position = Vector2( 447.57, 448 )
+
+[node name="TimeButton" parent="." instance=ExtResource( 8 )]
+position = Vector2( 447.57, 512 )
+
+[node name="SoccerButton" parent="." instance=ExtResource( 8 )]
+position = Vector2( 448, 576 )
+
+[node name="TrainingButton" parent="." instance=ExtResource( 8 )]
+position = Vector2( 447.57, 640 )
+
+[node name="OnlineButton" parent="." instance=ExtResource( 8 )]
+position = Vector2( 448, 704 )

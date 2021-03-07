@@ -1,0 +1,88 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
+[ext_resource path="res://scenes/supportscenes/CSS.gd" type="Script" id=2]
+[ext_resource path="res://ui/fonts/fontnooutline.tres" type="DynamicFont" id=3]
+[ext_resource path="res://characters/fox/foxpalette.png" type="Texture" id=4]
+[ext_resource path="res://characters/fox/foxportrait.png" type="Texture" id=5]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+uniform sampler2D palette_tex; //Palette to reference, this should be a 1-pixel tall texture containing your palette info
+uniform vec4 outline_col : hint_color; //Outline color
+uniform float skin;
+
+void fragment() {
+    
+    //Get red value and sample palette based on it
+    float pal_sample = texture(TEXTURE,UV).r;
+	float yval = skin/8f;
+    vec4 col = texture(palette_tex,vec2(pal_sample,yval));
+    
+    //Get alpha val of adjacent pixels
+    vec2 p = TEXTURE_PIXEL_SIZE;
+    
+    float a = texture(TEXTURE,UV+vec2(p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(-p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(0,p.y)).a;
+    a += texture(TEXTURE,UV+vec2(0,-p.y)).a;
+    
+    //Using found alpha value, determine the opacity of the outline
+    
+    a = step(a,.5);//Clamp the a value
+    col.rgb = mix(outline_col.xyz, col.rgb, col.a);
+    col.a = step(a, col.a);
+	
+	float w = 0.0;
+	
+	col += vec4(w,w,w,0);
+    
+    //Get palette color
+    COLOR = col;
+
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+shader_param/outline_col = null
+shader_param/skin = null
+shader_param/palette_tex = ExtResource( 4 )
+
+[node name="CSS" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_right = 1520.0
+margin_bottom = 987.0
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+margin_left = 436.505
+margin_top = 259.902
+margin_right = 1054.51
+margin_bottom = 350.902
+custom_fonts/normal_font = ExtResource( 1 )
+text = "CHARACTER SELECT"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Sprite" type="Sprite" parent="."]
+material = SubResource( 2 )
+position = Vector2( 589.399, 573.951 )
+texture = ExtResource( 5 )
+
+[node name="Num_of_players" type="RichTextLabel" parent="."]
+margin_left = 710.903
+margin_top = 535.531
+margin_right = 1363.9
+margin_bottom = 664.531
+custom_fonts/normal_font = ExtResource( 3 )
+text = "number of players"
+__meta__ = {
+"_edit_use_anchors_": false
+}

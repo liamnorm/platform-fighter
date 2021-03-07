@@ -1,34 +1,38 @@
 extends Node2D
 
-var Mat
+var buttons = []
+var buttonnames = []
 
 func _ready():
-	Mat = $Sprite.get_material()
+	
+	Globals.SELECTEDMENUBUTTON = 0
+	buttons = [$StockButton, 
+	$TimeButton, 
+	$SoccerButton, 
+	$TrainingButton, 
+	$OnlineButton]
+	buttonnames = ["STOCK", "TIME", "SOCCER", "TRAINING", "ONLINE"]
+	
+	for i in range(5):
+		buttons[i].get_node("Text").text = " " + buttonnames[i]
+		buttons[i].buttonnumber = i
 
 
 func _process(_delta):
-	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select") || Input.is_action_just_pressed("attack"):
-		start_game()
-	if Input.is_action_just_pressed("right"):
-		if Globals.playerskins[0] == Globals.NUM_OF_SKINS - 1:
-			Globals.playerskins[0] = 0
-		else:
-			Globals.playerskins[0] = (Globals.playerskins[0] + 1) % Globals.NUM_OF_SKINS
-	if Input.is_action_just_pressed("left"):
-		if Globals.playerskins[0] == 0:
-			Globals.playerskins[0] = Globals.NUM_OF_SKINS - 1
-		else:
-			Globals.playerskins[0] = (Globals.playerskins[0] - 1) % Globals.NUM_OF_SKINS
-	Mat.set_shader_param("skin", Globals.playerskins[0])
-	
-	if Input.is_action_just_pressed("jump"):
-		if Globals.NUM_OF_PLAYERS < 8:
-			Globals.NUM_OF_PLAYERS += 1
+
 	if Input.is_action_just_pressed("down"):
-		if Globals.NUM_OF_PLAYERS > 1:
-			Globals.NUM_OF_PLAYERS -= 1
+		if Globals.SELECTEDMENUBUTTON < 4:
+			Globals.SELECTEDMENUBUTTON += 1
+	if Input.is_action_just_pressed("jump"):
+		if Globals.SELECTEDMENUBUTTON > 0:
+			Globals.SELECTEDMENUBUTTON -= 1
 			
-	$Num_of_players.text = str(Globals.NUM_OF_PLAYERS) + " PLAYERS"
+	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select") || Input.is_action_just_pressed("attack"):
+		Globals.GAMEMODE = buttonnames[Globals.SELECTEDMENUBUTTON]
+		advance_to_css()
 
 func start_game():
-	var game = get_tree().change_scene("res://scenes/mainscene/World.tscn")
+	var _game = get_tree().change_scene("res://scenes/mainscene/World.tscn")
+	
+func advance_to_css():
+	var _css = get_tree().change_scene("res://scenes/supportscenes/CSS.tscn")

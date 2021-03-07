@@ -11,6 +11,8 @@ func _process(_delta):
 	else:
 		$Name.text = "CPU"
 	color = Globals.CONTROLLERCOLORS[controller]
-	$Name.set("custom_colors/default_color", color)
+	$Name.set("custom_colors/font_color", color)
+	
+	$Name.visible = !Globals.players[playernumber-1].defeated
 	
 	position = Globals.players[playernumber-1].position + Vector2(0, -72)
