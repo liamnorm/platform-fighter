@@ -1,20 +1,22 @@
-# PLATFORM FIGHTER
+# SPACEDOGS
 
-This is a platform fighter similar to Smash. There is only one character, Spacedog.
+SPACEDOGS is a platform fighter. There is only one character, SPACEDOG.
 
-Unlike Smash, this game is much more aerial-based. Fights can happen almost entirely in the air.
+Thanks to SPACEDOG'S acrobatic ability, battles can happen almost entirely in the air.
 
 There are three tiers of blast zones: The regular blast zone, the double blast zone, and the triple blast zone. Getting knocked off the bottom near the stage will cost you one stock, a bit further away will cost you two, and, if you get knocked off the distant side blast zone, you will lose three stocks.
 
-As you accumulate more and more damage, you will be faced with the choice of risking a triple-death off the side or playing it safe and self-destructing in the single blast zone. At high percents, your opponent's goal will be to PREVENT you from dying off the regular blast zone under the stage to account for lost investment.
+As you accumulate more and more damage, you will be faced with the choice of risking a triple-death off the side or playing it safe and self-destructing in the single blast zone.
 
-![icon](icon.png)
+![Gameplay](resources/epicgameplay.png)
+![Menu](resources/spacedogsmenu.png)
 
 
-## How to play
-- Install Godot
+## How to Play
+- Download Godot
 - Clone this repo
 - Open Godot and import the repo as a project.
+- Run the project
 
 
 ## Notes
@@ -22,4 +24,4 @@ Made in GODOT
 
 Art made in PISKEL
 
-![spacedog](characters/fox/spritesheetalpha.png)
+(c) Liam Norman 2021
