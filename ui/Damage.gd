@@ -20,7 +20,7 @@ func _process(_delta):
 	$Damage.visible =  !Globals.players[playernumber-1].defeated
 	
 	var stock = Globals.players[playernumber-1].stock
-	playername = "SPACEDOG"
+	playername = Globals.players[playernumber-1].character
 	if Globals.GAMEMODE == "STOCK":
 		$Name.text = " " + playername + " x" + str(stock)
 	else:
@@ -32,7 +32,7 @@ func _process(_delta):
 	visible = !Globals.PAUSED
 	
 	position = Vector2(
-		(playernumber-1-(Globals.NUM_OF_PLAYERS-1.0)/2.0)*Globals.SCREENX/
+		(playernumber-1-(Globals.NUM_OF_PLAYERS-1.0)/2.0)*1000/
 		(Globals.NUM_OF_PLAYERS)+(Globals.SCREENX/2.0), 
 		Globals.SCREENY - 100)
 	

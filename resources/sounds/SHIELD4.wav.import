@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/SHIELD4.wav-7ea7419a71d7b578fc916cd10edbae5f.sample"
+
+[deps]
+
+source_file="res://resources/sounds/SHIELD4.wav"
+dest_files=[ "res://.import/SHIELD4.wav-7ea7419a71d7b578fc916cd10edbae5f.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

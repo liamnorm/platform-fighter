@@ -26,6 +26,7 @@ const RESPAWN_IDLE_FRAMES = 180
 const LEDGE_INTANGIBILITY_FRAMES = 45
 const is_projectile = false
 const TRUEMAXSPEED = 10000
+const FLOATTIME = 180
 
 #character-dependent stuff that should basically act as constants
 #jumping
@@ -45,7 +46,7 @@ var MAXAIRSPEED = 700
 var AIRACCEL = 256
 var AIRFRICTION = 0.5
 var FASTFALLSPEED = 1400
-var ROLLSPEED = 250
+var ROLLSPEED = 400
 var ROLLFRAMES = 20
 var SPOTDODGEFRAMES = 17
 var AIRDODGEFRAMES = 18
@@ -89,16 +90,21 @@ var in_fast_fall = false
 var has_airdodge = true
 var shield_size = SHIELDTIME
 var prev_shield_size = shield_size
-var damage = 0
+var damage = 0.0
 var invincibility_frame = 0
 var intangibility_frame = 0
 var landing_lag = 0
 var neutral_airdodge = false
 var wavedash_frame = 0
 var respawn_order = -1
+var floatframe = 0
+var totalrollframes = 0
+var totalspotdodgeframes = 0
 
 #stale moves
 var roll_stale = 0
+var spotdodge_stale = 0
+var stale_queue = []
 
 #interactions
 var impact_frame = 0
@@ -106,6 +112,7 @@ var launch_direction = 0
 var launch_knockback = 1
 var stun_length = 0
 var connected = false
+var shieldconnected = false
 var shield_stun = 0
 var player_who_last_hit_me = 0
 var shield_physical_size = 0
@@ -165,17 +172,20 @@ func _physics_process(_delta):
 						respawn(Vector2(0,Globals.TOPBLASTZONE))
 					else:
 						defeated = true
+						Globals.ELIMINATIONFRAME = 120
+						Globals.ELIMINATEDPLAYER = playernumber
 						var players_left = 0
 						var winner = 0
 						for p in Globals.players:
 							if !p.defeated:
 								players_left += 1
 								winner = p.playernumber
+						Globals.DEFEATORDER[playernumber-1] = players_left
 						if players_left < 2:
 							Globals.GAMEENDFRAME = 1
 							Globals.WINNER = winner
-						Globals.WINNERCHARACTER = Globals.players[winner-1].character
-						Globals.WINNERCONTROLLER = Globals.players[winner-1].controller
+							Globals.WINNERCHARACTER = Globals.players[winner-1].character
+							Globals.WINNERCONTROLLER = Globals.players[winner-1].controller
 				elif Globals.GAMEMODE == "TIME":
 					if abs(x) > Globals.TRIPLEBLASTZONE:
 						score -= 3
@@ -192,6 +202,8 @@ func _physics_process(_delta):
 					respawn(Vector2(0,Globals.TOPBLASTZONE))
 				else:
 					respawn(Vector2(0,Globals.TOPBLASTZONE))
+				
+				playsound("KO")
 			
 			if !state == "ledge":
 				motion.y += GRAVITY
@@ -202,11 +214,17 @@ func _physics_process(_delta):
 			motion.y = clamp(motion.y, -TRUEMAXSPEED, TRUEMAXSPEED)
 			
 			if (state == "hit" && stage == 0):
-				var collision = move_and_collide(motion*0.0166)
+				var collision = move_and_collide(motion/60.0)
 				if collision:
-					if motion.length() > 500:
-						motion = motion.bounce(collision.normal)
-						motion = motion*0.7
+					if (collision.collider.get_node_or_null("Collision") != null):
+						if collision.collider.get_node("Collision").one_way_collision:
+							if motion.y > 0:
+								motion.y = -motion.y
+								motion = motion*0.7
+					else:
+						if motion.length() > 500:
+							motion = motion.bounce(collision.normal)
+							motion = motion*0.7
 			else:
 				motion = move_and_slide(motion, UP)
 			
@@ -226,7 +244,7 @@ func _physics_process(_delta):
 			roll_stale -= 1
 			roll_stale = clamp(roll_stale, 0, 2000)
 			
-			if Globals.FRAME%3 == 1:
+			if Globals.FRAME%2 == 1:
 				shield_size += 1
 			shield_size = clamp(shield_size, 0, SHIELDTIME)
 			shield_physical_size = sqrt(shield_size)*5-10
@@ -250,25 +268,28 @@ func statebasedaction():
 		"idle":
 			movement()
 			if input[0] || input[1]:
-				be("run")
+				if !(input[0] && input[1]):
+					be("run")
 			elif input[3]:
 				be("crouch")
 			groundoptions()
 				
 		"run":
 			movement()
+			if frame % 6 == 1:
+				playsound("WALK")
 			if frame == 1:
 				if d == 1:
-					if input[1]:
+					if input[1] && !input[0]:
 						d = -1
 						frame = 0
 						motion.x = -MAXGROUNDSPEED
 				else:
-					if input[0]:
+					if input[0] && !input[1]:
 						d = 1
 						frame = 0
 						motion.x = MAXGROUNDSPEED
-			elif (input[0] && d == 1) || (input[1] && d == -1):
+			elif (input[0] && d == 1 && !input[1]) || (input[1] && d == -1 && !input[0]):
 				if frame < 4:
 					if motion.x * d < 0:
 						frame = 0
@@ -289,12 +310,12 @@ func statebasedaction():
 		"runend":
 			movement()
 			buffer(true)
-			if input[0]:
+			if input[0] && !input[1]:
 				if d == 1:
 					be("run")
 				else:
 					be("turnaround")
-			elif input[1]:
+			elif input[1] && !input[0]:
 				if d == -1:
 					be("run")
 				else:
@@ -342,7 +363,7 @@ func statebasedaction():
 			intangibility_frame = 0
 			if landing_lag < 5:
 				landing_lag = 5
-			movement()
+			motion.x = lerp(motion.x, 0, 0.05)
 			if frame > landing_lag - 5:
 				buffer(true)
 			if frame > landing_lag:
@@ -352,23 +373,27 @@ func statebasedaction():
 				else:
 					be("idle")
 		"crouch":
-			match stage:
-				0:
-					if frame == 1:
-						position += Vector2(0, 10)
-					if frame > 5:
-						stage = 1
-						frame = 0
-				1:
-					if frame > 6:
-						if !input[3]:
-							stage = 2
-							frame = 0
-				2:
-					if frame > 5:
-						be("idle")
+			if !input[3]:
+				be("idle")
+#			match stage:
+#				0:
+#					if frame == 1:
+#						position += Vector2(0, 10)
+#					if frame > 5:
+#						stage = 1
+#						frame = 0
+#				1:
+#					if frame > 6:
+#						if !input[3]:
+#							stage = 2
+#							frame = 0
+#				2:
+#					if frame > 5:
+#						be("idle")
 			movement()
 			groundoptions()
+			if input[6]:
+				be("spotdodge")
 			
 		"neutralspecial":
 			neutralspecial()
@@ -399,7 +424,12 @@ func statebasedaction():
 		"downair":
 			downair()
 		
+		"extra":
+			extra()
+		
 		"ledge":
+			if frame == 1:
+				playsound("LEDGE")
 			if first_time_at_ledge:
 				intangibility_frame = LEDGE_INTANGIBILITY_FRAMES
 			in_fast_fall = false
@@ -444,6 +474,8 @@ func statebasedaction():
 				be("idle")
 
 		"shield":
+			if frame == 1:
+				playsound("SHIELDOPEN")
 			movement()
 			if frame < 20:
 				if motion.y > 300:
@@ -453,7 +485,9 @@ func statebasedaction():
 			prev_shield_size = shield_size
 			if frame > 8 || frame < 2:
 				if updatefloorstate():
-					if new_input[0]:
+					if new_input[2]:
+						be("jumpstart")
+					elif new_input[0]:
 						be("roll")
 					elif new_input[1]:
 						be("roll")
@@ -476,7 +510,7 @@ func statebasedaction():
 			if frame > shield_stun:
 				if input[6]:
 					be("shield")
-					frame = 2
+					frame = 3
 				else:
 					be("outofshield")
 		"outofshield":
@@ -532,19 +566,23 @@ func statebasedaction():
 		"roll":
 			if !updatefloorstate():
 				be("jump")
-			var speedmodifier = pow(ROLLFRAMES - abs(frame-(ROLLFRAMES/4)),2)/50
-			motion.x = ROLLSPEED * -d * speedmodifier
-			if frame > ROLLFRAMES:
+			if frame == 1:
+				totalrollframes = ROLLFRAMES+8+roll_stale/100
+			var speedmodifier = pow(ROLLFRAMES - abs(frame-(totalrollframes/3)),2)/70
+			motion.x = ROLLSPEED * -d * speedmodifier * float(ROLLFRAMES) / totalrollframes
+			if frame > totalrollframes - 5:
 				motion.x = 0
 				buffer(true)
-				if frame > ROLLFRAMES+8+roll_stale/100:
+				if frame > totalrollframes:
 					roll_stale += 150
 					be("idle")
 		"spotdodge":
 			motion.x = 0
-			if frame > SPOTDODGEFRAMES:
+			if frame == 1:
+				totalspotdodgeframes = SPOTDODGEFRAMES+8+spotdodge_stale/100
+			if frame > totalspotdodgeframes-5:
 				buffer(true)
-				if frame > SPOTDODGEFRAMES+8:
+				if frame > totalspotdodgeframes:
 					be("idle")
 			movement()
 		"hitstun":
@@ -682,7 +720,8 @@ func statebasedaction():
 		"shieldbreak":
 			if frame < 2:
 				motion = Vector2(0,-JUMPFORCE*1.5)
-			shield_size = SHIELDTIME
+			else:
+				shield_size = SHIELDTIME
 			motion.x = 0
 			if motion.y > MAXFALLSPEED:
 				motion.y = MAXFALLSPEED
@@ -690,9 +729,10 @@ func statebasedaction():
 				if updatefloorstate():
 					be("dizzy")
 		"dizzy":
+			shield_size = SHIELDTIME
 			if !updatefloorstate():
 				be("jump")
-			if frame > 450:
+			if frame > 300:
 				be("idle")
 	
 	#TEMPORARY FAILSAFE
@@ -733,7 +773,7 @@ func be(get):
 		if nextstate == "crouch":
 			var collision = move_and_collide(Vector2(0,10))
 			if collision:
-				if (collision.collider.get_node("Collision") != null):
+				if (collision.collider.get_node_or_null("Collision") != null):
 					if collision.collider.get_node("Collision").one_way_collision:
 						nextstate = "jump"
 						position.y += 10
@@ -814,6 +854,8 @@ func groundoptions():
 	elif input[6]:
 		if new_input[0] || new_input[1]:
 			be("roll")
+		if new_input[3]:
+			be("spotdodge")
 		else:
 			be("shield")
 	elif new_input[2]:
@@ -992,6 +1034,7 @@ func respawn(place, first_time_respawning=false):
 		state = "respawn"
 		nextstate = "respawn"
 
+	floatframe = 0
 	motion = Vector2(0,0)
 	in_fast_fall = false
 	double_jump_frame = 0
@@ -1009,7 +1052,7 @@ func respawn(place, first_time_respawning=false):
 	intangibility_frame = 0
 	first_time_at_ledge = true
 	drop_frame = 0
-	damage = 0
+	damage = 0.0
 	
 	impact_frame = 0
 	launch_direction = 0
@@ -1034,6 +1077,11 @@ func drawhurtbox():
 	$Hurtbox.margin_right = hurtboxsize.x + hurtboxoffset.x
 	$Hurtbox.margin_top = -hurtboxsize.y + hurtboxoffset.y
 	$Hurtbox.margin_bottom = hurtboxsize.y + hurtboxoffset.y
+	
+	$Shieldbox.margin_left = -shield_physical_size + SHIELDOFFSET.x
+	$Shieldbox.margin_right = shield_physical_size + SHIELDOFFSET.x
+	$Shieldbox.margin_top = -shield_physical_size + SHIELDOFFSET.y
+	$Shieldbox.margin_bottom = shield_physical_size + SHIELDOFFSET.y
 
 
 func get_input():
@@ -1061,7 +1109,11 @@ func get_input():
 			false,
 			false,
 		]
+		
 		var target = playernumber%Globals.NUM_OF_PLAYERS
+		if Globals.players[target].defeated || target == playernumber-1:
+			target += 1
+			target = target%Globals.NUM_OF_PLAYERS
 		var enemyx = Globals.players[target].get_position().x
 		var enemyy = Globals.players[target].get_position().y
 		
@@ -1071,6 +1123,7 @@ func get_input():
 		
 		var offstage = x < Globals.LEDGES[0][0].x ||  x > Globals.LEDGES[1][0].x
 		
+		#input[6] = true
 		if false:
 			#offense
 			if !offstage:
@@ -1122,7 +1175,7 @@ func get_input():
 
 
 
-	else:
+	elif controller == 1:
 		input = [
 			Input.is_action_pressed("right"),
 			Input.is_action_pressed("left"),
@@ -1131,11 +1184,28 @@ func get_input():
 			Input.is_action_pressed("special"),
 			Input.is_action_pressed("attack"),
 			Input.is_action_pressed("shield"),
-			false,
+			Input.is_action_pressed("extra"),
 			Input.is_action_pressed("rightattack"),
 			Input.is_action_pressed("leftattack"),
 			Input.is_action_pressed("upattack"),
 			Input.is_action_pressed("downattack"),
+		]
+		
+	elif controller > 1:
+		var c = str(controller-1)
+		input = [
+			Input.is_action_pressed("right" + c),
+			Input.is_action_pressed("left" + c),
+			Input.is_action_pressed("jump" + c),
+			Input.is_action_pressed("down" + c),
+			Input.is_action_pressed("special" + c),
+			Input.is_action_pressed("attack" + c),
+			Input.is_action_pressed("shield" + c),
+			Input.is_action_pressed("extra" + c),
+			Input.is_action_pressed("rightattack" + c),
+			Input.is_action_pressed("leftattack" + c),
+			Input.is_action_pressed("upattack" + c),
+			Input.is_action_pressed("downattack" + c),
 		]
 		
 	for i in range(len(input)):
@@ -1244,6 +1314,7 @@ func playerEffects():
 
 	
 	$Hurtbox.visible = Globals.SHOWHITBOXES
+	$Shieldbox.visible = Globals.SHOWHITBOXES
 	
 	Mat.set_shader_param("outline_col", Color((damage-50)/100.0, 0, 0, 1))
 	Mat.set_shader_param("invincibility", invincibility_frame)
@@ -1298,3 +1369,10 @@ func upair():
 
 func downair():
 	movement()
+	
+func extra():
+	movement()
+	
+func playsound(sound):
+	if !Globals.MUTED:
+		get_node("Sounds").get_node(sound).play()

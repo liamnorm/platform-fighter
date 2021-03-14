@@ -1,10 +1,11 @@
 extends Node2D
 
-onready var PLAYER = preload("res://characters/fox/Fox.tscn")
+onready var SPACEDOG = preload("res://characters/spacedog/Spacedog.tscn")
+onready var TODD = preload("res://characters/todd/Todd.tscn")
 onready var BALL = preload("res://projectiles/ball/Ball.tscn")
 onready var EFFECT = preload("res://resources/ImpactEffect.tscn")
 onready var DAMAGE = preload("res://ui/Damage.tscn")
-onready var TAG    = preload("res://ui/Tag.tscn")
+onready var TAG = preload("res://ui/Tag.tscn")
 
 var iq = []
 
@@ -20,6 +21,10 @@ func _ready():
 	Globals.SLOMOFRAME = 0
 	Globals.LEFTSCOREFRAME = 0
 	Globals.RIGHTSCOREFRAME = 0
+	Globals.ELIMINATIONFRAME = 0
+	Globals.DEFEATORDER = []
+	for i in range(Globals.NUM_OF_PLAYERS):
+		Globals.DEFEATORDER.append(0)
 	
 	Globals.LEFTSCORE = 0
 	Globals.RIGHTSCORE = 0
@@ -29,7 +34,9 @@ func _ready():
 	Globals.players = []
 	Globals.projectiles = []
 	for i in range(Globals.NUM_OF_PLAYERS):
-		Globals.players.append(PLAYER.instance())
+		var character = Globals.playerchars[i]
+		var characterdict = {0: SPACEDOG, 1:TODD}
+		Globals.players.append(characterdict[character].instance())
 	
 		resetplayer(i)
 		
@@ -66,11 +73,13 @@ func resetplayer(i):
 	else:
 		Globals.players[i].d = 1
 	Globals.players[i].playernumber = i+1
-	Globals.players[i].character = "SPACEDOG"
+	Globals.players[i].character = Globals.characternames[Globals.playerchars[i]]
 	Globals.players[i].name = "Player" + str(i+1)
 	Globals.players[i].skin = Globals.playerskins[i]
 	if i == 0:
 		Globals.players[i].controller = 1
+	if i == 1:
+		Globals.players[i].controller = 2
 	Globals.players[i].respawn(pos, true)
 	
 
@@ -111,6 +120,8 @@ func _process(_delta):
 	if ((!paused) || framechange):
 		Globals.FRAME += 1
 		
+		if Globals.ELIMINATIONFRAME > 0:
+			Globals.ELIMINATIONFRAME -= 1
 		if Globals.KOFRAME > 0:
 			Globals.KOFRAME -= 1
 		if Globals.DOUBLEKOFRAME > 0:
@@ -137,7 +148,6 @@ func _process(_delta):
 					Globals.WINNERCONTROLLER = Globals.players[winner-1].controller
 		
 			if Globals.GAMEMODE == "SOCCER" && Globals.FRAME > Globals.TIME*60:
-				var winner = max(0,0)
 				Globals.GAMEENDFRAME = 1
 				if Globals.LEFTSCORE > Globals.RIGHTSCORE:
 					Globals.WINNER = 1
@@ -257,9 +267,11 @@ func checkforoverlap(ps,h,b,player_on_projectile = false):
 				iq.append(["hit", ps, h, b])
 
 func checkforreflect(ps):
-		var them = ps[1].get_position()
-		var me = ps[0].get_position()
-		if  (them-me).length() < ps[1].shield_physical_size:
+		var them = ps[1].get_position() + ps[1].SHIELDOFFSET
+		var me = ps[0].get_position() + ps[0].hurtboxoffset
+		var xdist = (ps[1].shield_physical_size + ps[0].hurtboxsize.x)
+		var ydist = (ps[1].shield_physical_size + ps[0].hurtboxsize.y)
+		if  abs(them.x-me.x) < xdist && abs(them.y-me.y) < ydist:
 			if (((ps[1].state == "shield" && ps[1].frame > 1) || ps[1].state == "shieldstun") && 
 				!ps[0].state == "reflect" &&
 				!ps[0].player_who_last_hit_me == ps[1].playernumber):
@@ -269,7 +281,7 @@ func checkforreflect(ps):
 func shieldattack(ps,h,b):
 	h.players_to_ignore.append(ps[0].playernumber)
 	ps[0].state = "shieldstun"
-	ps[0].frame = 0
+	ps[0].frame = 1
 	ps[0].stage = 0
 	ps[0].shield_stun = h.shieldstun[b]
 	ps[0].shield_size -= h.shieldstun[b] * 4
@@ -277,6 +289,9 @@ func shieldattack(ps,h,b):
 		ps[0].state = "shieldbreak"
 		ps[0].nextstate = "shieldbreak"
 		ps[0].motion = Vector2(0, ps[0].JUMPFORCE*-1.5)
+		playsound("SHIELDBREAK")
+	else:
+		playsound("SHIELDHIT")
 	ps[0].player_who_last_hit_me = ps[1].playernumber
 	var hitlength = h.shieldstun[b]
 	if hitlength > ps[0].impact_frame:
@@ -284,7 +299,7 @@ func shieldattack(ps,h,b):
 	hitlength = h.stun[b]
 	if hitlength > ps[1].impact_frame:
 		ps[1].impact_frame = hitlength
-	ps[1].connected = true
+	ps[1].shieldconnected = true
 	
 func invincibleattack(ps,h,b):
 	ps[0].player_who_last_hit_me = ps[1].playernumber
@@ -292,7 +307,7 @@ func invincibleattack(ps,h,b):
 	var hitlength = h.stun[b]
 	if hitlength > ps[1].impact_frame:
 		ps[1].impact_frame = hitlength
-	ps[1].connected = true
+	ps[1].shieldconnected = true
 	
 func behurt(ps,h,b):
 	h.players_to_ignore.append(ps[0].playernumber)
@@ -309,15 +324,17 @@ func behurt(ps,h,b):
 		if !ps[0].is_projectile:
 			ps[0].has_airdodge = true
 		ps[0].motion = Vector2(0,0)
-		ps[0].hitter_motion = ps[1].motion
+		ps[0].hitter_motion = ps[1].motion * .1
 		ps[0].player_who_last_hit_me = ps[1].playernumber
 		ps[0].launch_knockback = ps[0].damage * 50 * h.knockback[b] + h.constknockback[b]
 		if ps[0].launch_direction%360 < 90 || ps[0].launch_direction%360 > 270:
 			ps[0].d = -1
 		else:
 			ps[0].d = 1
+		playsound("HIT")
 			
 	Input.start_joy_vibration(0, 1, 1, 0.1)
+	ps[1].connected = true
 	
 	if (ps[0].launch_knockback > ps[0].LAUNCH_THRESHOLD && b == 0):
 		pass
@@ -332,16 +349,16 @@ func visualstun(ps, h, b):
 		ps[0].impact_frame = hitlength
 	if hitlength > ps[1].impact_frame:
 		ps[1].impact_frame = hitlength
-	ps[1].connected = true
 	Globals.IMPACTFRAME = hitlength
 	
 func impact(ps, h, b):
 	var effect = EFFECT.instance()
-	effect.position = h.get_parent().get_position() + (-h.topleft[b]/2 + h.bottomright[b]/2) * Vector2(h.get_parent().d, 0)
+	effect.position = h.get_parent().get_position() + (h.topleft[b]/2 + h.bottomright[b]/2) * Vector2(h.get_parent().d, 0)
 	effect.d = ps[0].d
 	effect.myframe = 0
 	effect.playernumber = ps[0].playernumber
 	effect.effecttype = "impact"
+	effect.scale = Vector2(1,1) + Vector2(h.damage[b], h.damage[b]) / 10.0
 	if ps[0].combo < 2:
 		effect.modulate = Color(1,1,1,1)
 	else:
@@ -352,13 +369,16 @@ func combocounter(ps):
 	if ["hitstun", "hit", "mildstun"].has(ps[0].state):
 		ps[0].combo+=1
 	else:
-		ps[1].combo = 1
+		ps[0].combo = 1
 		
 func reflect(ps):
 #	var pos0 = ps[0].get_position() + ps[1].SHIELDOFFSET
 #	var pos1 = ps[1].get_position() + ps[1].SHIELDOFFSET
 	#ps[0].motion = (pos0-pos1).normalized() * (ps[0].motion.length()+200)
 	var stun = ps[0].shieldstun
+	if ps[0].projectiletype != "ball":
+		ps[0].shieldstun += 4
+		ps[0].damage_delt *= 1.5
 	ps[0].motion = ps[0].motion * -1.5
 	ps[1].state = "shieldstun"
 	ps[1].frame = 0
@@ -379,6 +399,7 @@ func reflect(ps):
 	ps[0].stage = 0
 	ps[0].player_who_last_hit_me = ps[1].playernumber
 	ps[0].playernumber = ps[1].playernumber
+	playsound("REFLECT")
 
 func spawnball():
 	var ball = BALL.instance()
@@ -430,28 +451,49 @@ func bottommenu():
 			$CanvasLayer/Message.text = "1"
 		else:
 			$CanvasLayer/Message.text = "GO!"
+	elif (Globals.GAMEMODE == "TIME" || Globals.GAMEMODE == "SOCCER") && Globals.FRAME > Globals.TIME*60-300:
+		$CanvasLayer/Message.visible = true
+		$CanvasLayer/Message.text = str((Globals.TIME*60-Globals.FRAME)/60+1)
+		if Globals.GAMEENDFRAME > 0:
+			$CanvasLayer/Message.visible = true
+			$CanvasLayer/Message.text = "GAME!"
 	elif Globals.GAMEENDFRAME > 0:
+		$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "GAME!"
+	elif Globals.ELIMINATIONFRAME > 0:
+		$CanvasLayer/Message.visible = true
+		$CanvasLayer/Message.text = "PLAYER " + str(Globals.ELIMINATEDPLAYER) + "\nDEFEATED"
+		if Globals.ELIMINATIONFRAME%10 < 6:
+			$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
+		else:
+			$CanvasLayer/Message.set("custom_colors/font_color", Globals.CONTROLLERCOLORS[Globals.players[Globals.ELIMINATEDPLAYER-1].controller])
 	elif Globals.TRIPLEKOFRAME > 0:
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "TRIPLE K.O."
-		if Globals.NUM_OF_PLAYERS == 2:
-			$CanvasLayer/Message.text += "\n" + str(Globals.players[0].stock) + "-" + str(Globals.players[1].stock) 
+		if Globals.TRIPLEKOFRAME%10 < 6:
+			$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
+		else:
+			$CanvasLayer/Message.set("custom_colors/font_color", Color(1,.5,1,1))
 	elif Globals.DOUBLEKOFRAME > 0:
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "DOUBLE K.O."
-		if Globals.NUM_OF_PLAYERS == 2:
-			$CanvasLayer/Message.text += "\n" + str(Globals.players[0].stock) + "-" + str(Globals.players[1].stock)
+		if Globals.DOUBLEKOFRAME%10 < 6:
+			$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
+		else:
+			$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,.5,1))
 	elif Globals.KOFRAME > 0:
 		if Globals.NUM_OF_PLAYERS == 2:
+			$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
 			$CanvasLayer/Message.visible = true
 			$CanvasLayer/Message.text = str(Globals.players[0].stock) + "-" + str(Globals.players[1].stock)
 	elif Globals.LEFTSCOREFRAME > 0:
+		$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "LEFT SCORES GOAL!"
 		$CanvasLayer/Message.text += "\n" + str(Globals.LEFTSCORE) + "-" + str(Globals.RIGHTSCORE)
 	elif Globals.RIGHTSCOREFRAME > 0:
+		$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "RIGHT SCORES GOAL!"
 		$CanvasLayer/Message.text += "\n" + str(Globals.LEFTSCORE) + "-" + str(Globals.RIGHTSCORE)
@@ -461,10 +503,10 @@ func bottommenu():
 func background():
 	
 	
-	$Background/Background.margin_left = -128
-	$Background/Background.margin_top = -128
-	$Background/Background.margin_right = max(Globals.SCREENX,Globals.SCREENY)+128
-	$Background/Background.margin_bottom = max(Globals.SCREENX,Globals.SCREENY)+128
+	$Background/Background.margin_left = 0
+	$Background/Background.margin_top = 0
+	$Background/Background.margin_right = max(Globals.SCREENX,Globals.SCREENY)/4
+	$Background/Background.margin_bottom = max(Globals.SCREENX,Globals.SCREENY)/4
 	
 	var bottom = Globals.BOTTOMBLASTZONE
 	var top = Globals.TOPBLASTZONE
@@ -517,3 +559,8 @@ func background():
 				
 				
 				
+func playsound(sound):
+	if !Globals.MUTED:
+		if sound == "HIT":
+			sound = "HIT" + str(randi()%4)
+		get_node("Sounds").get_node(sound).play()

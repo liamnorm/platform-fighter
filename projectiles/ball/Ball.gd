@@ -34,6 +34,7 @@ func projectilemovement():
 			if frame > 0:
 				motion = Vector2(cos(launch_direction * PI/180), sin(launch_direction * PI/180)) 
 				motion *= launch_knockback
+				motion += hitter_motion
 				nextstate = "hit"
 				frame = 0
 				stage = 0
@@ -69,7 +70,15 @@ func projectilemovement():
 	
 	var collision = move_and_collide(motion*0.0166)
 	if collision:
-		motion = motion.bounce(collision.normal)
+		if (collision.collider.get_node("Collision") != null):
+			if collision.collider.get_node("Collision").one_way_collision:
+				if motion.y > 0:
+					motion.y = -motion.y
+					motion = motion*1
+		else:
+			if motion.length() > 500:
+				motion = motion.bounce(collision.normal)
+				motion = motion*1
 
 func start():
 	hurtboxsize = Vector2(32,32)

@@ -22,7 +22,7 @@ func _ready():
 	Mat.set_shader_param("skin", Globals.playerskins[Globals.WINNER-1])
 	
 
-func _process(delta):
+func _process(_delta):
 	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select") || Input.is_action_just_pressed("attack"):
 		go_to_menu()
 

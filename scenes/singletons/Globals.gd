@@ -1,6 +1,6 @@
 extends Node
 
-var NUM_OF_PLAYERS = 2
+var NUM_OF_PLAYERS = 8
 
 var STOCKS = 4
 var TIME = 120
@@ -9,7 +9,20 @@ var GAMEMODE = "STOCK"
 
 var SELECTEDMENUBUTTON = 0
 
+var MUTED = true
+
 var playerskins = [0,1,2,3,4,5,6,7,8]
+var playerchars = [0,0,0,0,0,0,0,0,0]
+var playercontrollers = [1,2,0,0,0,0,0,0]
+var chipholder =  [0,0,0,0,0,0,0,0,0]
+
+var chippos = []
+var pointpos = []
+var playerselected = []
+var CSSFRAME = 0
+
+var characternames = ["SPACEDOG", "TODD"]
+var characterdirectories = {-1:"", 0:"spacedog", 1:"todd"}
 
 
 const CONTROLLERCOLORS = [
@@ -55,6 +68,9 @@ var RIGHTSCOREFRAME = 0
 var WINNER = 0
 var WINNERCONTROLLER = 0
 var WINNERCHARACTER = ""
+var DEFEATORDER = []
+var ELIMINATIONFRAME = 0
+var ELIMINATEDPLAYER = 0
 
 var FRAME = 0
 

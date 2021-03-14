@@ -1,36 +1,72 @@
 extends Node2D
 
+onready var SLATE = preload("res://ui/CharSlate.tscn")
+onready var CHIP = preload("res://ui/Chip.tscn")
+onready var POINTER = preload("res://ui/Pointer.tscn")
+
+var slates = []
+var chips = []
+var pointers = []
+
 var Mat
 
 func _ready():
 	Mat = $Sprite.get_material()
+	
+	slates = []
+	for i in range(8):
+		slates.append(SLATE.instance())
+		slates[i].start(i+1)
+		add_child(slates[i])
+		
+	Globals.CSSFRAME = 0
+	Globals.chippos = []
+	Globals.pointpos = []
+	Globals.playerselected = []
+	Globals.chipholder =  [0,0,0,0,0,0,0,0,0]
+	for i in range(8):
+		Globals.pointpos.append(Vector2((i+0.5)/8.0, 0.45))
+		Globals.chippos.append(Vector2((i+0.5)/8.0, 0.45))
+		Globals.playerselected.append(!(Globals.playercontrollers[i] > 0))
+		
+	chips = []
+	for i in range(8):
+		chips.append(CHIP.instance())
+		chips[i].start(i+1)
+		add_child(chips[i])
+		
+	pointers = []
+	for i in range(8):
+		pointers.append(POINTER.instance())
+		pointers[i].start(i+1)
+		add_child(pointers[i])
+
 
 
 func _process(_delta):
-	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select") || Input.is_action_just_pressed("attack"):
+	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select"):
 		start_game()
 	if Input.is_action_just_pressed("special"):
 		go_back()
-	if Input.is_action_just_pressed("right"):
-		if Globals.playerskins[0] == Globals.NUM_OF_SKINS - 1:
-			Globals.playerskins[0] = 0
-		else:
-			Globals.playerskins[0] = (Globals.playerskins[0] + 1) % Globals.NUM_OF_SKINS
-	if Input.is_action_just_pressed("left"):
-		if Globals.playerskins[0] == 0:
-			Globals.playerskins[0] = Globals.NUM_OF_SKINS - 1
-		else:
-			Globals.playerskins[0] = (Globals.playerskins[0] - 1) % Globals.NUM_OF_SKINS
-	Mat.set_shader_param("skin", Globals.playerskins[0])
 
-	if Input.is_action_just_pressed("jump"):
-		if Globals.NUM_OF_PLAYERS < 8:
-			Globals.NUM_OF_PLAYERS += 1
-	if Input.is_action_just_pressed("down"):
-		if Globals.NUM_OF_PLAYERS > 1:
-			Globals.NUM_OF_PLAYERS -= 1
 
 	$Num_of_players.text = str(Globals.NUM_OF_PLAYERS) + " PLAYERS"
+	
+	$Rules.text = Globals.GAMEMODE
+	
+	$Sprite.position = Vector2(Globals.SCREENX / 2, Globals.SCREENY / 4)
+	
+	$Background.margin_left = 0
+	$Background.margin_top = 0
+	$Background.margin_right = max(Globals.SCREENX,Globals.SCREENY)
+	$Background.margin_bottom = max(Globals.SCREENX,Globals.SCREENY)
+	
+	$ColorRect.margin_left = 0
+	$ColorRect.margin_top = 0
+	$ColorRect.margin_right = Globals.SCREENX
+	$ColorRect.margin_bottom = Globals.SCREENY/2
+	
+	Globals.CSSFRAME += 1
 	
 	
 func start_game():

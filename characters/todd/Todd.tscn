@@ -1,0 +1,219 @@
+[gd_scene load_steps=17 format=2]
+
+[ext_resource path="res://resources/sounds/SHIELD4.wav" type="AudioStream" id=1]
+[ext_resource path="res://characters/Hurtbox.tscn" type="PackedScene" id=2]
+[ext_resource path="res://resources/sounds/SQUISHY.wav" type="AudioStream" id=3]
+[ext_resource path="res://resources/shield.png" type="Texture" id=4]
+[ext_resource path="res://resources/sounds/PEW.wav" type="AudioStream" id=5]
+[ext_resource path="res://resources/sounds/DEATH4.wav" type="AudioStream" id=6]
+[ext_resource path="res://resources/sounds/WALK.wav" type="AudioStream" id=7]
+[ext_resource path="res://characters/todd/spritesheetalpha.png" type="Texture" id=8]
+[ext_resource path="res://characters/spacedog/Spacedog.gd" type="Script" id=9]
+[ext_resource path="res://characters/todd/palette.png" type="Texture" id=10]
+[ext_resource path="res://resources/sounds/LEDGE.wav" type="AudioStream" id=11]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+uniform sampler2D palette_tex; //Palette to reference, this should be a 1-pixel tall texture containing your palette info
+uniform vec4 outline_col : hint_color; //Outline color
+uniform float skin;
+uniform int invincibility;
+uniform int intangibility;
+
+void fragment() {
+    
+    //Get red value and sample palette based on it
+    float pal_sample = texture(TEXTURE,UV).r;
+	float yval = skin/8f;
+    vec4 col = texture(palette_tex,vec2(pal_sample,yval));
+    
+    //Get alpha val of adjacent pixels
+    vec2 p = TEXTURE_PIXEL_SIZE;
+    
+    float a = texture(TEXTURE,UV+vec2(p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(-p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(0,p.y)).a;
+    a += texture(TEXTURE,UV+vec2(0,-p.y)).a;
+    
+    //Using found alpha value, determine the opacity of the outline
+    
+    a = step(a,.5);//Clamp the a value
+    col.rgb = mix(outline_col.xyz, col.rgb, col.a);
+    col.a = step(a, col.a);
+	
+	float w = 0.0;
+	
+	if (invincibility > 0 || intangibility > 0) {
+		vec2 position = POINT_COORD;
+		w = sin((position.x+TIME/2.0) * 16.0)/50.0 + 0.35;
+	}
+	col += vec4(w,w,w,0);
+	
+	if (intangibility > 0 && col.a > 0.0) {
+		col.a = 0.5
+	}
+    
+    //Get palette color
+    COLOR = col;
+
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+resource_local_to_scene = true
+shader = SubResource( 1 )
+shader_param/outline_col = Color( 0, 0, 0, 1 )
+shader_param/skin = 7.0
+shader_param/invincibility = 0
+shader_param/intangibility = 0
+shader_param/palette_tex = ExtResource( 10 )
+
+[sub_resource type="RectangleShape2D" id=3]
+extents = Vector2( 32, 56 )
+
+[sub_resource type="Shader" id=4]
+code = "shader_type canvas_item;
+
+uniform bool stun;
+uniform int size;
+uniform int prevsize;
+uniform vec4 color : hint_color;
+
+void fragment(){
+	vec2 choppyUV = vec2(floor(UV.x*256.)/256., floor(UV.y*256.)/256.);
+	float radius = distance(vec2(.5,.5), choppyUV);
+	
+	vec2 midvector = vec2(.5,.5) - choppyUV;
+	int angle = int(atan(midvector.y/midvector.x)*180./3.14);
+	angle += int(TIME*120.);
+	int modangle = angle%60;
+	float hexeffect;
+	if (modangle < 30) {
+		hexeffect = sqrt(float(modangle))*(float(size)+100.)/150.;
+	} else {
+		hexeffect = sqrt(float(60-modangle))*(float(size)+100.)/150.;
+	}
+	radius += float(hexeffect)/400.-.02;
+	
+	
+	vec4 col;
+	vec4 inside = color;
+	vec4 white = vec4(1,1,1,1);
+	vec4 black = vec4(0,0,0,1);
+	vec4 empty = vec4(1,1,1,0);
+	//float rsize = sqrt(float(size)) / 65.;
+	float n = (300.-float(size))/600.;
+	float rsize = 0.25 - (n*n);
+	float m = (300.-float(prevsize))/600.;
+	float prevrsize = 0.25 - (m*m)+.01;
+	float rsize2 = rsize - 0.02;
+	float rsize3 = rsize2 * .85;
+	float rsize4 = rsize * 0.5;
+	float rsize5 = rsize4 - 0.02;
+	float rsizeout = rsize * 1.05;
+	if (radius < rsize5) {
+		col = empty;
+	} else if (radius < rsize4) {
+		col = white;
+	} else if (radius < rsize3) {
+		if (stun){
+			col = white;
+		}else {
+			col = inside;
+			col.a = 0.6;
+			col.a += float(
+				int(
+					((int(choppyUV.x*32.+TIME*5.)%2)+
+					(int(choppyUV.y*32.+TIME*5.)%2)
+					)%2)
+					
+					)*.15;
+			if (int(TIME*100.)%2 ==1) {
+				float bright = .6;
+				col.r*=bright;
+				col.g*=bright;
+				col.b*=bright;
+			}
+		}
+	} else if (radius < rsize2) {
+		if (stun) {
+			col = white;
+		} else {
+			col = inside;
+			col.a = 0.9;
+		}
+	} else if (radius < rsize) {
+		col = white;
+	} else if (radius < prevrsize) {
+		col = white;
+		col.a = .5
+	} else {
+		col = empty;
+	}
+	COLOR = col;
+}
+"
+
+[sub_resource type="ShaderMaterial" id=5]
+resource_local_to_scene = true
+shader = SubResource( 4 )
+shader_param/stun = false
+shader_param/size = 300
+shader_param/prevsize = 100
+shader_param/color = Color( 0, 1, 0.831373, 1 )
+
+[node name="Todd" type="KinematicBody2D"]
+collision_layer = 3
+collision_mask = 0
+script = ExtResource( 9 )
+
+[node name="Sprite" type="Sprite" parent="."]
+material = SubResource( 2 )
+position = Vector2( 0, 8 )
+texture = ExtResource( 8 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+position = Vector2( 0, 8 )
+shape = SubResource( 3 )
+
+[node name="Shield" type="Sprite" parent="."]
+visible = false
+material = SubResource( 5 )
+position = Vector2( -144, 152 )
+texture = ExtResource( 4 )
+offset = Vector2( 144, -152 )
+
+[node name="Hurtbox" parent="." instance=ExtResource( 2 )]
+
+[node name="Shieldbox" type="ColorRect" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+color = Color( 0, 0.996078, 0.25098, 0.25098 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Sounds" type="Node" parent="."]
+
+[node name="BLASTERSTART" type="AudioStreamPlayer" parent="Sounds"]
+
+[node name="PEW" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 5 )
+
+[node name="KO" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 6 )
+
+[node name="VOICE" type="AudioStreamPlayer" parent="Sounds"]
+
+[node name="SHIELDOPEN" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 1 )
+
+[node name="WALK" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 7 )
+
+[node name="SQUISHY" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 3 )
+
+[node name="LEDGE" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 11 )

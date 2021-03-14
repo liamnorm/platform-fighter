@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://resources/chips.png" type="Texture" id=1]
+[ext_resource path="res://ui/Chip.gd" type="Script" id=2]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+uniform vec4 color : hint_color;
+
+void fragment() {
+	vec4 tex = texture(TEXTURE, UV);
+	if (tex == vec4(1,0,0,1)) {
+		COLOR = color;
+	} else {
+		COLOR = tex;
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+resource_local_to_scene = true
+shader = SubResource( 1 )
+shader_param/color = Color( 1, 0, 0, 1 )
+
+[node name="Chip" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="Sprite" type="Sprite" parent="."]
+material = SubResource( 2 )
+texture = ExtResource( 1 )
+vframes = 4
+hframes = 4

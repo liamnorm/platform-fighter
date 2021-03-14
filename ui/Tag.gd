@@ -15,4 +15,4 @@ func _process(_delta):
 	
 	$Name.visible = !Globals.players[playernumber-1].defeated
 	
-	position = Globals.players[playernumber-1].position + Vector2(0, -72)
+	position = Globals.players[playernumber-1].position + Vector2(0, -96)

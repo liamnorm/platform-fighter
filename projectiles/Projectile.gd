@@ -31,11 +31,13 @@ var launch_knockback = 0
 var LAUNCH_THRESHOLD = 0
 var combo = 0
 var stun_length = 0
+var damage_delt = 0
 
 const is_projectile = true
 
 var has_hurtbox = false
 var connected = false
+var shieldconnected = false
 var impact_frame = 0
 
 var hurtboxsize = Vector2(0,0)

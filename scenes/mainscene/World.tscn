@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
 [ext_resource path="res://stage/stage.png" type="Texture" id=2]
@@ -10,8 +10,15 @@
 [ext_resource path="res://ui/fonts/hugefont.tres" type="DynamicFont" id=8]
 [ext_resource path="res://ui/fonts/biggerfont.tres" type="DynamicFont" id=9]
 [ext_resource path="res://stage/static.png" type="Texture" id=10]
+[ext_resource path="res://ui/fonts/biggerfontoutline.tres" type="DynamicFont" id=11]
+[ext_resource path="res://resources/sounds/REFLECT2.wav" type="AudioStream" id=12]
+[ext_resource path="res://resources/sounds/HIT4.wav" type="AudioStream" id=14]
+[ext_resource path="res://resources/sounds/HIT.wav" type="AudioStream" id=15]
+[ext_resource path="res://resources/sounds/DEATH.wav" type="AudioStream" id=16]
+[ext_resource path="res://resources/sounds/HIT2.wav" type="AudioStream" id=17]
+[ext_resource path="res://resources/sounds/HIT3.wav" type="AudioStream" id=18]
 
-[sub_resource type="Shader" id=3]
+[sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
 
 void fragment(){
@@ -54,10 +61,10 @@ void fragment(){
 }
 "
 
-[sub_resource type="ShaderMaterial" id=4]
-shader = SubResource( 3 )
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
 
-[sub_resource type="Shader" id=1]
+[sub_resource type="Shader" id=3]
 code = "shader_type canvas_item;
 
 
@@ -81,8 +88,8 @@ void fragment(){
 }
 "
 
-[sub_resource type="ShaderMaterial" id=2]
-shader = SubResource( 1 )
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
 
 [node name="World" type="Node2D"]
 script = ExtResource( 6 )
@@ -91,11 +98,12 @@ script = ExtResource( 6 )
 layer = -1
 
 [node name="Background" type="TextureRect" parent="Background"]
-material = SubResource( 4 )
-margin_right = 480.0
-margin_bottom = 480.0
+material = SubResource( 2 )
+margin_right = 360.0
+margin_bottom = 335.0
 rect_scale = Vector2( 4, 4 )
 texture = ExtResource( 10 )
+expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -138,7 +146,7 @@ __meta__ = {
 
 [node name="PauseEffect" type="ColorRect" parent="CanvasLayer"]
 modulate = Color( 0, 0, 0, 0.298039 )
-material = SubResource( 2 )
+material = SubResource( 4 )
 margin_right = 1440.0
 margin_bottom = 768.0
 __meta__ = {
@@ -148,7 +156,7 @@ __meta__ = {
 [node name="Message" type="Label" parent="CanvasLayer"]
 margin_right = 1440.0
 margin_bottom = 768.0
-custom_fonts/font = ExtResource( 1 )
+custom_fonts/font = ExtResource( 11 )
 text = "DOUBLE K.O."
 align = 1
 valign = 1
@@ -157,6 +165,7 @@ __meta__ = {
 }
 
 [node name="Score" type="Label" parent="CanvasLayer"]
+visible = false
 margin_top = 747.0
 margin_right = 1440.0
 margin_bottom = 978.0
@@ -170,6 +179,7 @@ __meta__ = {
 [node name="ParallaxBackground" type="ParallaxBackground" parent="."]
 
 [node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+visible = false
 
 [node name="Sprite" type="Sprite" parent="ParallaxBackground/ParallaxLayer"]
 visible = false
@@ -314,3 +324,29 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Sounds" type="Node" parent="."]
+
+[node name="REFLECT" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 12 )
+
+[node name="BIGHIT" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 14 )
+
+[node name="SHIELDHIT" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 12 )
+
+[node name="SHIELDBREAK" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 16 )
+
+[node name="HIT0" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 14 )
+
+[node name="HIT1" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 15 )
+
+[node name="HIT2" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 17 )
+
+[node name="HIT3" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 18 )

@@ -10,6 +10,7 @@ func _ready():
 func projectilemovement():
 			
 	if frame == 0:
+		hitboxes = []
 		hitbox([
 			{"del":0, 
 			"len":40, 
@@ -17,7 +18,7 @@ func projectilemovement():
 			"b":10, 
 			"l":-110, 
 			"r":110, 
-			"dam":2, 
+			"dam":damage_delt, 
 			"dir":0, 
 			"kb":0, 
 			"ckb":0, 
@@ -30,7 +31,8 @@ func projectilemovement():
 		motion = motion.normalized() * MAXSPEED
 
 	$CollisionShape2D.disabled = true
-	motion = move_and_slide(motion, UP)
+	if frame > 0:
+		motion = move_and_slide(motion, UP)
 	
 	if connected:
 		if state != "reflect":
@@ -51,3 +53,4 @@ func start():
 	shieldstun = 2
 	hurtboxsize = Vector2(110,10)
 	hurtboxoffset = Vector2(0,0)
+	damage_delt = 2.0

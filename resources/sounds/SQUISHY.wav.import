@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/SQUISHY.wav-5d65811c0be99a8be83c551e8de15fd9.sample"
+
+[deps]
+
+source_file="res://resources/sounds/SQUISHY.wav"
+dest_files=[ "res://.import/SQUISHY.wav-5d65811c0be99a8be83c551e8de15fd9.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

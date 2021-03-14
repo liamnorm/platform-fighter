@@ -31,8 +31,9 @@ func _process(_delta):
 				if len(secondsprinted) == 1:
 					secondsprinted = "0" + secondsprinted
 				thetext += "\n " + str(minutes) + ":" + secondsprinted
-			
-			thetext += "\n\n\n " + str(Globals.COMBO) + " COMBO"
+		
+		if Globals.GAMEMODE == "TRAINING":
+			thetext += "\n " + str(Globals.COMBO) + " COMBO"
 
 		text = thetext
 	else:
