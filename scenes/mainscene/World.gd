@@ -35,7 +35,7 @@ func _ready():
 	Globals.projectiles = []
 	for i in range(Globals.NUM_OF_PLAYERS):
 		var character = Globals.playerchars[i]
-		var characterdict = {0: SPACEDOG, 1:TODD}
+		var characterdict = {-1: SPACEDOG, 0: SPACEDOG, 1:TODD}
 		Globals.players.append(characterdict[character].instance())
 	
 		resetplayer(i)
@@ -76,10 +76,8 @@ func resetplayer(i):
 	Globals.players[i].character = Globals.characternames[Globals.playerchars[i]]
 	Globals.players[i].name = "Player" + str(i+1)
 	Globals.players[i].skin = Globals.playerskins[i]
-	if i == 0:
-		Globals.players[i].controller = 1
-	if i == 1:
-		Globals.players[i].controller = 2
+	Globals.players[i].controller = Globals.playercontrollers[i]
+	Globals.players[i].team = Globals.playerteams[i]
 	Globals.players[i].respawn(pos, true)
 	
 
@@ -463,7 +461,10 @@ func bottommenu():
 		$CanvasLayer/Message.text = "GAME!"
 	elif Globals.ELIMINATIONFRAME > 0:
 		$CanvasLayer/Message.visible = true
-		$CanvasLayer/Message.text = "PLAYER " + str(Globals.ELIMINATEDPLAYER) + "\nDEFEATED"
+		if Globals.ELIMINATEDPLAYER > 0:
+			$CanvasLayer/Message.text = "PLAYER " + str(Globals.ELIMINATEDPLAYER) + "\nDEFEATED"
+		else:
+			$CanvasLayer/Message.text = "COMPUTER \nPLAYER \nDEFEATED"
 		if Globals.ELIMINATIONFRAME%10 < 6:
 			$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
 		else:
@@ -490,12 +491,12 @@ func bottommenu():
 	elif Globals.LEFTSCOREFRAME > 0:
 		$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
 		$CanvasLayer/Message.visible = true
-		$CanvasLayer/Message.text = "LEFT SCORES GOAL!"
+		$CanvasLayer/Message.text = "LEFT SCORES!"
 		$CanvasLayer/Message.text += "\n" + str(Globals.LEFTSCORE) + "-" + str(Globals.RIGHTSCORE)
 	elif Globals.RIGHTSCOREFRAME > 0:
 		$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
 		$CanvasLayer/Message.visible = true
-		$CanvasLayer/Message.text = "RIGHT SCORES GOAL!"
+		$CanvasLayer/Message.text = "RIGHT SCORES!"
 		$CanvasLayer/Message.text += "\n" + str(Globals.LEFTSCORE) + "-" + str(Globals.RIGHTSCORE)
 	else:
 		$CanvasLayer/Message.visible = false

@@ -1,10 +1,11 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=1]
 [ext_resource path="res://scenes/supportscenes/CSS.gd" type="Script" id=2]
 [ext_resource path="res://ui/fonts/fontnooutline.tres" type="DynamicFont" id=3]
 [ext_resource path="res://characters/spacedog/palette.png" type="Texture" id=4]
 [ext_resource path="res://characters/spacedog/portrait.png" type="Texture" id=5]
+[ext_resource path="res://resources/addsubtract.png" type="Texture" id=6]
 
 [sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
@@ -135,3 +136,16 @@ text = "STOCK"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Subtract" type="Sprite" parent="."]
+position = Vector2( 1452.02, 432.577 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 6 )
+vframes = 2
+frame = 1
+
+[node name="Add" type="Sprite" parent="."]
+position = Vector2( 1324.02, 432.577 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 6 )
+vframes = 2

@@ -2,7 +2,7 @@
 
 [ext_resource path="res://ui/fonts/biggerfontoutline.tres" type="DynamicFont" id=1]
 [ext_resource path="res://scenes/supportscenes/Menu.gd" type="Script" id=2]
-[ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=6]
+[ext_resource path="res://ui/fonts/smallestfont.tres" type="DynamicFont" id=3]
 [ext_resource path="res://ui/MenuOption.tscn" type="PackedScene" id=8]
 
 [node name="Menu" type="Node2D"]
@@ -40,6 +40,7 @@ position = Vector2( 448, 576 )
 position = Vector2( 447.57, 640 )
 
 [node name="OnlineButton" parent="." instance=ExtResource( 8 )]
+visible = false
 position = Vector2( 448, 704 )
 
 [node name="Info" type="RichTextLabel" parent="."]
@@ -47,7 +48,7 @@ margin_left = 17.1767
 margin_top = 12.366
 margin_right = 363.177
 margin_bottom = 304.366
-custom_fonts/normal_font = ExtResource( 6 )
+custom_fonts/normal_font = ExtResource( 3 )
 text = "ARROW KEYS TO MOVE
 Z, X TO ATTACK
 C TO SHIELD

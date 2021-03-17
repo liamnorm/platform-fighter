@@ -9,6 +9,7 @@ var playernumber = 0
 var character = "SPACEDOG"
 var skin = 0
 var controller = 0
+var team = 0
 
 #shader materials
 var Mat
@@ -173,7 +174,7 @@ func _physics_process(_delta):
 					else:
 						defeated = true
 						Globals.ELIMINATIONFRAME = 120
-						Globals.ELIMINATEDPLAYER = playernumber
+						Globals.ELIMINATEDPLAYER = controller
 						var players_left = 0
 						var winner = 0
 						for p in Globals.players:
@@ -1124,7 +1125,7 @@ func get_input():
 		var offstage = x < Globals.LEDGES[0][0].x ||  x > Globals.LEDGES[1][0].x
 		
 		#input[6] = true
-		if false:
+		if !Globals.GAMEMODE == "TRAINING":
 			#offense
 			if !offstage:
 				input[0] = input[0] || x < enemyx - 128
@@ -1302,7 +1303,13 @@ func playerEffects():
 	var rage = clamp((damage-50)/50.0, 0, 20)
 	$Sprite.position = Vector2(randi() %2 * rage - rage/2, randi() %2 * rage - rage/2)
 	
-	controllercolor = Globals.CONTROLLERCOLORS[controller]
+	if !Globals.GAMEMODE == "SOCCER":
+		controllercolor = Globals.CONTROLLERCOLORS[controller]
+	else:
+		if team == 0:
+			controllercolor = Globals.LEFTCOLOR
+		else:
+			controllercolor = Globals.RIGHTCOLOR
 	
 	skin = skin % 8
 	$Shield.visible = (state == "shield" && frame > 1) || state == "shieldstun"

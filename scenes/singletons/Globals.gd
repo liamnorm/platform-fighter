@@ -1,6 +1,6 @@
 extends Node
 
-var NUM_OF_PLAYERS = 8
+var NUM_OF_PLAYERS = 2
 
 var STOCKS = 4
 var TIME = 120
@@ -13,7 +13,8 @@ var MUTED = true
 
 var playerskins = [0,1,2,3,4,5,6,7,8]
 var playerchars = [0,0,0,0,0,0,0,0,0]
-var playercontrollers = [1,2,0,0,0,0,0,0]
+var playercontrollers = [1,0,0,0,0,0,0,0]
+var playerteams = [0,1,0,1,0,1,0,1]
 var chipholder =  [0,0,0,0,0,0,0,0,0]
 
 var chippos = []
@@ -36,6 +37,8 @@ const CONTROLLERCOLORS = [
 	Color(.8,0,1,1),
 	Color(0,.86,1,1),
 	]
+const LEFTCOLOR = Color("ff0089")
+const RIGHTCOLOR = Color("00ffcf")
 	
 var LEFTSIDECOLOR = Color("40ff0000")
 var RIGHTSIDECOLOR = Color("4000c9ff")
@@ -71,6 +74,7 @@ var WINNERCHARACTER = ""
 var DEFEATORDER = []
 var ELIMINATIONFRAME = 0
 var ELIMINATEDPLAYER = 0
+var CSSBACKFRAME = 0
 
 var FRAME = 0
 

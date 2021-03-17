@@ -16,8 +16,11 @@ func start(i):
 	playernumber = i
 	Mat = $Sprite.get_material()
 	heldplayer = playernumber
-	if Input.get_connected_joypads().has(playernumber-1):
-		Globals.chipholder[playernumber-1] = playernumber
+	if Input.get_connected_joypads().has(playernumber-1) || playernumber == 1:
+		if Globals. playercontrollers[playernumber-1] > 0:
+			Globals.chipholder[playernumber-1] = playernumber
+	else:
+		Globals.chipholder[playernumber-1] = 0
 
 func _ready():
 	display()
@@ -32,8 +35,14 @@ func display():
 		if canselect():
 			$Sprite.frame = 2
 	else:
-		
 		$Sprite.frame = (Globals.CSSFRAME/10)%2
+	var pointing = false
+	if overlappingadd():
+		pointing = true
+	if overlappingslate():
+		pointing = true
+	if pointing:
+		$Sprite.frame = 3
 	Mat.set_shader_param("color", Globals.CONTROLLERCOLORS[Globals.playercontrollers[heldplayer-1]])
 	visible = (
 		(playernumber == 1) || 
@@ -43,11 +52,11 @@ func display():
 	pos = Globals.pointpos[playernumber-1]
 	position = Vector2(
 		pos.x * Globals.SCREENX,
-		pos.y * Globals.SCREENY)
+		pos.y * Globals.SCREENY + 32)
 		
 func controls():
 	var input = [false,false,false,false,false,false]
-	var c = str(Globals.playercontrollers[playernumber-1] - 1)
+	var c = str(playernumber-1)
 	if c == "0":
 		input = [
 			Input.is_action_pressed("right"),
@@ -81,7 +90,7 @@ func controls():
 		
 
 	if !Globals.playerselected[heldplayer-1]:
-		if pos.y < 0.5:
+		if !overlappingslate():
 			if input[4]:
 				if Globals.playerchars[heldplayer-1] >= 0:
 					Globals.playerselected[heldplayer-1] = true
@@ -110,13 +119,36 @@ func controls():
 	if pos.y > 0.5:
 		var selectedslate = floor(pos.x * Globals.NUM_OF_PLAYERS)
 		if input[4]:
-			if Globals.playercontrollers[selectedslate] == playernumber:
-				Globals.playerskins[selectedslate] += 1
-				Globals.playerskins[selectedslate] = Globals.playerskins[selectedslate] % 8
+			if position.y > Globals.SCREENY - 32:
+				#human or computer
+				if Globals.playercontrollers[selectedslate] > 0:
+					Globals.playercontrollers[selectedslate] = 0
+				else:
+					for i in range(8):
+						if !Globals.playercontrollers.has(i+1):
+							Globals.playercontrollers[selectedslate] = i+1
+							break
+			else:
+				#change skin
+				if Globals.playercontrollers[selectedslate] == playernumber || Globals.playercontrollers[selectedslate] == 0:
+					Globals.playerskins[selectedslate] += 1
+					Globals.playerskins[selectedslate] = Globals.playerskins[selectedslate] % 8
 	
+	if overlappingadd():
+		if input[4]:
+			if position.x > Globals.SCREENX - 96:
+				Globals.NUM_OF_PLAYERS -= 1
+			else:
+				Globals.NUM_OF_PLAYERS += 1
+		Globals.NUM_OF_PLAYERS = clamp(Globals.NUM_OF_PLAYERS, 2, 8)
 
 	Globals.pointpos[playernumber-1] = pos
 
+func overlappingadd():
+	return position.x > Globals.SCREENX - 256 && position.y < Globals.SCREENY/2 + 32 && position.y > Globals.SCREENY/2 - 96
+
+func overlappingslate():
+	return pos.y > 0.5
 
 func canselect():
 	for i in range(Globals.NUM_OF_PLAYERS):

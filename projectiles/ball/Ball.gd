@@ -79,13 +79,14 @@ func projectilemovement():
 			if motion.length() > 500:
 				motion = motion.bounce(collision.normal)
 				motion = motion*1
+	shieldstun = 20
 
 func start():
 	hurtboxsize = Vector2(32,32)
 	hurtboxoffset = Vector2(0,0)
 	LAUNCH_THRESHOLD = 500
 	damage = 0
-	shieldstun = 4
+	shieldstun = 20
 	
 func drawprojectile():
 	$Sprite.rotation += motion.length()/1000

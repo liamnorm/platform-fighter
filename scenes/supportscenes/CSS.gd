@@ -26,7 +26,10 @@ func _ready():
 	Globals.chipholder =  [0,0,0,0,0,0,0,0,0]
 	for i in range(8):
 		Globals.pointpos.append(Vector2((i+0.5)/8.0, 0.45))
-		Globals.chippos.append(Vector2((i+0.5)/8.0, 0.45))
+		if Globals.playercontrollers[i] == 0:
+			Globals.chippos.append(Vector2(0.5, .25))
+		else:
+			Globals.chippos.append(Vector2((i+0.5)/8.0, 0.45))
 		Globals.playerselected.append(!(Globals.playercontrollers[i] > 0))
 		
 	chips = []
@@ -46,7 +49,11 @@ func _ready():
 func _process(_delta):
 	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select"):
 		start_game()
-	if Input.is_action_just_pressed("special"):
+	if Input.is_action_pressed("special"):
+		Globals.CSSBACKFRAME += 1
+	else:
+		Globals.CSSBACKFRAME = 0
+	if Globals.CSSBACKFRAME > 60:
 		go_back()
 
 
@@ -65,6 +72,12 @@ func _process(_delta):
 	$ColorRect.margin_top = 0
 	$ColorRect.margin_right = Globals.SCREENX
 	$ColorRect.margin_bottom = Globals.SCREENY/2
+	
+	$Add.position.x = Globals.SCREENX - 192
+	$Add.position.y = Globals.SCREENY/2 - 64
+	
+	$Subtract.position.x = Globals.SCREENX - 64
+	$Subtract.position.y = Globals.SCREENY/2 - 64
 	
 	Globals.CSSFRAME += 1
 	

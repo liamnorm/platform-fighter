@@ -39,6 +39,18 @@ func display():
 	$Label.text = Globals.characternames[Globals.playerchars[playernumber-1]]
 	$Label.margin_top = 10
 	
+	$CPU.position.y = size.y - 32
+	$CPU.position.x = 32
+	$CPU.frame = !Globals.playercontrollers[playernumber-1] > 0
+	$P.margin_left = 62
+	$P.margin_top = size.y - 58
+	$P.margin_bottom = size.y
+	$P.margin_right = size.x
+	if Globals.playercontrollers[playernumber-1] > 0:
+		$P.text = "P" + str(Globals.playercontrollers[playernumber-1])
+	else:
+		$P.text = ""
+	
 	$LabelBack.margin_bottom = size.y
 	$LabelBack.margin_right = size.x
 	$LabelBack.color = Globals.CONTROLLERCOLORS[Globals.playercontrollers[playernumber-1]]

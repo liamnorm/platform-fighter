@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://ui/CharSlate.gd" type="Script" id=1]
+[ext_resource path="res://resources/humanrobot.png" type="Texture" id=2]
 [ext_resource path="res://characters/spacedog/palette.png" type="Texture" id=3]
 [ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=4]
 
@@ -73,7 +74,7 @@ script = ExtResource( 1 )
 material = SubResource( 2 )
 margin_right = 512.0
 margin_bottom = 648.0
-color = Color( 1, 0, 0.235294, 0.701961 )
+color = Color( 0, 1, 0.811765, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -103,3 +104,20 @@ text = "SPACEDOG"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="P" type="Label" parent="."]
+margin_left = 72.0
+margin_top = 464.0
+margin_right = 344.0
+margin_bottom = 560.0
+custom_fonts/font = ExtResource( 4 )
+text = "P1"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CPU" type="Sprite" parent="."]
+position = Vector2( 64, 264 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 2 )
+vframes = 2
