@@ -225,6 +225,7 @@ func _process(_delta):
 				Globals.WINNER = winner
 				if Globals.WINNER != 0:
 					Globals.WINNERCHARACTER = players[winner-1].character
+					Globals.WINNERSKIN = players[winner-1].skin
 					Globals.WINNERCONTROLLER = players[winner-1].controller
 		
 			if GAMEMODE == "SOCCER" && FRAME > TIME*60:

@@ -190,6 +190,7 @@ func _physics_process(_delta):
 						if players_left < 2:
 							w.GAMEENDFRAME = 1
 							Globals.WINNER = winner
+							Globals.WINNERSKIN = w.players[winner-1].skin
 							Globals.WINNERCHARACTER = w.players[winner-1].character
 							Globals.WINNERCONTROLLER = w.players[winner-1].controller
 				elif w.GAMEMODE == "TIME":
@@ -1274,17 +1275,19 @@ func get_input():
 			
 			if  y > tlp.y + 64:
 				var slope = abs((x-tlp.x)/(y-tlp.y))
-				print(slope)
 				if has_double_jump:
+					#double jump
 					input[2] = true
 				elif ((slope > 0.9 && slope < 1.1) || abs(x-tlp.x) < 64) && !has_double_jump || state == "upspecial":
+					#upspecial if diagonal or under ledge
 					if abs(x-tlp.x) < 64:
 						input[0] = false
 						input[1] = false
 					input[2] = true
 					input[4] = true
 			else:
-				if state == "jump":
+				#sidespecial
+				if state == "jump" && abs(x-tlp.x) > 256:
 					input[4] = true
 					input[2] = false
 #		input = w.players[0].input

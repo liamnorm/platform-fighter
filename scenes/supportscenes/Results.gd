@@ -31,7 +31,7 @@ func _ready():
 			$The_Winner.text = "THE WINNER IS..."
 			$Winner.text = Globals.WINNERCHARACTER
 	
-	Mat.set_shader_param("skin", Globals.playerskins[Globals.WINNER-1])
+	Mat.set_shader_param("skin", Globals.WINNERSKIN)
 	
 	bgcolor.a = 0.7
 	$Banner.color = bgcolor

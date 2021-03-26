@@ -183,13 +183,14 @@ func upspecial():
 			
 			if frame %3 == 0:
 				#hitbox(1, Vector2(-48,-48), Vector2(48, 48), 1, -100, 0, 0, 1, 3)
+				var s = 40
 				hitbox([
 					{"del":0, 
 					"len":1, 
-					"t":-48, 
-					"b":48, 
-					"l":-48, 
-					"r":48, 
+					"t":-s, 
+					"b":s, 
+					"l":-s, 
+					"r":s, 
 					"dam":1, 
 					"dir":-100, 
 					"kb":0, 
@@ -245,13 +246,15 @@ func upspecial():
 						launchd = 180 - int(direction.angle()/3.14*180)
 					else:
 						launchd = -180 + int(direction.angle()/3.14*180)
+						
+				var s = 40
 				hitbox([
 					{"del":0, 
 					"len":21, 
-					"t":-48, 
-					"b":48, 
-					"l":-48, 
-					"r":48, 
+					"t":-s, 
+					"b":s, 
+					"l":-s, 
+					"r":s, 
 					"dam":9, 
 					"dir":launchd, 
 					"kb":1, 
@@ -272,6 +275,7 @@ func upspecial():
 		2:
 			movement()
 			ledgesnap()
+			landing_lag = 15
 			if updatefloorstate():
 				be("land")
 

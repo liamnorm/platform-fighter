@@ -100,7 +100,7 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id=6]
 shader = SubResource( 5 )
 shader_param/outline_col = null
-shader_param/skin = 10.0
+shader_param/skin = 8.0
 shader_param/palette_tex = ExtResource( 6 )
 
 [node name="Results" type="Node2D"]

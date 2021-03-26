@@ -51,6 +51,7 @@ const NUM_OF_SKINS = 16
 var WINNER = 0
 var WINNERCHARACTER = ""
 var WINNERCONTROLLER = 0
+var WINNERSKIN = 0
 
 
 
