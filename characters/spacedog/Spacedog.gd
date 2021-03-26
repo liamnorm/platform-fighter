@@ -54,7 +54,7 @@ func neutralspecial():
 				laser.frame = 0
 				laser.playernumber = playernumber
 				get_tree().get_root().get_node("World").add_child(laser)
-				Globals.projectiles.append(laser)
+				w.projectiles.append(laser)
 				laser.start()
 				
 				
@@ -139,6 +139,14 @@ func sidespecial():
 			motion.y = 0
 			# zoop
 			
+			var effect = EFFECT.instance()
+			effect.position = get_position()
+			effect.d = d
+			effect.myframe = 0
+			effect.playernumber = playernumber
+			effect.effecttype = "foxside"
+			w.add_child(effect)
+			
 			if frame > 3:
 				var endspeed = 1600
 				if (input[0] && d == 1) || (input[1] && d == -1):
@@ -184,13 +192,25 @@ func upspecial():
 					"r":48, 
 					"dam":1, 
 					"dir":-100, 
-					"kb":.5, 
+					"kb":0, 
 					"ckb":0, 
 					"hs":1, 
 					"ss":1}
 					])
 			
-			if input[2]:
+			var c = str(playernumber-1)
+			if playernumber == 1:
+				c = ""
+			var up = "jump" + c
+			var down = "down" + c
+			var right = "right" + c
+			var left = "left" + c
+			var vert = Input.get_action_strength(down) - Input.get_action_strength(up)
+			var hor = Input.get_action_strength(right) - Input.get_action_strength(left)
+			if vert != 0 || hor != 0:
+				direction = Vector2(hor, vert)
+				direction *= 1/direction.length()
+			elif input[2]:
 				if input[0]:
 					direction = Vector2(0.7,-0.7)
 				elif input[1]:
@@ -213,6 +233,7 @@ func upspecial():
 				stage+= 1
 				frame = 0
 		1:
+			
 			if frame == 1:
 				#FIRE!!
 				#hitbox(10, Vector2(-48,-48), Vector2(48, 48), 13, -70, 1, 0, 4, 25)
@@ -226,12 +247,12 @@ func upspecial():
 						launchd = -180 + int(direction.angle()/3.14*180)
 				hitbox([
 					{"del":0, 
-					"len":13, 
+					"len":21, 
 					"t":-48, 
 					"b":48, 
 					"l":-48, 
 					"r":48, 
-					"dam":13, 
+					"dam":9, 
 					"dir":launchd, 
 					"kb":1, 
 					"ckb":0, 
@@ -243,7 +264,7 @@ func upspecial():
 			else:
 				motion = Vector2(0,0)
 			if frame > 21:
-				if direction == Vector2(0,-1):
+				if motion.y < -700:
 					motion.y = -700
 				stage+= 1
 				frame = 0
@@ -329,6 +350,7 @@ func neutralground():
 			buffer(true)
 			if frame > 5:
 				be("idle")
+	be_jump_if_in_midair()
 
 
 func sideground():
@@ -356,14 +378,49 @@ func sideground():
 			be("run")
 		else:
 			be("idle")
+	be_jump_if_in_midair()
 			
 func upground():
 	movement()
-	if frame > 30:
+	
+	if frame == 4:
+		hitbox([
+			{"del":0, 
+			"len":4, 
+			"t":-75, 
+			"b":50, 
+			"l":-60, 
+			"r":40, 
+			"dam":7, 
+			"dir":-85, 
+			"kb":.3, 
+			"ckb":600, 
+			"hs":5, 
+			"ss":8},
+			
+			{"del":4, 
+			"len":4, 
+			"t":-75, 
+			"b":50, 
+			"l":-60, 
+			"r":30, 
+			"dam":5, 
+			"dir":-85, 
+			"kb":.2, 
+			"ckb":500, 
+			"hs":2, 
+			"ss":4}
+			])
+	
+	if frame > 14:
+		buffer(true)
+		
+	if frame > 25:
 		if input[0] || input[1]:
 			be("run")
 		else:
 			be("idle")
+	be_jump_if_in_midair()
 
 func downground():
 	movement()
@@ -372,9 +429,10 @@ func downground():
 			be("run")
 		else:
 			be("idle")
+	be_jump_if_in_midair()
 
 func neutralair():
-	landing_lag = 7
+	landing_lag = 4
 	movement()
 	if frame == 1:
 		playsound("VOICE")
@@ -415,7 +473,7 @@ func neutralair():
 			be("jump")
 		
 func forwardair():
-	landing_lag = 17
+	landing_lag = 14
 	movement()
 	if frame == 1:
 		playsound("VOICE")
@@ -472,7 +530,7 @@ func backair():
 			"l":-110, 
 			"r":0, 
 			"dam":10, 
-			"dir":-145, 
+			"dir":-155, 
 			"kb":1.1, 
 			"ckb":0, 
 			"hs":6, 
@@ -485,7 +543,7 @@ func backair():
 			be("jump")
 
 func upair():
-	landing_lag = 7
+	landing_lag = 4
 	movement()
 	if frame == 1:
 		playsound("VOICE")
@@ -525,7 +583,7 @@ func upair():
 			be("jump")
 			
 func downair():
-	landing_lag = 13
+	landing_lag = 11
 	movement()
 	if frame == 1:
 		playsound("VOICE")
@@ -535,7 +593,7 @@ func downair():
 			{"del":0, 
 			"len":1, 
 			"t":-0, 
-			"b":100, 
+			"b":80, 
 			"l":-30, 
 			"r":50, 
 			"dam":1, 
@@ -545,7 +603,7 @@ func downair():
 			"hs":1, 
 			"ss":1}
 			])
-	if frame > 48:
+	if frame > 39:
 		if updatefloorstate():
 			be("land")
 		else:
@@ -556,7 +614,7 @@ func drawPlayer():
 	match state:
 		"idle":
 			beFrame(0+(frame/12)%2)
-			hurtbox(40,58,0,12)
+			hurtbox(40,54,0,10)
 		"run":
 			beFrame(2+((frame-1)/3)%4)
 			hurtbox(40,58,0,12)
@@ -570,7 +628,13 @@ func drawPlayer():
 			beFrame(7)
 			hurtbox(40,54,0,14)
 		"jump":
-			if double_jump_frame > 0:
+			if floating:
+				ref = 90
+				if float_frame < 16:
+					beFrame(ref+(float_frame-1)/3)
+				else:
+					beFrame(ref+5)
+			elif double_jump_frame > 0:
 				beFrame(9+(frame/3)%4)
 				hurtbox(40,40,0,0)
 			else:
@@ -671,8 +735,12 @@ func drawPlayer():
 		
 		"upground":
 			ref = 117
-			if frame < 20:
-				beFrame(ref+2+(frame-1)/4)
+			if frame < 3:
+				beFrame(ref)
+			elif frame < 5:
+				beFrame(ref+1)
+			elif frame < 20:
+				beFrame(ref+2+(frame-5)/4)
 			else:
 				beFrame(1)
 		
@@ -720,8 +788,10 @@ func drawPlayer():
 				beFrame(ref+(frame-1)/2)
 			elif frame < 30:
 				beFrame(ref+3+((frame-1)/2)%4)
-			else:
+			elif frame < 35:
 				beFrame(ref+7)
+			else:
+				beFrame(ref+8)
 		"hitstun":
 			beFrame(28)
 			hurtbox(44,54,0,8)
@@ -772,6 +842,10 @@ func drawPlayer():
 		"ledge":
 			ref = 53
 			beFrame(ref+(frame/12)%2)
+			hurtbox(35,45,-30,48)
+		"ledgegetup":
+			ref = 124
+			beFrame(ref+(frame/3))
 		
 		"respawn":
 			beFrame(0)

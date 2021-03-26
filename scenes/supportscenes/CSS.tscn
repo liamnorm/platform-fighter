@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=1]
 [ext_resource path="res://scenes/supportscenes/CSS.gd" type="Script" id=2]
@@ -91,6 +91,23 @@ shader_param/outline_col = null
 shader_param/skin = null
 shader_param/palette_tex = ExtResource( 4 )
 
+[sub_resource type="Shader" id=5]
+code = "shader_type canvas_item;
+
+uniform float progress;
+
+void fragment() {
+	if (UV.x < progress) {
+		COLOR = vec4(1,0,0,1);
+	} else {
+		COLOR = vec4(0.2,0.2, 0.2, 1);
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = SubResource( 5 )
+shader_param/progress = 0.3
+
 [node name="CSS" type="Node2D"]
 script = ExtResource( 2 )
 
@@ -129,7 +146,8 @@ __meta__ = {
 }
 
 [node name="Rules" type="Label" parent="."]
-margin_right = 398.0
+margin_left = 354.887
+margin_right = 752.887
 margin_bottom = 125.0
 custom_fonts/font = ExtResource( 1 )
 text = "STOCK"
@@ -149,3 +167,14 @@ position = Vector2( 1324.02, 432.577 )
 scale = Vector2( 2, 2 )
 texture = ExtResource( 6 )
 vframes = 2
+
+[node name="Back" type="ColorRect" parent="."]
+material = SubResource( 6 )
+margin_left = 9.77765
+margin_top = 13.1647
+margin_right = 103.778
+margin_bottom = 19.1647
+color = Color( 0.94902, 0.0117647, 0.0117647, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}

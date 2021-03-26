@@ -7,31 +7,41 @@ var SCREENY = 1080
 
 func _ready():
 	
-	Globals.SELECTEDMENUBUTTON = 0
 	buttons = [$StockButton, 
 	$TimeButton, 
 	$SoccerButton, 
-	$TrainingButton]
-	buttonnames = ["STOCK", "TIME", "SOCCER", "TRAINING"]
+	$TrainingButton, $OnlineButton]
+	buttonnames = ["STOCK", "TIME", "SOCCER", "TRAINING", "ONLINE"]
+
 	
-	for i in range(4):
+	for i in range(5):
 		buttons[i].get_node("Text").text = buttonnames[i]
 		buttons[i].buttonnumber = i
+		buttons[i].visible = true
 	lookgood()
 
 
 func _process(_delta):
 
 	if Input.is_action_just_pressed("down"):
-		if Globals.SELECTEDMENUBUTTON < 3:
+		if Globals.SELECTEDMENUBUTTON < 4:
 			Globals.SELECTEDMENUBUTTON += 1
 	if Input.is_action_just_pressed("jump"):
 		if Globals.SELECTEDMENUBUTTON > 0:
 			Globals.SELECTEDMENUBUTTON -= 1
 			
 	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select") || Input.is_action_just_pressed("attack"):
-		Globals.GAMEMODE = buttonnames[Globals.SELECTEDMENUBUTTON]
-		advance_to_css()
+		if buttonnames[Globals.SELECTEDMENUBUTTON] == "ONLINE":
+			advance_to_lobby()
+		else:
+			Globals.GAMEMODE = buttonnames[Globals.SELECTEDMENUBUTTON]
+			if  Globals.GAMEMODE == "SOCCER":
+				Globals.STAGE = 1
+				Globals.TEAMMODE = true
+			else:
+				Globals.STAGE = 0
+				Globals.TEAMMODE = false
+			advance_to_css()
 	
 	SCREENX = Globals.SCREENX
 	SCREENY = Globals.SCREENY
@@ -41,6 +51,7 @@ func lookgood():
 	
 	$Title.margin_right = SCREENX
 	$Title.margin_bottom = SCREENY / 3
+	$Title.visible = true
 	$Background.margin_right = SCREENX + 128
 	$Background.margin_bottom = SCREENY + 128
 	var i = 0
@@ -54,3 +65,6 @@ func start_game():
 	
 func advance_to_css():
 	var _css = get_tree().change_scene("res://scenes/supportscenes/CSS.tscn")
+	
+func advance_to_lobby():
+	var _css = get_tree().change_scene("res://scenes/supportscenes/Lobby.tscn")

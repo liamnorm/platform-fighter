@@ -29,7 +29,7 @@ void fragment() {
     
     //Get red value and sample palette based on it
     float pal_sample = texture(TEXTURE,UV).r;
-	float yval = skin/8f;
+	float yval = (skin+.5)/17f;
     vec4 col = texture(palette_tex,vec2(pal_sample,yval));
     
     //Get alpha val of adjacent pixels

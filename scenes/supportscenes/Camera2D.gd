@@ -8,30 +8,39 @@ var maxy = 0
 var x_offset = 0
 var y_offset = 0
 var XBOUNDS = 2500
-var YLOWERBOUND = 800
-var YUPPERBOUND = -800
-var SCREENX = 200
-var SCREENY = 200
+var YLOWERBOUND = 1500
+var YUPPERBOUND = -1300
+var SCREENX = 1920
+var SCREENY = 1080
 var do_rumble = 0
 var rumblex = 0
 var rumbley = 0
 var finalposx = 0
 var finalposy = 0
+var smarg = 256
+
+var Parallax
+
+var w
 
 var NUM_OF_ACTIVE_PLAYERS
 
 func _ready():
-	pass
+	w = get_parent()
 
 func _process(_delta):
 	
-	do_rumble = Globals.IMPACTFRAME
+	XBOUNDS = Globals.STAGEDATA[w.STAGE]["cameraxbound"]
+	YUPPERBOUND = Globals.STAGEDATA[w.STAGE]["camerayupperbound"]
+	YLOWERBOUND = Globals.STAGEDATA[w.STAGE]["cameraylowerbound"]
+	
+	do_rumble = w.IMPACTFRAME
 	
 	
-	var paused = Globals.PAUSED
+	var paused = w.PAUSED
 	var framechange = Input.is_action_just_pressed("nextframe")
-	var intro = Globals.FRAME < 0
-	var slowmo = Globals.SLOMOFRAME % 2 != 1 && Globals.SLOMOFRAME > 0
+	var intro = w.FRAME < 0
+	var slowmo = w.SLOMOFRAME % 2 != 1 && w.SLOMOFRAME > 0
 	if ((!paused) || framechange) && !slowmo:
 		
 		minx = 0
@@ -40,45 +49,52 @@ func _process(_delta):
 		maxy = 0
 		
 		NUM_OF_ACTIVE_PLAYERS = 0
-		for i in range(Globals.NUM_OF_PLAYERS):
+		for i in range(w.NUM_OF_PLAYERS):
 			var node_name = "../Player" + str(i+1)
 			var pxpos = get_node(node_name).get_position().x
 			var pypos = get_node(node_name).get_position().y
 			if !get_node(node_name).defeated:
 				NUM_OF_ACTIVE_PLAYERS += 1
 				if NUM_OF_ACTIVE_PLAYERS == 1:
-					minx = pxpos
-					miny = pypos
-					maxx = pxpos
-					maxy = pypos
+					minx = pxpos - smarg
+					maxx = pxpos + smarg
+					miny = pypos - smarg
+					maxy = pypos + smarg
 				else:
-					minx = min(minx, pxpos)
-					maxx = max(maxx, pxpos)
-					miny = min(miny, pypos)
-					maxy = max(maxy, pypos)
+					minx = min(minx, pxpos - smarg)
+					maxx = max(maxx, pxpos + smarg)
+					miny = min(miny, pypos - smarg)
+					maxy = max(maxy, pypos + smarg)
 					
-		for i in range(len(Globals.projectiles)):
-			if Globals.projectiles[i]!=null:
-				if Globals.projectiles[i].important_to_camera:
-					var pxpos = Globals.projectiles[i].get_position().x
-					var pypos = Globals.projectiles[i].get_position().y
-					minx = min(minx, pxpos)
-					maxx = max(maxx, pxpos)
-					miny = min(miny, pypos)
-					maxy = max(maxy, pypos)
+		for i in range(len(w.projectiles)):
+			if w.projectiles[i]!=null:
+				if w.projectiles[i].important_to_camera:
+					var pxpos = w.projectiles[i].get_position().x
+					var pypos = w.projectiles[i].get_position().y
+					minx = min(minx, pxpos - smarg)
+					maxx = max(maxx, pxpos + smarg)
+					miny = min(miny, pypos - smarg)
+					maxy = max(maxy, pypos + smarg)
+					
+		minx = clamp(minx, -XBOUNDS, XBOUNDS)
+		maxx = clamp(maxx, -XBOUNDS, XBOUNDS)
 		
-		var finalmax = max(abs(maxx-minx), abs(maxy-miny)*2)
 		
 		SCREENX = Globals.SCREENX
-		SCREENY = Globals.SCREENY - 400
+		SCREENY = Globals.SCREENY - 128
 		
-		var biggestzoom = 0.75 * 1440 / SCREENX
-		var smallestzoom = 2.5 * 1440 / SCREENX
+		var finalmax
+		if float(maxx-minx) / SCREENX > float(maxy-miny) / SCREENY:
+			finalmax = float(maxx-minx) / SCREENX
+		else:
+			finalmax = float(maxy-miny) / SCREENY
 		
-		var zoomo = sqrt(finalmax)/22 * 1440 / SCREENX
+		
+		var zoomo = finalmax
 		zoomo = lerp(zoomo,zoom.x,0.95)
 		
-		
+		var biggestzoom = 0.5 * 1920 / SCREENX
+		var smallestzoom = 4 * 1920 / SCREENX
 		zoomo = clamp(zoomo, biggestzoom, smallestzoom)
 		zoom = Vector2(zoomo, zoomo) 
 		
@@ -93,20 +109,6 @@ func _process(_delta):
 		x_offset = lerp(x_offset, finalposx, 0.95)
 		y_offset = lerp(y_offset, finalposy, 0.95)
 		
-		var xadj = SCREENX*0.5*zoomo
-		var yadj = SCREENY*0.5*zoomo
-		
-		if x_offset < -XBOUNDS + xadj:
-			x_offset = -XBOUNDS + xadj
-		
-		if x_offset > XBOUNDS - xadj:
-			x_offset = XBOUNDS - xadj
-		
-		if y_offset > YLOWERBOUND - yadj:
-			y_offset = YLOWERBOUND - yadj
-		
-		if y_offset < YUPPERBOUND + yadj:
-			y_offset = YUPPERBOUND + yadj
 		
 		
 		
@@ -115,3 +117,8 @@ func _process(_delta):
 		finalposx = x_offset
 		finalposy = y_offset
 		set_position(Vector2(finalposx+rumblex, finalposy+rumbley+64))
+		
+		#Parallax.position = -.0125 * zoomo * Vector2(finalposx+rumblex, 0) + Vector2(Globals.SCREENX/2, Globals.SCREENY)
+		#Parallax.scale = Vector2(2/sqrt(zoomo), 2/sqrt(zoomo))
+		#Parallax.position = Vector2(SCREENX/2, SCREENY/2 + 500)
+		#Parallax.scale = Vector2(SCREENX/1920, SCREENX/1920)

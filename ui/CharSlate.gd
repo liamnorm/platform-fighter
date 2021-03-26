@@ -26,7 +26,13 @@ func display():
 	position = Vector2((playernumber-1) * size.x, SCREENY / 2)
 	$Background.margin_right = size.x - 0
 	$Background.margin_bottom = size.y - 0
-	$Background.color = Globals.CONTROLLERCOLORS[Globals.playercontrollers[playernumber-1]]
+	if !Globals.TEAMMODE:
+		$Background.color = Globals.CONTROLLERCOLORS[Globals.playercontrollers[playernumber-1]]
+	else:
+		if Globals.playerteams[playernumber-1] == 0:
+			$Background.color = Globals.LEFTCOLOR
+		else:
+			$Background.color = Globals.RIGHTCOLOR
 	$Background.color.a = 0.7
 	
 	$TextureRect.margin_left = size.x/2 - 256

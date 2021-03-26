@@ -1,0 +1,201 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://resources/mountain.png" type="Texture" id=5]
+[ext_resource path="res://ui/fonts/hugefont.tres" type="DynamicFont" id=8]
+[ext_resource path="res://stage/static.png" type="Texture" id=10]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+void fragment(){
+	float s = 480.;
+	vec2 choppyUV = vec2(floor(UV.x*s)/s, floor(UV.y*s)/s);
+	float radius = distance(vec2(.5,.5), choppyUV);
+	vec2 midvector = vec2(.5,.5) - choppyUV;
+	
+	vec4 lightblue = vec4(0.1, 0.12, 0.45, 1);
+	vec4 dependent = vec4(radius,radius,radius,1);
+	vec4 darkblue = vec4(0.1,0.1,0.4,1);
+	vec4 white = vec4(1,1,1,1);
+	vec4 col;
+	int x = int(choppyUV.x*s);
+	int y = int(choppyUV.y*s);
+	float xf = float(x);
+	float yf = float(y);
+	float movingUVx = float((x+int(TIME*2.))%480)/480.;
+	vec2 movingUV = vec2(movingUVx, choppyUV.y);
+	float w = texture(TEXTURE, movingUV).r;
+	bool cloud = int(yf+
+		sin(TIME*0.5)*10.*sin(xf*0.1+TIME*.05)+(TIME*3.)+
+		sin(TIME*0.1)*100.*sin((xf+yf)*0.005+TIME*.5)+
+		sin(TIME*0.1)*28.*sin((xf+20.)*3.+TIME*5.)
+		)%130 > 70;
+	if (cloud) {
+		col = darkblue;
+	} else {
+		col = lightblue;
+	}
+	if ((x+y)%2 == 0) {
+		col += vec4(0.01,0.01,0.01,1);
+	}
+	
+	float whiteness = pow(w, 20);
+	col.r += whiteness*0.5;
+	col.g += whiteness*1.;
+	col.b += whiteness*1.5;
+	COLOR = col;
+}
+"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+
+[node name="SoccerField" type="Node2D"]
+
+[node name="Background" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Parallax" type="Sprite" parent="Background"]
+visible = false
+modulate = Color( 1, 1, 1, 0.572549 )
+position = Vector2( 0, 2.27612 )
+texture = ExtResource( 5 )
+
+[node name="Background" type="TextureRect" parent="Background"]
+visible = false
+material = SubResource( 2 )
+margin_right = 360.0
+margin_bottom = 335.0
+rect_scale = Vector2( 4, 4 )
+texture = ExtResource( 10 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Floor" type="StaticBody2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Floor"]
+position = Vector2( 0, 256 )
+polygon = PoolVector2Array( -3000, 0, 3000, 0 )
+one_way_collision = true
+
+[node name="Ceiling" type="StaticBody2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Ceiling"]
+position = Vector2( 0, -1300 )
+polygon = PoolVector2Array( -3000, 0, 3000, 0, 3000, -1000, -3000, -1000 )
+disabled = true
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="LeftWall"]
+position = Vector2( -2500, 0 )
+polygon = PoolVector2Array( 0, -1300, 0, 0 )
+disabled = true
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="RightWall"]
+position = Vector2( 2500, 0 )
+polygon = PoolVector2Array( 0, -1300, 0, 0 )
+disabled = true
+
+[node name="LeftDoubleZone" type="ColorRect" parent="."]
+margin_left = -3000.0
+margin_top = -1300.0
+margin_right = -1152.0
+margin_bottom = 1500.0
+color = Color( 0, 0.788235, 1, 0.25098 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="LeftDoubleZone"]
+margin_left = 952.0
+margin_top = 4.0
+margin_right = 1848.0
+margin_bottom = 2800.0
+custom_fonts/font = ExtResource( 8 )
+text = "-2"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LeftTripleZone" type="ColorRect" parent="."]
+margin_left = -3000.0
+margin_top = -1295.78
+margin_right = -2048.0
+margin_bottom = 1504.22
+color = Color( 0.0117647, 0.992157, 0.211765, 0.25098 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="LeftTripleZone"]
+anchor_left = 0.00555625
+anchor_top = 0.00142857
+anchor_right = 0.00555625
+anchor_bottom = 0.00142857
+margin_left = 476.0
+margin_top = -4.0
+margin_right = 952.0
+margin_bottom = 2792.0
+custom_fonts/font = ExtResource( 8 )
+text = "-3"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RightDoubleZone" type="ColorRect" parent="."]
+margin_left = 1156.47
+margin_top = -1300.0
+margin_right = 3000.0
+margin_bottom = 1500.0
+color = Color( 0, 0.788235, 1, 0.25098 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="RightDoubleZone"]
+margin_top = 4.21997
+margin_right = 896.0
+margin_bottom = 2800.22
+custom_fonts/font = ExtResource( 8 )
+text = "-2"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RightTripleZone" type="ColorRect" parent="."]
+margin_left = 2048.0
+margin_top = -1288.0
+margin_right = 3000.0
+margin_bottom = 1512.0
+color = Color( 0.0117647, 0.992157, 0.211765, 0.25098 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="RightTripleZone"]
+anchor_left = 0.00555625
+anchor_top = 0.00142857
+anchor_right = 0.00555625
+anchor_bottom = 0.00142857
+margin_left = -5.28955
+margin_top = -4.0
+margin_right = 470.71
+margin_bottom = 2792.0
+custom_fonts/font = ExtResource( 8 )
+text = "-3"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}

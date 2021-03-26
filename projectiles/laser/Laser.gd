@@ -24,7 +24,7 @@ func projectilemovement():
 			"ckb":0, 
 			"dohs":0,
 			"hs":0, 
-			"ss":4}
+			"ss":0}
 			])
 			
 	if motion.length()>MAXSPEED:
@@ -36,13 +36,13 @@ func projectilemovement():
 	
 	if connected:
 		if state != "reflect":
-			Globals.projectiles.erase(self)
+			w.projectiles.erase(self)
 			queue_free()
 		
 	frame += 1
 	
 	if frame == LIFESPAN:
-		Globals.projectiles.erase(self)
+		w.projectiles.erase(self)
 	if frame > LIFESPAN:
 		queue_free()
 

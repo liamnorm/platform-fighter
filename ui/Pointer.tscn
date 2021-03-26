@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://resources/pointer.png" type="Texture" id=1]
 [ext_resource path="res://ui/Pointer.gd" type="Script" id=2]
+[ext_resource path="res://ui/fonts/smallestfontnooutline.tres" type="DynamicFont" id=3]
 
 [sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
@@ -28,3 +29,15 @@ script = ExtResource( 2 )
 material = SubResource( 2 )
 texture = ExtResource( 1 )
 hframes = 5
+
+[node name="Label" type="Label" parent="."]
+margin_left = -16.4509
+margin_top = -12.7951
+margin_right = 23.5491
+margin_bottom = 15.2049
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color = Color( 1, 0, 0, 1 )
+text = "1"
+__meta__ = {
+"_edit_use_anchors_": false
+}

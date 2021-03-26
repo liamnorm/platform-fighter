@@ -1,16 +1,66 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
-[ext_resource path="res://ui/fonts/biggerfont.tres" type="DynamicFont" id=2]
+[ext_resource path="res://ui/fonts/biggerfontoutline.tres" type="DynamicFont" id=2]
 [ext_resource path="res://scenes/supportscenes/Results.gd" type="Script" id=3]
 [ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=4]
-[ext_resource path="res://characters/spacedog/portrait.png" type="Texture" id=5]
+[ext_resource path="res://characters/spacedog/cssportrait.png" type="Texture" id=5]
 [ext_resource path="res://characters/spacedog/palette.png" type="Texture" id=6]
 
-
-
-
 [sub_resource type="Shader" id=1]
+code = "shader_type canvas_item;
+
+void fragment(){
+	float s = 480.;
+	vec2 choppyUV = vec2(floor(UV.x*s)/s, floor(UV.y*s)/s);
+	vec2 midvector = vec2(.5,.5) - choppyUV;
+	float a;
+	
+	int x = int(choppyUV.x*s);
+	int y = int(choppyUV.y*s);
+	float xf = float(x);
+	float yf = float(y);
+	float movingUVx = float((x+int(TIME*2.))%480)/480.;
+	vec2 movingUV = vec2(movingUVx, choppyUV.y);
+	bool cloud = int(yf+
+		sin(TIME*0.5)*10.*sin(xf*0.1+TIME*.05)+(TIME*3.)+
+		sin(TIME*0.1)*1000.*sin((xf+yf)*0.005+TIME*.5)+
+		sin(TIME*0.1)*28.*sin((xf+20.)*3.+TIME*5.)
+		)%130 > 70;
+	if (cloud) {
+		a = .1;
+	} else {
+		a = 1.;
+	}
+	if ((x+y)%2 == 0) {
+		a += 0.01;
+	}
+	
+	COLOR.a = a;
+	if (a == .1) {
+		COLOR.r += .1;
+		COLOR.g += .1;
+		COLOR.b += .1;
+	}
+}
+"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+
+[sub_resource type="Shader" id=3]
+code = "shader_type canvas_item;
+
+void fragment(){
+	COLOR *= (1.5-UV.y);
+	COLOR.a = 0.7;
+}
+"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
+
+[sub_resource type="Shader" id=5]
 code = "shader_type canvas_item;
 
 uniform sampler2D palette_tex; //Palette to reference, this should be a 1-pixel tall texture containing your palette info
@@ -21,7 +71,7 @@ void fragment() {
     
     //Get red value and sample palette based on it
     float pal_sample = texture(TEXTURE,UV).r;
-	float yval = skin/8f;
+	float yval = (skin+.5)/17f;
     vec4 col = texture(palette_tex,vec2(pal_sample,yval));
     
     //Get alpha val of adjacent pixels
@@ -47,19 +97,29 @@ void fragment() {
 
 }"
 
-[sub_resource type="ShaderMaterial" id=2]
-shader = SubResource( 1 )
+[sub_resource type="ShaderMaterial" id=6]
+shader = SubResource( 5 )
 shader_param/outline_col = null
-shader_param/skin = null
+shader_param/skin = 10.0
 shader_param/palette_tex = ExtResource( 6 )
 
 [node name="Results" type="Node2D"]
 script = ExtResource( 3 )
 
 [node name="Background" type="ColorRect" parent="."]
+material = SubResource( 2 )
 margin_right = 1440.0
 margin_bottom = 931.0
-color = Color( 0, 0, 0, 1 )
+color = Color( 0.00784314, 0.458824, 0.984314, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Banner" type="ColorRect" parent="."]
+material = SubResource( 4 )
+margin_right = 1440.0
+margin_bottom = 931.0
+color = Color( 0.392157, 0.521569, 0.392157, 0.694118 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -99,17 +159,8 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Banner" type="ColorRect" parent="."]
-margin_top = 496.0
-margin_right = 1440.0
-margin_bottom = 832.0
-color = Color( 1, 0.00784314, 0.00784314, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="Sprite" type="Sprite" parent="."]
-material = SubResource( 2 )
+material = SubResource( 6 )
 position = Vector2( 320, 576 )
-scale = Vector2( 4, 4 )
+scale = Vector2( 2, 2 )
 texture = ExtResource( 5 )

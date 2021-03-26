@@ -21,21 +21,21 @@ var players_to_ignore = []
 
 var impact_frame = 0
 
+var w
+
 
 func _ready():
-	pass
+	w = get_parent().get_parent()
 
 
 func _process(_delta):
 	
 	
-	var paused = Globals.PAUSED
+	var paused = w.PAUSED
 	var framechange = Input.is_action_just_pressed("nextframe")
-	var intro = Globals.FRAME < 0
-	var slowmo = Globals.SLOMOFRAME % 2 == 1
+	var intro = w.FRAME < 0
+	var slowmo = w.SLOMOFRAME % 2 == 1
 	if ((!paused) || framechange) && impact_frame == 0 && !intro && !slowmo:
-		d = get_parent().d
-		
 		
 		for b in range(len(topleft)):
 			var boxname = "Box" + str(b)
@@ -50,7 +50,7 @@ func _process(_delta):
 			box.margin_top = topleft[b].y
 			box.margin_bottom = bottomright[b].y
 			
-			if Globals.FRAME >= startframe[b] && Globals.FRAME <= startframe[b] + boxlengths[b]:
+			if w.FRAME >= startframe[b] && w.FRAME <= startframe[b] + boxlengths[b]:
 				box.visible = true
 			else:
 				box.visible = false

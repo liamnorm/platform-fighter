@@ -20,6 +20,8 @@ var bounceoffshield = true
 var shieldstun = 0
 var hitter_motion = Vector2(0,0)
 
+var team = 0
+
 #variables that are required to exist for 
 #interaction, but optional
 var intangibility_frame = 0
@@ -47,20 +49,22 @@ var players_to_ignore = []
 
 var UP = Vector2(0,-1)
 
+var w
+
 func _ready():
-	pass
+	w = get_parent()
 
 
 func _physics_process(_delta):
 	
-	var paused = Globals.PAUSED
+	var paused = w.PAUSED
 	var framechange = Input.is_action_just_pressed("nextframe")
-	var intro = Globals.FRAME < 0
-	var slowmo = Globals.SLOMOFRAME % 2 == 1
+	var intro = w.FRAME < 0
+	var slowmo = w.SLOMOFRAME % 2 == 1
 	if ((!paused) || framechange) && impact_frame == 0 && !intro && !slowmo:
 		
 		if player_who_last_hit_me > 0:
-			if !(["shield", "shieldstun"].has(Globals.players[player_who_last_hit_me-1].state)):
+			if !(["shield", "shieldstun"].has(w.players[player_who_last_hit_me-1].state)):
 				player_who_last_hit_me = 0
 		
 		projectilemovement()
@@ -94,7 +98,7 @@ func hitbox(boxes):
 	hbox.shieldstun = []
 	hbox.hitstun = []
 	
-	hbox.visible = Globals.SHOWHITBOXES
+	hbox.visible = w.SHOWHITBOXES
 	hbox.players_to_ignore = []
 	
 	for b in boxes:
@@ -118,11 +122,11 @@ func hitbox(boxes):
 		else:
 			hbox.hitstun.append(true)
 		if b.has("del"):
-			hbox.startframe.append(Globals.FRAME + b["del"])
+			hbox.startframe.append(w.FRAME + b["del"])
 			if hbox.life < b["len"] + b["del"]:
 				hbox.life = b["len"] + b["del"]
 		else:
-			hbox.startframe.append(Globals.FRAME)
+			hbox.startframe.append(w.FRAME)
 			if hbox.life < b["len"]:
 				hbox.life = b["len"]
 	hitboxes.append(hbox)
@@ -130,7 +134,7 @@ func hitbox(boxes):
 	
 	
 func drawhurtbox():
-	$Hurtbox.visible = Globals.SHOWHITBOXES
+	$Hurtbox.visible = w.SHOWHITBOXES
 	$Hurtbox.margin_left = -hurtboxsize.x + hurtboxoffset.x
 	$Hurtbox.margin_right = hurtboxsize.x + hurtboxoffset.x
 	$Hurtbox.margin_top = -hurtboxsize.y + hurtboxoffset.y
@@ -143,5 +147,5 @@ func drawprojectile():
 	pass
 
 func respawn(_place):
-	Globals.projectiles.erase(self)
+	w.projectiles.erase(self)
 	queue_free()

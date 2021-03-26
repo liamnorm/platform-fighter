@@ -1,11 +1,67 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://projectiles/ball/ball.png" type="Texture" id=1]
 [ext_resource path="res://projectiles/ball/Ball.gd" type="Script" id=2]
 [ext_resource path="res://characters/Hurtbox.tscn" type="PackedScene" id=3]
+[ext_resource path="res://projectiles/ball/ballpalette.png" type="Texture" id=4]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 32.0
+
+[sub_resource type="Shader" id=2]
+code = "shader_type canvas_item;
+
+uniform sampler2D palette_tex; //Palette to reference, this should be a 1-pixel tall texture containing your palette info
+uniform vec4 outline_col : hint_color; //Outline color
+uniform float skin;
+uniform int invincibility;
+uniform int intangibility;
+
+void fragment() {
+    
+    //Get red value and sample palette based on it
+    float pal_sample = texture(TEXTURE,UV).r;
+	float yval = skin/8f;
+    vec4 col = texture(palette_tex,vec2(pal_sample,yval));
+    
+    //Get alpha val of adjacent pixels
+    vec2 p = TEXTURE_PIXEL_SIZE;
+    
+    float a = texture(TEXTURE,UV+vec2(p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(-p.x,0)).a;
+    a += texture(TEXTURE,UV+vec2(0,p.y)).a;
+    a += texture(TEXTURE,UV+vec2(0,-p.y)).a;
+    
+    //Using found alpha value, determine the opacity of the outline
+    
+    a = step(a,.5);//Clamp the a value
+    col.rgb = mix(outline_col.xyz, col.rgb, col.a);
+    col.a = step(a, col.a);
+	
+	float w = 0.0;
+	
+	if (invincibility > 0 || intangibility > 0) {
+		vec2 position = POINT_COORD;
+		w = sin((position.x+TIME/2.0) * 16.0)/50.0 + 0.35;
+	}
+	col += vec4(w,w,w,0);
+	
+	if (intangibility > 0 && col.a > 0.0) {
+		col.a = 0.5
+	}
+    
+    //Get palette color
+    COLOR = col;
+
+}"
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = SubResource( 2 )
+shader_param/outline_col = Color( 0, 0, 0, 1 )
+shader_param/skin = 0.0
+shader_param/invincibility = 0
+shader_param/intangibility = 0
+shader_param/palette_tex = ExtResource( 4 )
 
 [node name="Ball" type="KinematicBody2D"]
 collision_layer = 3
@@ -13,9 +69,11 @@ collision_mask = 0
 script = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
 shape = SubResource( 1 )
 
 [node name="Sprite" type="Sprite" parent="."]
+material = SubResource( 3 )
 position = Vector2( 3.8147e-06, 3.8147e-06 )
 texture = ExtResource( 1 )
 

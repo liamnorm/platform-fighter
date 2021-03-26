@@ -30,7 +30,8 @@ func _ready():
 			Globals.chippos.append(Vector2(0.5, .25))
 		else:
 			Globals.chippos.append(Vector2((i+0.5)/8.0, 0.45))
-		Globals.playerselected.append(!(Globals.playercontrollers[i] > 0))
+		#Globals.playerselected.append(!(Globals.playercontrollers[i] > 0))
+		Globals.playerselected.append(true)
 		
 	chips = []
 	for i in range(8):
@@ -47,7 +48,9 @@ func _ready():
 
 
 func _process(_delta):
-	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select"):
+	if (Input.is_action_just_pressed("pause") ||
+		Input.is_action_just_pressed("select")
+		) && !Globals.playerselected.has(false):
 		start_game()
 	if Input.is_action_pressed("special"):
 		Globals.CSSBACKFRAME += 1
@@ -67,6 +70,8 @@ func _process(_delta):
 	$Background.margin_top = 0
 	$Background.margin_right = max(Globals.SCREENX,Globals.SCREENY)
 	$Background.margin_bottom = max(Globals.SCREENX,Globals.SCREENY)
+	
+	$Back.get_material().set_shader_param("progress", Globals.CSSBACKFRAME/60.0)
 	
 	$ColorRect.margin_left = 0
 	$ColorRect.margin_top = 0

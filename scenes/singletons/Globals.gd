@@ -1,16 +1,7 @@
 extends Node
 
-var NUM_OF_PLAYERS = 2
 
-var STOCKS = 4
-var TIME = 120
-
-var GAMEMODE = "STOCK"
-
-var SELECTEDMENUBUTTON = 0
-
-var MUTED = true
-
+#Character select
 var playerskins = [0,1,2,3,4,5,6,7,8]
 var playerchars = [0,0,0,0,0,0,0,0,0]
 var playercontrollers = [1,0,0,0,0,0,0,0]
@@ -21,10 +12,17 @@ var chippos = []
 var pointpos = []
 var playerselected = []
 var CSSFRAME = 0
+var CSSBACKFRAME = 0
 
+
+#Menu stuff / options
+var SELECTEDMENUBUTTON = 0
+var MUTED = true
+var SHOWHITBOXES = false
+
+#General stuff
 var characternames = ["SPACEDOG", "TODD"]
 var characterdirectories = {-1:"", 0:"spacedog", 1:"todd"}
-
 
 const CONTROLLERCOLORS = [
 	Color(.46,.61,.66,1), 
@@ -39,55 +37,88 @@ const CONTROLLERCOLORS = [
 	]
 const LEFTCOLOR = Color("ff0089")
 const RIGHTCOLOR = Color("00ffcf")
-	
-var LEFTSIDECOLOR = Color("40ff0000")
-var RIGHTSIDECOLOR = Color("4000c9ff")
-var LEFTGOALCOLOR = Color("40ff0022")
-var RIGHTGOALCOLOR = Color("4003fd36")
-var DOUBLECOLOR = Color("400022ff")
-var TRIPLECOLOR = Color("40ff0022")
-		
-		
-const NUM_OF_SKINS = 8
 
-const LEDGES = [[Vector2(-640, 256), 1], [Vector2(640, 256), -1]]
-var PLATFORMLEDGES = []
-const TOPBLASTZONE = -1100
-const BOTTOMBLASTZONE = 1300
-const SIDEBLASTZONE = 3000
-const DOUBLEBLASTZONE = 1152
-const TRIPLEBLASTZONE = 2048
+const LEFTSIDECOLOR = Color("40ff0000")
+const RIGHTSIDECOLOR = Color("4000c9ff")
+const LEFTGOALCOLOR = Color("40ff0022")
+const RIGHTGOALCOLOR = Color("4003fd36")
+const DOUBLECOLOR = Color("400022ff")
+const TRIPLECOLOR = Color("40ff0022")
 
-var RIGHTSCORE = 0
-var LEFTSCORE = 0
+const NUM_OF_SKINS = 16
 
-var GAMEENDFRAME = 0
-var SLOMOFRAME = 0
-var KOFRAME = 0
-var DOUBLEKOFRAME = 0
-var TRIPLEKOFRAME = 0
-var LEFTSCOREFRAME = 0
-var RIGHTSCOREFRAME = 0
+#results
 var WINNER = 0
-var WINNERCONTROLLER = 0
 var WINNERCHARACTER = ""
-var DEFEATORDER = []
-var ELIMINATIONFRAME = 0
-var ELIMINATEDPLAYER = 0
-var CSSBACKFRAME = 0
+var WINNERCONTROLLER = 0
 
-var FRAME = 0
 
-var players
-var projectiles
 
-var PAUSED = false
+#specific to World
+var NUM_OF_PLAYERS = 2
+var STOCKS = 4
+var TIME = 180
+var GAMEMODE = "STOCK"
+var TEAMMODE = false
+var TEAMATTACK = false
+var STAGE = 0
 
-var COMBO = 0
 
-var IMPACTFRAME = 10
+var STAGEDATA = [
+	{
+		"name": "Final Destination",
+		
+		"TOPBLASTZONE": -1100,
+		"BOTTOMBLASTZONE": 1300,
+		"SIDEBLASTZONE": 3000,
+		"DOUBLEBLASTZONE": 1152,
+		"TRIPLEBLASTZONE": 2048,
+		"cameraxbound": 2500,
+		"camerayupperbound": -800,
+		"cameraylowerbound": 1300,
+		"spawnpositions":
+			[
+			Vector2(-384,0),
+			Vector2(384,0),
+			Vector2(0,192),
+			Vector2(0,-192),
+			Vector2(-384,192),
+			Vector2(384,192),
+			Vector2(192,192),
+			Vector2(-192,192),
+			],
+		"ballspawn": Vector2(0, -160),
+	
+	},
+	{
+		"name": "Soccer Field",
+		
+		"TOPBLASTZONE": -1100,
+		"BOTTOMBLASTZONE": 1300,
+		"SIDEBLASTZONE": 3000,
+		"DOUBLEBLASTZONE": 1152,
+		"TRIPLEBLASTZONE": 2048,
+		"cameraxbound": 2500,
+		"camerayupperbound": -800,
+		"cameraylowerbound": 1300,
+		
+		"spawnpositions":
+			[
+			Vector2(-384,192),
+			Vector2(384,192),
+			Vector2(-640,192),
+			Vector2(640,192),
+			Vector2(-896,192),
+			Vector2(896,192),
+			Vector2(-1152,192),
+			Vector2(1152,192),
+			],
+			
+		
+		"ballspawn": Vector2(0, 224),
+	}
+]
 
-var SHOWHITBOXES = false
 
 var SCREENY
 var SCREENX

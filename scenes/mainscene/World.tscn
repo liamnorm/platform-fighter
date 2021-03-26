@@ -1,15 +1,10 @@
-[gd_scene load_steps=22 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
-[ext_resource path="res://stage/stage.png" type="Texture" id=2]
 [ext_resource path="res://scenes/supportscenes/Camera2D.gd" type="Script" id=3]
 [ext_resource path="res://ui/FPS.gd" type="Script" id=4]
-[ext_resource path="res://stage/background.png" type="Texture" id=5]
 [ext_resource path="res://scenes/mainscene/World.gd" type="Script" id=6]
-[ext_resource path="res://stage/Platform.tscn" type="PackedScene" id=7]
-[ext_resource path="res://ui/fonts/hugefont.tres" type="DynamicFont" id=8]
 [ext_resource path="res://ui/fonts/biggerfont.tres" type="DynamicFont" id=9]
-[ext_resource path="res://stage/static.png" type="Texture" id=10]
 [ext_resource path="res://ui/fonts/biggerfontoutline.tres" type="DynamicFont" id=11]
 [ext_resource path="res://resources/sounds/REFLECT2.wav" type="AudioStream" id=12]
 [ext_resource path="res://resources/sounds/HIT4.wav" type="AudioStream" id=14]
@@ -24,40 +19,33 @@ code = "shader_type canvas_item;
 void fragment(){
 	float s = 480.;
 	vec2 choppyUV = vec2(floor(UV.x*s)/s, floor(UV.y*s)/s);
-	float radius = distance(vec2(.5,.5), choppyUV);
 	vec2 midvector = vec2(.5,.5) - choppyUV;
+	float a;
 	
-	vec4 lightblue = vec4(0.1, 0.12, 0.45, 1);
-	vec4 dependent = vec4(radius,radius,radius,1);
-	vec4 darkblue = vec4(0.1,0.1,0.4,1);
-	vec4 white = vec4(1,1,1,1);
-	vec4 col;
 	int x = int(choppyUV.x*s);
 	int y = int(choppyUV.y*s);
 	float xf = float(x);
 	float yf = float(y);
 	float movingUVx = float((x+int(TIME*2.))%480)/480.;
 	vec2 movingUV = vec2(movingUVx, choppyUV.y);
-	float w = texture(TEXTURE, movingUV).r;
 	bool cloud = int(yf+
 		sin(TIME*0.5)*10.*sin(xf*0.1+TIME*.05)+(TIME*3.)+
-		sin(TIME*0.1)*100.*sin((xf+yf)*0.005+TIME*.5)+
+		sin(TIME*0.1)*1000.*sin((xf+yf)*0.005+TIME*.5)+
 		sin(TIME*0.1)*28.*sin((xf+20.)*3.+TIME*5.)
 		)%130 > 70;
 	if (cloud) {
-		col = darkblue;
+		a = .1;
 	} else {
-		col = lightblue;
+		a = 1.;
 	}
 	if ((x+y)%2 == 0) {
-		col += vec4(0.01,0.01,0.01,1);
+		a += 0.01;
 	}
 	
-	float whiteness = pow(w, 20);
-	col.r += whiteness*0.5;
-	col.g += whiteness*1.;
-	col.b += whiteness*1.5;
-	COLOR = col;
+	COLOR.a = a;
+	if (a < .2) {
+		COLOR = vec4(0.3,0.3,0.3,1);
+	}
 }
 "
 
@@ -94,20 +82,6 @@ shader = SubResource( 3 )
 [node name="World" type="Node2D"]
 script = ExtResource( 6 )
 
-[node name="Background" type="CanvasLayer" parent="."]
-layer = -1
-
-[node name="Background" type="TextureRect" parent="Background"]
-material = SubResource( 2 )
-margin_right = 360.0
-margin_bottom = 335.0
-rect_scale = Vector2( 4, 4 )
-texture = ExtResource( 10 )
-expand = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Info" type="RichTextLabel" parent="CanvasLayer"]
@@ -124,10 +98,23 @@ __meta__ = {
 }
 
 [node name="BottomBar" type="ColorRect" parent="CanvasLayer"]
-modulate = Color( 0, 0, 0, 1 )
+material = SubResource( 2 )
+anchor_left = -0.00143945
+anchor_right = -0.00143945
 margin_top = 768.0
 margin_right = 1440.0
 margin_bottom = 900.0
+color = Color( 0.00784314, 0.458824, 0.984314, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BottomBarFront" type="ColorRect" parent="CanvasLayer"]
+margin_left = 498.0
+margin_top = 731.0
+margin_right = 940.0
+margin_bottom = 907.0
+color = Color( 0, 0, 0, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -165,162 +152,13 @@ __meta__ = {
 }
 
 [node name="Score" type="Label" parent="CanvasLayer"]
-visible = false
-margin_top = 747.0
-margin_right = 1440.0
-margin_bottom = 978.0
+margin_left = 6.61823
+margin_top = 749.503
+margin_right = 1446.62
+margin_bottom = 889.503
 custom_fonts/font = ExtResource( 9 )
 text = "0-0"
 align = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
-
-[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
-visible = false
-
-[node name="Sprite" type="Sprite" parent="ParallaxBackground/ParallaxLayer"]
-visible = false
-scale = Vector2( 4, 4 )
-texture = ExtResource( 5 )
-
-[node name="Background" type="ColorRect" parent="ParallaxBackground"]
-visible = false
-modulate = Color( 0, 0.192157, 0.4, 1 )
-anchor_top = 0.00468886
-anchor_bottom = 0.00468886
-margin_left = -3000.0
-margin_top = -1300.0
-margin_right = 3000.0
-margin_bottom = 1500.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Platform" parent="." instance=ExtResource( 7 )]
-position = Vector2( 0, -128 )
-
-[node name="Platform2" parent="." instance=ExtResource( 7 )]
-position = Vector2( -384, 64 )
-
-[node name="Platform3" parent="." instance=ExtResource( 7 )]
-position = Vector2( 384, 64 )
-
-[node name="Stage" type="StaticBody2D" parent="."]
-collision_layer = 3
-collision_mask = 3
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Stage"]
-position = Vector2( -144, 208 )
-scale = Vector2( 0.852781, 0.797682 )
-polygon = PoolVector2Array( -581.626, 60.1743, 919.345, 60.1743, 919.345, 140.407, 694.199, 381.104, -356.481, 381.104, -581.626, 140.407 )
-
-[node name="Sprite" type="Sprite" parent="Stage"]
-position = Vector2( -2.28882e-05, 384 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 2 )
-
-[node name="Camera2D" type="Camera2D" parent="."]
-current = true
-script = ExtResource( 3 )
-
-[node name="LeftDoubleZone" type="ColorRect" parent="."]
-margin_left = -3000.0
-margin_top = -1300.0
-margin_right = -1152.0
-margin_bottom = 1500.0
-color = Color( 0, 0.788235, 1, 0.25098 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="LeftDoubleZone"]
-margin_left = 952.0
-margin_top = 4.0
-margin_right = 1848.0
-margin_bottom = 2800.0
-custom_fonts/font = ExtResource( 8 )
-text = "-2"
-align = 1
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="LeftTripleZone" type="ColorRect" parent="."]
-margin_left = -3000.0
-margin_top = -1295.78
-margin_right = -2048.0
-margin_bottom = 1504.22
-color = Color( 0.0117647, 0.992157, 0.211765, 0.25098 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="LeftTripleZone"]
-anchor_left = 0.00555625
-anchor_top = 0.00142857
-anchor_right = 0.00555625
-anchor_bottom = 0.00142857
-margin_left = 476.0
-margin_top = -4.0
-margin_right = 952.0
-margin_bottom = 2792.0
-custom_fonts/font = ExtResource( 8 )
-text = "-3"
-align = 1
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="RightDoubleZone" type="ColorRect" parent="."]
-margin_left = 1156.47
-margin_top = -1300.0
-margin_right = 3004.47
-margin_bottom = 1500.0
-color = Color( 0, 0.788235, 1, 0.25098 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="RightDoubleZone"]
-margin_top = 4.21997
-margin_right = 896.0
-margin_bottom = 2800.22
-custom_fonts/font = ExtResource( 8 )
-text = "-2"
-align = 1
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="RightTripleZone" type="ColorRect" parent="."]
-margin_left = 2048.0
-margin_top = -1300.0
-margin_right = 3000.0
-margin_bottom = 1500.0
-color = Color( 0.0117647, 0.992157, 0.211765, 0.25098 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="RightTripleZone"]
-anchor_left = 0.00555625
-anchor_top = 0.00142857
-anchor_right = 0.00555625
-anchor_bottom = 0.00142857
-margin_left = -5.28955
-margin_top = -4.0
-margin_right = 470.71
-margin_bottom = 2792.0
-custom_fonts/font = ExtResource( 8 )
-text = "-3"
-align = 1
-valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -350,3 +188,7 @@ stream = ExtResource( 17 )
 
 [node name="HIT3" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 18 )
+
+[node name="Camera2D" type="Camera2D" parent="."]
+current = true
+script = ExtResource( 3 )
