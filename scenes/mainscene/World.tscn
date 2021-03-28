@@ -1,6 +1,7 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
+[ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=2]
 [ext_resource path="res://scenes/supportscenes/Camera2D.gd" type="Script" id=3]
 [ext_resource path="res://ui/FPS.gd" type="Script" id=4]
 [ext_resource path="res://scenes/mainscene/World.gd" type="Script" id=6]
@@ -111,7 +112,7 @@ __meta__ = {
 
 [node name="BottomBarFront" type="ColorRect" parent="CanvasLayer"]
 margin_left = 498.0
-margin_top = 731.0
+margin_top = 763.0
 margin_right = 940.0
 margin_bottom = 907.0
 color = Color( 0, 0, 0, 1 )
@@ -152,13 +153,26 @@ __meta__ = {
 }
 
 [node name="Score" type="Label" parent="CanvasLayer"]
-margin_left = 6.61823
-margin_top = 749.503
-margin_right = 1446.62
-margin_bottom = 889.503
+margin_left = 339.335
+margin_top = 763.701
+margin_right = 1124.33
+margin_bottom = 903.701
 custom_fonts/font = ExtResource( 9 )
 text = "0-0"
 align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Time" type="Label" parent="CanvasLayer"]
+margin_left = 7.0
+margin_top = 875.642
+margin_right = 1447.0
+margin_bottom = 939.642
+custom_fonts/font = ExtResource( 2 )
+text = "TIME"
+align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }

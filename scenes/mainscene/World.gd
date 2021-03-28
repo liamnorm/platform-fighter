@@ -93,7 +93,7 @@ func _ready():
 	RIGHTSCOREFRAME = 0
 	ELIMINATIONFRAME = 0
 	DEFEATORDER = []
-	for i in range(NUM_OF_PLAYERS):
+	for _i in range(NUM_OF_PLAYERS):
 		DEFEATORDER.append(0)
 	
 	LEFTSCORE = 0
@@ -111,7 +111,7 @@ func _ready():
 
 	spawnpositions = [] 
 	var indexList = range(NUM_OF_PLAYERS)
-	for i in range(NUM_OF_PLAYERS):
+	for _i in range(NUM_OF_PLAYERS):
 		var x = randi()%indexList.size()
 		spawnpositions.append(pos[indexList[x]])
 		indexList.remove(x)
@@ -405,6 +405,8 @@ func behurt(ps,h,b):
 		ps[0].stage = 0
 		if !ps[0].is_projectile:
 			ps[0].has_airdodge = true
+			ps[0].floatframe = ps[0].FLOATTIME
+			ps[1].has_double_jump = true
 		ps[0].motion = Vector2(0,0)
 		ps[0].hitter_motion = ps[1].motion * .1
 		ps[0].player_who_last_hit_me = ps[1].playernumber
@@ -426,8 +428,8 @@ func behurt(ps,h,b):
 		visualstun(ps, h, b)
 	
 func visualstun(ps, h, b):
-	ps[0].stun_length = int(15+ps[0].damage/15)
-	var hitlength = int(h.stun[b] + ps[0].damage/20)
+	ps[0].stun_length = int(21+ps[0].damage/15)
+	var hitlength = int(h.stun[b] + ps[0].damage/40)
 	if hitlength > ps[0].impact_frame:
 		ps[0].impact_frame = hitlength
 	if hitlength > ps[1].impact_frame:
@@ -449,7 +451,7 @@ func impact(ps, h, b):
 	add_child(effect)
 	
 func combocounter(ps):
-	if ["hitstun", "hit", "mildstun"].has(ps[0].state):
+	if ["hitstun", "mildstun"].has(ps[0].state) || (ps[0].state == "hit" && ps[0].stage == 0):
 		ps[0].combo+=1
 	else:
 		ps[0].combo = 1
@@ -482,6 +484,15 @@ func reflect(ps):
 	ps[0].stage = 0
 	ps[0].player_who_last_hit_me = ps[1].playernumber
 	ps[0].playernumber = ps[1].playernumber
+	
+	var effect = EFFECT.instance()
+	effect.position = (ps[0].get_position() + ps[1].get_position()) / 2
+	effect.d = 1
+	effect.myframe = 0
+	effect.playernumber = ps[1].playernumber
+	effect.effecttype = "reflect"
+	add_child(effect)
+	
 	playsound("REFLECT")
 
 func spawnball():
@@ -502,6 +513,16 @@ func bottommenu():
 	$CanvasLayer/BottomBar.margin_right = SCREENX + 128
 	$CanvasLayer/BottomBar.margin_top = SCREENY - 128
 	$CanvasLayer/BottomBar.margin_bottom = SCREENY + 128
+	
+	$CanvasLayer/Score.margin_left = SCREENX/2 - 256
+	$CanvasLayer/Score.margin_right = SCREENX/2 + 256
+	$CanvasLayer/Score.margin_top = SCREENY - 128
+	$CanvasLayer/Score.margin_bottom = SCREENY
+	
+	$CanvasLayer/Time.margin_left = 0
+	$CanvasLayer/Time.margin_right = SCREENX - 32
+	$CanvasLayer/Time.margin_top = 32
+	$CanvasLayer/Time.margin_bottom = 64
 	
 	if PAUSED:
 		$CanvasLayer/BottomBarFront.visible = true
@@ -583,15 +604,21 @@ func bottommenu():
 			$CanvasLayer/Message.visible = true
 			$CanvasLayer/Message.text = str(players[0].stock) + "-" + str(players[1].stock)
 	elif LEFTSCOREFRAME > 0:
-		$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
+		if LEFTSCOREFRAME%10 < 6:
+			$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
+		else:
+			$CanvasLayer/Message.set("custom_colors/font_color", Globals.LEFTCOLOR)
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "LEFT SCORES!"
-		$CanvasLayer/Message.text += "\n" + str(LEFTSCORE) + "-" + str(RIGHTSCORE)
+		#$CanvasLayer/Message.text += "\n" + str(LEFTSCORE) + "-" + str(RIGHTSCORE)
 	elif RIGHTSCOREFRAME > 0:
-		$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
+		if RIGHTSCOREFRAME%10 < 6:
+			$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
+		else:
+			$CanvasLayer/Message.set("custom_colors/font_color", Globals.RIGHTCOLOR)
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "RIGHT SCORES!"
-		$CanvasLayer/Message.text += "\n" + str(LEFTSCORE) + "-" + str(RIGHTSCORE)
+		#$CanvasLayer/Message.text += "\n" + str(LEFTSCORE) + "-" + str(RIGHTSCORE)
 	elif (GAMEMODE == "TIME" || GAMEMODE == "SOCCER") && FRAME > TIME*60-300:
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = str((TIME*60-FRAME)/60+1)
@@ -634,6 +661,24 @@ func background():
 	$Stage/RightTripleZone.margin_left = side3
 	$Stage/RightTripleZone.margin_right = side
 	
+	
+	var thetext = ""
+	if GAMEMODE == "TIME" ||  GAMEMODE == "SOCCER":
+		if TIME - (FRAME / 60) > 0:
+			var seconds = (TIME - (FRAME / 60)) % 60
+			var minutes = (TIME - (FRAME/60)) / 60
+			var secondsprinted = str(seconds)
+			if len(secondsprinted) == 1:
+				secondsprinted = "0" + secondsprinted
+			thetext = str(minutes) + ":" + secondsprinted
+	else:
+		var seconds = (FRAME / 60)
+		var minutes = (FRAME/60) / 60
+		var secondsprinted = str(seconds)
+		if len(secondsprinted) == 1:
+			secondsprinted = "0" + secondsprinted
+		thetext = str(minutes) + ":" + secondsprinted
+	
 	if GAMEMODE == "SOCCER":
 		$Stage/LeftDoubleZone.color = Globals.LEFTSIDECOLOR
 		$Stage/RightDoubleZone.color = Globals.RIGHTSIDECOLOR
@@ -645,6 +690,8 @@ func background():
 		$Stage/RightTripleZone/Label.text = "+1"
 		$CanvasLayer/Score.visible = true
 		$CanvasLayer/Score.text = str(LEFTSCORE) + "-" + str(RIGHTSCORE)
+		$CanvasLayer/Time.visible = true
+		$CanvasLayer/Time.text = thetext
 	else:
 		$Stage/LeftDoubleZone.color = Globals.DOUBLECOLOR
 		$Stage/RightDoubleZone.color = Globals.DOUBLECOLOR
@@ -655,15 +702,19 @@ func background():
 		$Stage/LeftTripleZone/Label.text = "-3"
 		$Stage/RightTripleZone/Label.text = "-3"
 		$CanvasLayer/Score.visible = false
+		$CanvasLayer/Time.visible = true
+		$CanvasLayer/Time.text = thetext
 		if NUM_OF_PLAYERS == 2:
 			if GAMEMODE == "STOCK":
 				$CanvasLayer/Score.text = str(players[0].stock) + "-" + str(players[1].stock)
 				$CanvasLayer/Score.visible = true
+				$CanvasLayer/Time.visible = true
+				$CanvasLayer/Time.text = thetext
 				
 				
 				
 func playsound(sound):
-	if !Globals.MUTED:
+	if !Globals.MUTED || GAMEENDFRAME > 0:
 		if sound == "HIT":
 			sound = "HIT" + str(randi()%4)
 		get_node("Sounds").get_node(sound).play()

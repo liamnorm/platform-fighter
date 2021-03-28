@@ -5,8 +5,6 @@ var MAXFALLSPEED = 750
 var MAXAIRSPEED = 2000
 const TRUEMAXSPEED = 10000
 
-var skin = 1
-
 var Mat
 
 func _ready():
@@ -19,18 +17,19 @@ func projectilemovement():
 	if (y > w.BOTTOMBLASTZONE || 
 	(y < w.TOPBLASTZONE && state == "ooga boofghsa") || 
 	abs(x) > w.SIDEBLASTZONE):
-		if x < -w.TRIPLEBLASTZONE:
-			w.RIGHTSCORE += 1
-			w.RIGHTSCOREFRAME = 120
-			motion = Vector2(0,0)
-			damage = 0
-		elif x > w.TRIPLEBLASTZONE:
-			w.LEFTSCORE += 1
-			w.LEFTSCOREFRAME = 120
-			motion = Vector2(0,0)
-			damage = 0
-		else:
-			pass
+		if w.STAGE == 0 || (w.STAGE == 1 && y > 0):
+			if x < -w.TRIPLEBLASTZONE:
+				w.RIGHTSCORE += 1
+				w.RIGHTSCOREFRAME = 120
+				motion = Vector2(0,0)
+				damage = 0
+			elif x > w.TRIPLEBLASTZONE:
+				w.LEFTSCORE += 1
+				w.LEFTSCOREFRAME = 120
+				motion = Vector2(0,0)
+				damage = 0
+			else:
+				pass
 		respawn(Vector2(0,w.TOPBLASTZONE))
 	if y < w.TOPBLASTZONE:
 		motion.y = 0

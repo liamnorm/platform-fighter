@@ -73,13 +73,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Floor" type="StaticBody2D" parent="."]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Floor"]
-position = Vector2( 0, 256 )
-polygon = PoolVector2Array( -3000, 0, 3000, 0 )
-one_way_collision = true
-
 [node name="Ceiling" type="StaticBody2D" parent="."]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Ceiling"]
@@ -199,3 +192,16 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Floor" type="StaticBody2D" parent="."]
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Floor"]
+position = Vector2( 0, 256 )
+polygon = PoolVector2Array( -3000, 0, 3000, 0 )
+one_way_collision = true
+
+[node name="Sprite" type="Sprite" parent="Floor"]
+modulate = Color( 0.266667, 0.658824, 0, 1 )
+position = Vector2( 4, 880.53 )
+scale = Vector2( 12.5167, 2.60197 )
+texture = ExtResource( 10 )

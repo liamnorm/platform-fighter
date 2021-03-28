@@ -57,7 +57,10 @@ func _process(_delta):
 	else:
 		Globals.CSSBACKFRAME = 0
 	if Globals.CSSBACKFRAME > 60:
-		go_back()
+		if Globals.GAMEMODE == "TRAINING":
+			go_back()
+		else:
+			go_back_to_rules()
 
 
 	$Num_of_players.text = str(Globals.NUM_OF_PLAYERS) + " PLAYERS"
@@ -92,3 +95,6 @@ func start_game():
 
 func go_back():
 	var _menu = get_tree().change_scene("res://scenes/supportscenes/Menu.tscn")
+	
+func go_back_to_rules():
+	var _rules = get_tree().change_scene("res://scenes/supportscenes/Rules.tscn")

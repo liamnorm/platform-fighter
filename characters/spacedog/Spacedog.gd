@@ -26,6 +26,7 @@ func _ready():
 	
 	hurtbox(40,58,0,12)
 	
+	
 
 func neutralspecial():
 	fallcap(on_floor)
@@ -53,6 +54,7 @@ func neutralspecial():
 				laser.d = d
 				laser.frame = 0
 				laser.playernumber = playernumber
+				laser.skin = skin
 				get_tree().get_root().get_node("World").add_child(laser)
 				w.projectiles.append(laser)
 				laser.start()
@@ -144,6 +146,7 @@ func sidespecial():
 			effect.d = d
 			effect.myframe = 0
 			effect.playernumber = playernumber
+			effect.skin = skin
 			effect.effecttype = "foxside"
 			w.add_child(effect)
 			
@@ -181,7 +184,7 @@ func upspecial():
 			if frame == 1:
 				direction = Vector2(0,-1)
 			
-			if frame %3 == 0:
+			if frame %3 == 0 && frame > 6:
 				#hitbox(1, Vector2(-48,-48), Vector2(48, 48), 1, -100, 0, 0, 1, 3)
 				var s = 40
 				hitbox([
@@ -199,8 +202,8 @@ func upspecial():
 					"ss":1}
 					])
 			
-			var c = str(playernumber-1)
-			if playernumber == 1:
+			var c = str(controller-1)
+			if controller == 1:
 				c = ""
 			var up = "jump" + c
 			var down = "down" + c
@@ -229,6 +232,7 @@ func upspecial():
 				direction = Vector2(1,0)
 			elif input[1]:
 				direction = Vector2(-1,0)
+				
 			
 			if frame > 30:
 				stage+= 1
@@ -239,28 +243,43 @@ func upspecial():
 				#FIRE!!
 				#hitbox(10, Vector2(-48,-48), Vector2(48, 48), 13, -70, 1, 0, 4, 25)
 				var launchd
+				var newvect = direction + Vector2(d,1) * 0.1
+				var la = int(newvect.angle()/3.14*180) 
 				if d == 1:
-					launchd = int(direction.angle()/3.14*180) 
+					launchd = la
 				else:
-					if int(direction.angle()/3.14*180) % 360 <= 180:
-						launchd = 180 - int(direction.angle()/3.14*180)
+					if la % 360 <= 180:
+						launchd = 180 - la
 					else:
-						launchd = -180 + int(direction.angle()/3.14*180)
+						launchd = -180 + la
 						
 				var s = 40
 				hitbox([
 					{"del":0, 
-					"len":21, 
+					"len":5, 
 					"t":-s, 
 					"b":s, 
 					"l":-s, 
 					"r":s, 
-					"dam":9, 
+					"dam":7, 
 					"dir":launchd, 
 					"kb":1, 
 					"ckb":0, 
 					"hs":4, 
-					"ss":25}
+					"ss":13},
+					
+					{"del":5, 
+					"len":16, 
+					"t":-s, 
+					"b":s, 
+					"l":-s, 
+					"r":s, 
+					"dam":4, 
+					"dir":launchd, 
+					"kb":1, 
+					"ckb":0, 
+					"hs":2, 
+					"ss":7}
 					])
 			if !shieldconnected:
 				motion = 1600 * direction
@@ -451,7 +470,7 @@ func neutralair():
 			"r":70, 
 			"dam":7, 
 			"dir":-35, 
-			"kb":1, 
+			"kb":.7, 
 			"ckb":0, 
 			"hs":5, 
 			"ss":8},
@@ -470,6 +489,8 @@ func neutralair():
 			"ss":4}
 			])
 		#hitbox(10, Vector2(-50,-15), Vector2(70, 60), 4, -60, 1, 0, 5, 8)
+	if frame > 20:
+		buffer(false)
 	if frame > 30:
 		if updatefloorstate():
 			be("land")
@@ -513,6 +534,8 @@ func forwardair():
 	if frame == 16:
 		pass
 		#hitbox(3, Vector2(-20,-5), Vector2(85, 64), 4, 80, 1, 0, 4, 5)
+	if frame > 30:
+		buffer(false)
 	if frame > 43:
 		if updatefloorstate():
 			be("land")
@@ -540,6 +563,8 @@ func backair():
 			"hs":6, 
 			"ss":10}
 			])
+	if frame > 20:
+		buffer(false)
 	if frame > 30:
 		if updatefloorstate():
 			be("land")
@@ -561,7 +586,7 @@ func upair():
 			"l":-20, 
 			"r":90, 
 			"dam":7, 
-			"dir":-88, 
+			"dir":-96, 
 			"kb":.5, 
 			"ckb":300, 
 			"hs":4, 
@@ -580,7 +605,9 @@ func upair():
 			"hs":4, 
 			"ss":7}
 			])
-	if frame > 23:
+	if frame > 14:
+		buffer(false)
+	if frame > 24:
 		if updatefloorstate():
 			be("land")
 		else:
@@ -602,11 +629,13 @@ func downair():
 			"r":50, 
 			"dam":1, 
 			"dir":75, 
-			"kb":.5, 
-			"ckb":-3,
+			"kb":.3, 
+			"ckb":-300,
 			"hs":1, 
 			"ss":1}
 			])
+	if frame > 30:
+		buffer(false)
 	if frame > 39:
 		if updatefloorstate():
 			be("land")
@@ -685,6 +714,7 @@ func drawPlayer():
 						beFrame(6)
 				2:
 					beFrame(6)
+			hurtbox(40,54,0,10)
 		"floating":
 			ref = 90
 			match stage:
@@ -760,6 +790,7 @@ func drawPlayer():
 				beFrame(ref+3)
 			else:
 				beFrame(8)
+			hurtbox(40,54,0,10)
 		"forwardair":
 			ref = 55
 			if frame < 19:
@@ -809,8 +840,16 @@ func drawPlayer():
 						beFrame(30)
 					hurtbox(54,40,0,12)
 				1:
-					beFrame(9+(frame/3)%4)
-					hurtbox(40,40,0,0)
+					if floating:
+						ref = 90
+						if float_frame < 16:
+							beFrame(ref+(float_frame-1)/3)
+						else:
+							beFrame(ref+5)
+					else:
+						ref = 131
+						var s = [0, 1, 3, 4, 6, 7, 1, 2, 4, 5, 7, 0, 2, 3, 5, 6]
+						beFrame(ref+(s[(frame/3)%16]))
 		"knockeddown":
 			ref = 31
 			match stage:
@@ -853,3 +892,12 @@ func drawPlayer():
 		
 		"respawn":
 			beFrame(0)
+			
+		"dizzy":
+			ref = 139
+			beFrame(ref+(frame/12)%7)
+		
+		"shieldbreak":
+			ref = 131
+			var s = [0, 1, 3, 4, 6, 7, 1, 2, 4, 5, 7, 0, 2, 3, 5, 6]
+			beFrame(ref+(s[(frame/3)%16]))

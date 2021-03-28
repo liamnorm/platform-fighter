@@ -28,7 +28,7 @@ const RESPAWN_IDLE_FRAMES = 180
 const LEDGE_INTANGIBILITY_FRAMES = 45
 const is_projectile = false
 const TRUEMAXSPEED = 10000
-const FLOATTIME = 60
+const FLOATTIME = 360
 
 #character-dependent stuff that should basically act as constants
 #jumping
@@ -102,7 +102,7 @@ var respawn_order = -1
 var floatframe = FLOATTIME
 var float_frame = 0
 var floating = false
-var totalrollframes = 0
+var totalrollframes = ROLLFRAMES
 var totalspotdodgeframes = 0
 
 #stale moves
@@ -519,8 +519,9 @@ func statebasedaction():
 				playsound("SHIELDOPEN")
 			movement()
 			if frame < 20:
-				if motion.y > 300:
-					motion.y = 300
+				motion.y = 0
+			if motion.y > MAXFALLSPEED:
+				motion.y = MAXFALLSPEED
 			motion.x = lerp(motion.x, 0, AIRFRICTION)
 			shield_size -= 2
 			in_fast_fall = false
@@ -542,8 +543,6 @@ func statebasedaction():
 						be("airdodge")
 					elif !input[6]:
 						be("outofshield")
-					if motion.y >= 0:
-						motion.y -= GRAVITY*0.9
 			elif frame < 4:
 				if updatefloorstate():
 					if input[0]:
@@ -739,7 +738,7 @@ func statebasedaction():
 				0:
 					if frame == 1:
 						var people_respawning = []
-						for i in range(w.NUM_OF_PLAYERS):
+						for _i in range(w.NUM_OF_PLAYERS):
 							people_respawning.append(false)
 						for i in range(w.NUM_OF_PLAYERS):
 							if w.players[i].state == "respawn":
@@ -761,8 +760,8 @@ func statebasedaction():
 					motion.y -= GRAVITY
 					position.y = -512
 					invincibility_frame = 2
-					respawn_order = -1
 					if input.has(true) || frame > RESPAWN_IDLE_FRAMES:
+						respawn_order = -1
 						invincibility_frame = RESPAWN_INVINCIBILITY_FRAMES
 						be("jump")
 						if input[3]:
@@ -783,14 +782,18 @@ func statebasedaction():
 					be("dizzy")
 		"dizzy":
 			shield_size = SHIELDTIME
+			if new_input.has(true):
+				frame += 3
 			if !updatefloorstate():
 				be("jump")
-			if frame > 300:
+			if frame > 600:
 				be("idle")
 				
 				
 	if ((input[7] && floatframe > 0 &&
-	!["ledge", "hitstun", "hit", "mildstun", "knockeddown", "respawn", "shield", "shieldstun", "shieldbreak", "dizzy", "sidespecial", "upspecial", "downspecial"].has(state))
+	!["ledge", "hitstun", "mildstun", "knockeddown", "respawn", "shield", "shieldstun", "shieldbreak", "dizzy", "sidespecial", "upspecial", "downspecial"].has(state))
+	&& !(state == "hit" && stage == 0)
+	&& !(["neutralair", "forwardair", "backair", "upair", "downair"].has(state) && !floating) #can't start floating if doing aerial
 	|| (float_frame > 0 && float_frame < 16)):
 		if !floating:
 			float_frame = 0
@@ -975,7 +978,7 @@ func airoptions():
 				be("backair")
 		else:
 			be("neutralair")
-	elif input[6]:
+	elif new_input[6]:
 		if (input[0] || input[1] || input[2] || input[3]) && has_airdodge:
 			be("airdodge")
 		else:
@@ -1142,6 +1145,8 @@ func respawn(place, first_time_respawning=false):
 	first_time_at_ledge = true
 	drop_frame = 0
 	damage = 0.0
+	
+	totalrollframes = ROLLFRAMES
 	
 	impact_frame = 0
 	launch_direction = 0
@@ -1521,5 +1526,5 @@ func extra():
 	movement()
 	
 func playsound(sound):
-	if !Globals.MUTED:
+	if !Globals.MUTED || w.GAMEENDFRAME > 0:
 		get_node("Sounds").get_node(sound).play()

@@ -19,6 +19,7 @@ var spawnposition = Vector2(0,-512)
 var bounceoffshield = true
 var shieldstun = 0
 var hitter_motion = Vector2(0,0)
+var skin = 0
 
 var team = 0
 

@@ -3,8 +3,10 @@ extends "res://projectiles/Projectile.gd"
 var SPEED = 2500
 var MAXSPEED = 5000
 
+var Mat
+
 func _ready():
-	pass
+	Mat = $Sprite.get_material()
 
 
 func projectilemovement():
@@ -27,10 +29,14 @@ func projectilemovement():
 			"ss":0}
 			])
 			
+	$CollisionShape2D.disabled = true
+	Mat.set_shader_param("skin", skin)
+	intangibility_frame = 2
+	
 	if motion.length()>MAXSPEED:
 		motion = motion.normalized() * MAXSPEED
 
-	$CollisionShape2D.disabled = true
+	
 	if frame > 0:
 		motion = move_and_slide(motion, UP)
 	

@@ -17,8 +17,22 @@ var CSSBACKFRAME = 0
 
 #Menu stuff / options
 var SELECTEDMENUBUTTON = 0
-var MUTED = true
+var SELECTEDRULE = 0
+var MUTED = false
 var SHOWHITBOXES = false
+
+var RULECHOICES = {
+	"STAGE": 1,
+	"GAME MODE": 0,
+	"STOCKS": 4,
+	"TIME LIMIT": 0,
+	"TIME": 3,
+	"TEAM MODE": 0,
+	"TEAM ATTACK": 0,
+	"TIEBREAKER": 0,
+	"CPU LEVEL": 2,
+	"SCORE TO WIN": 0,
+}
 
 #General stuff
 var characternames = ["SPACEDOG", "TODD"]
@@ -57,7 +71,7 @@ var WINNERSKIN = 0
 
 #specific to World
 var NUM_OF_PLAYERS = 2
-var STOCKS = 4
+var STOCKS = 6
 var TIME = 180
 var GAMEMODE = "STOCK"
 var TEAMMODE = false

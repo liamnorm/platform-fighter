@@ -22,7 +22,7 @@ func start(i):
 #	else:
 #		Globals.chipholder[playernumber-1] = 0
 	Globals.chipholder[playernumber-1] = 0
-	Globals.playerchars[heldplayer-1] = 0
+	Globals.playerchars[playernumber-1] = 0
 
 func _ready():
 	display()

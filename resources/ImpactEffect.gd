@@ -4,6 +4,7 @@ onready var BLASTZONE = preload("res://resources/blastzone.png")
 onready var IMPACT = preload("res://resources/impact.png")
 onready var FOXSIDE = preload("res://characters/spacedog/foxside.png")
 onready var EXPLOSION = preload("res://resources/explosion.png")
+onready var REFLECT = preload("res://resources/reflect.png")
 
 var SPEED = 3000
 var LIFESPAN = 15
@@ -13,11 +14,17 @@ var playernumber = 0
 var d = 1
 var effecttype = "undefined"
 var w
+var skin = 0
 
 func _ready():
 	w = get_parent()
 	draweffect()
 	z_index = -1
+	
+	if effecttype == "foxside":
+		material.shader = load("res://characters/spacedog/side.shader")
+		material.set_shader_param("skin", skin)
+		material.set_shader_param("palette_tex", load("res://characters/spacedog/palette.png"))
 
 
 func _physics_process(_delta):
@@ -51,10 +58,11 @@ func draweffect():
 					frame = 5
 			"foxside":
 				vframes = 1
-				hframes = 4
+				hframes = 1
 				texture = FOXSIDE
 				LIFESPAN = 9
-				frame = myframe / 3
+				material.set_shader_param("frame", myframe)
+				frame = 0
 			"launch":
 				vframes = 2
 				hframes = 8
@@ -78,5 +86,11 @@ func draweffect():
 				vframes = 2
 				hframes = 8
 				texture = EXPLOSION
+				LIFESPAN = 40
+				frame = myframe / 4
+			"reflect":
+				vframes = 2
+				hframes = 4
+				texture = REFLECT
 				LIFESPAN = 40
 				frame = myframe / 4

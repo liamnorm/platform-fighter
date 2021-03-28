@@ -39,7 +39,7 @@ func _process(_delta):
 	
 	var paused = w.PAUSED
 	var framechange = Input.is_action_just_pressed("nextframe")
-	var intro = w.FRAME < 0
+	var _intro = w.FRAME < 0
 	var slowmo = w.SLOMOFRAME % 2 != 1 && w.SLOMOFRAME > 0
 	if ((!paused) || framechange) && !slowmo:
 		
@@ -78,6 +78,8 @@ func _process(_delta):
 					
 		minx = clamp(minx, -XBOUNDS, XBOUNDS)
 		maxx = clamp(maxx, -XBOUNDS, XBOUNDS)
+		miny = clamp(miny, YUPPERBOUND, YLOWERBOUND)
+		maxy = clamp(maxy, YUPPERBOUND, YLOWERBOUND)
 		
 		
 		SCREENX = Globals.SCREENX
@@ -101,6 +103,7 @@ func _process(_delta):
 		x_offset = (maxx+minx)/2
 		y_offset = (maxy+miny)/2
 		
+		
 		#x_offset = clamp(x_offset, -XBOUNDS*zoomo, XBOUNDS*zoomo)
 		
 		#x_offset = clamp(x_offset,-XBOUNDS-SCREENX/zoomo,XBOUNDS+SCREENX/zoomo)
@@ -109,7 +112,17 @@ func _process(_delta):
 		x_offset = lerp(x_offset, finalposx, 0.95)
 		y_offset = lerp(y_offset, finalposy, 0.95)
 		
+		if x_offset + zoom.x * SCREENX/2 > XBOUNDS:
+			x_offset = XBOUNDS - zoom.x * SCREENX/2
+			
+		if x_offset - zoom.x * SCREENX/2 < -XBOUNDS:
+			x_offset = -XBOUNDS + zoom.x * SCREENX/2
 		
+		if y_offset + zoom.x * SCREENY/2 > YLOWERBOUND:
+			y_offset = YLOWERBOUND - zoom.y * SCREENY/2
+			
+		if y_offset - zoom.y * SCREENY/2 < YUPPERBOUND:
+			y_offset = YUPPERBOUND + zoom.y * SCREENY/2
 		
 		
 		rumblex = do_rumble * randi()%10

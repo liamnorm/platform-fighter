@@ -27,20 +27,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="StockButton" parent="." instance=ExtResource( 8 )]
+[node name="PlayButton" parent="." instance=ExtResource( 8 )]
 position = Vector2( 447.57, 448 )
 
-[node name="TimeButton" parent="." instance=ExtResource( 8 )]
-position = Vector2( 447.57, 512 )
-
-[node name="SoccerButton" parent="." instance=ExtResource( 8 )]
+[node name="TrainingButton" parent="." instance=ExtResource( 8 )]
 position = Vector2( 448, 576 )
 
-[node name="TrainingButton" parent="." instance=ExtResource( 8 )]
-position = Vector2( 447.57, 640 )
-
 [node name="OnlineButton" parent="." instance=ExtResource( 8 )]
-position = Vector2( 448, 704 )
+position = Vector2( 448.43, 640 )
+
+[node name="SettingsButton" parent="." instance=ExtResource( 8 )]
+position = Vector2( 448.43, 512 )
 
 [node name="Info" type="RichTextLabel" parent="."]
 margin_left = 17.1767
