@@ -672,7 +672,7 @@ func background():
 				secondsprinted = "0" + secondsprinted
 			thetext = str(minutes) + ":" + secondsprinted
 	else:
-		var seconds = (FRAME / 60)
+		var seconds = (FRAME / 60) % 60
 		var minutes = (FRAME/60) / 60
 		var secondsprinted = str(seconds)
 		if len(secondsprinted) == 1:

@@ -1,6 +1,7 @@
 extends "res://characters/Player.gd"
 
 onready var LASER = preload("res://projectiles/laser/Laser.tscn")
+onready var BOMB = preload("res://projectiles/bomb/Bomb.tscn")
 
 var new_laser
 
@@ -297,6 +298,26 @@ func upspecial():
 			landing_lag = 15
 			if updatefloorstate():
 				be("land")
+				
+func downspecial():
+	movement()
+	if frame == 7:
+		var bomb = BOMB.instance()
+		bomb.position = get_position() + Vector2(d*0,-14)
+		bomb.d = d
+		bomb.frame = 0
+		bomb.playernumber = playernumber
+		bomb.skin = skin
+		bomb.holder = 0
+		bomb.state = "held"
+		get_tree().get_root().get_node("World").add_child(bomb)
+		w.projectiles.append(bomb)
+		bomb.start()
+	if frame > 40:
+		if (on_floor):
+			be("idle")
+		else:
+			be("jump")
 
 func unuseddownspecial():
 	in_fast_fall = false

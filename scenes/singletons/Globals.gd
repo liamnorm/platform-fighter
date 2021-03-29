@@ -27,7 +27,7 @@ var RULECHOICES = {
 	"STOCKS": 4,
 	"TIME LIMIT": 0,
 	"TIME": 3,
-	"TEAM MODE": 0,
+	"TEAMS": 0,
 	"TEAM ATTACK": 0,
 	"TIEBREAKER": 0,
 	"CPU LEVEL": 2,
@@ -73,6 +73,7 @@ var WINNERSKIN = 0
 var NUM_OF_PLAYERS = 2
 var STOCKS = 6
 var TIME = 180
+var TIMELIMIT = 180
 var GAMEMODE = "STOCK"
 var TEAMMODE = false
 var TEAMATTACK = false
@@ -81,7 +82,7 @@ var STAGE = 0
 
 var STAGEDATA = [
 	{
-		"name": "Final Destination",
+		"name": "FINAL DESTINATION",
 		
 		"TOPBLASTZONE": -1100,
 		"BOTTOMBLASTZONE": 1300,
@@ -106,16 +107,16 @@ var STAGEDATA = [
 	
 	},
 	{
-		"name": "Soccer Field",
+		"name": "SOCCER FIELD",
 		
 		"TOPBLASTZONE": -1100,
-		"BOTTOMBLASTZONE": 1300,
+		"BOTTOMBLASTZONE": 800,
 		"SIDEBLASTZONE": 3000,
 		"DOUBLEBLASTZONE": 1152,
 		"TRIPLEBLASTZONE": 2048,
 		"cameraxbound": 2500,
 		"camerayupperbound": -800,
-		"cameraylowerbound": 1300,
+		"cameraylowerbound": 800,
 		
 		"spawnpositions":
 			[

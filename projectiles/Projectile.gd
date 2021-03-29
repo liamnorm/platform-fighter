@@ -21,6 +21,9 @@ var shieldstun = 0
 var hitter_motion = Vector2(0,0)
 var skin = 0
 
+var holdable = false
+var holder = 0
+
 var team = 0
 
 #variables that are required to exist for 

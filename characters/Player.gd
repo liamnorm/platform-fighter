@@ -1436,7 +1436,9 @@ func playerEffects():
 	visible = !defeated
 	
 	var rage = clamp((damage-50)/50.0, 0, 20)
-	$Sprite.position = Vector2(randi() %2 * rage - rage/2, randi() %2 * rage - rage/2)
+	var randox = (randi() %10 - 5) / 5
+	var randoy = (randi() %10 - 5) / 5
+	$Sprite.position = Vector2(randox * rage - rage/2, randoy * rage - rage/2)
 	
 	if !w.GAMEMODE == "SOCCER":
 		controllercolor = Globals.CONTROLLERCOLORS[controller]
