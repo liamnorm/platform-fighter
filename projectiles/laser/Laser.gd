@@ -7,6 +7,7 @@ var Mat
 
 func _ready():
 	Mat = $Sprite.get_material()
+	drawprojectile()
 
 
 func projectilemovement():
@@ -30,7 +31,6 @@ func projectilemovement():
 			])
 			
 	$CollisionShape2D.disabled = true
-	Mat.set_shader_param("skin", skin)
 	intangibility_frame = 2
 	
 	if motion.length()>MAXSPEED:
@@ -51,6 +51,9 @@ func projectilemovement():
 		w.projectiles.erase(self)
 	if frame > LIFESPAN:
 		queue_free()
+		
+func drawprojectile():
+	Mat.set_shader_param("skin", skin)
 
 func start():
 	LIFESPAN = 60

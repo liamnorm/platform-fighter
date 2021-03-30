@@ -70,6 +70,8 @@ func _ready():
 			LEDGES = [[Vector2(-640, 256), 1, 0], [Vector2(640, 256), -1, 0]]
 		1:
 			stage = load("res://stage/SoccerField.tscn").instance()
+		2:
+			stage = load("res://stage/TheVoid.tscn").instance()
 	stage.name = "Stage"
 	add_child(stage)
 	
@@ -171,6 +173,14 @@ func _process(_delta):
 			
 		if Input.is_action_just_pressed("select"):
 			SHOWHITBOXES = !SHOWHITBOXES
+		
+		if Input.is_action_just_pressed("swap"):
+			if players[0].controller == 1:
+				players[0].controller = 0
+				players[1].controller = 1
+			else:
+				players[0].controller = 1
+				players[1].controller = 0
 		
 		if (Input.is_action_just_pressed("reset")):
 			for i in range(NUM_OF_PLAYERS):
@@ -330,7 +340,8 @@ func checkforoverlap(ps,h,b,player_on_projectile = false):
 	(h.startframe[b] < FRAME) && 
 	(h.startframe[b] + h.boxlengths[b]>= FRAME) &&
 	((!player_on_projectile) || (ps[0].playernumber != ps[1].playernumber))):
-		if !(TEAMMODE && TEAMATTACK && (ps[0].team == ps[1].team)):
+		if (!(TEAMMODE && TEAMATTACK && (ps[0].team == ps[1].team)) &&
+		!(ps[0].holder > 0)):
 			var them = ps[1].get_position()
 			var me = ps[0].get_position() + Vector2(ps[0].hurtboxoffset.x * ps[0].d, ps[0].hurtboxoffset.y)
 			var htl = h.topleft[b]
@@ -349,6 +360,7 @@ func checkforoverlap(ps,h,b,player_on_projectile = false):
 					iq.append(["hit", ps, h, b])
 
 func checkforreflect(ps):
+	if !(ps[0].holder > 0):
 		var them = ps[1].get_position() + Vector2(ps[1].SHIELDOFFSET.x * ps[1].d, ps[1].SHIELDOFFSET.y)
 		var me = ps[0].get_position() + Vector2(ps[0].hurtboxoffset.x * ps[0].d, ps[0].hurtboxoffset.y)
 		var xdist = (ps[1].shield_physical_size + ps[0].hurtboxsize.x)

@@ -58,7 +58,7 @@ func projectilemovement():
 			motion.x = lerp(motion.x, 0, .005)
 			motion.y = lerp(motion.y, 0, .005)
 			
-	if holder > 0:
+	if holder == 0:
 		motion.y += GRAVITY
 	
 		motion.x = clamp(motion.x, -TRUEMAXSPEED, TRUEMAXSPEED)
@@ -81,6 +81,18 @@ func projectilemovement():
 				else:
 					motion = motion.bounce(collision.normal)
 					prevcollision = true
+	else:
+		var h = w.players[holder-1]
+		h.heldobject = self
+		position = h.get_position() + Vector2(h.heldpos.x * h.d, h.heldpos.y)
+		
+		
+	var rage = clamp((damage-20)/20.0, 0, 20)
+	var randox = (randi() %10 - 5) / 5.0
+	var randoy = (randi() %10 - 5) / 5.0
+	rageoffset = Vector2(randox * rage - rage/2, randoy * rage - rage/2)
+	hurtboxoffset = rageoffset
+		
 	shieldstun = 11
 
 func start():
@@ -102,17 +114,10 @@ func drawprojectile():
 	#Mat.set_shader_param("invincibility", invincibility_frame)
 	#Mat.set_shader_param("intangibility", intangibility_frame)
 	#Mat.set_shader_param("skin", skin)
-	
-	var rage = clamp((damage-20)/20.0, 0, 20)
-	var randox = (randi() %10 - 5) / 5
-	var randoy = (randi() %10 - 5) / 5
-	$Sprite.position = Vector2(randox * rage - rage/2, randoy * rage - rage/2)
+	$Sprite.position = rageoffset
 	
 	$Sprite.frame = (frame/15)%2
 
-func respawn(place):
-	motion = Vector2(0,0)
-	spawnposition = place
-	position = place
-	d = 0
-	damage = 0
+func respawn(_place):
+	w.projectiles.erase(self)
+	queue_free()

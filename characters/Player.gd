@@ -55,6 +55,7 @@ var AIRDODGEFRAMES = 18
 var WAVEDASHLENGTH = 14
 var DOUBLEJUMPFRAMES = 30
 var SHIELDOFFSET = Vector2(0,0)
+var HELDCOORDS = []
 
 #stuff that changes in game
 #state and buffered state
@@ -104,6 +105,9 @@ var float_frame = 0
 var floating = false
 var totalrollframes = ROLLFRAMES
 var totalspotdodgeframes = 0
+var rageoffset = Vector2(0,0)
+var holder = 0
+const holdable = false
 
 #stale moves
 var roll_stale = 0
@@ -121,6 +125,8 @@ var shield_stun = 0
 var player_who_last_hit_me = 0
 var shield_physical_size = 0
 var hitter_motion = Vector2(0,0)
+var heldpos = Vector2(0,0)
+var heldobject = null
 
 #scorekeeping
 var stock = 3
@@ -135,6 +141,10 @@ var input =      [false,false,false,false,false,false,false,false,false,false,fa
 var new_input =  [false,false,false,false,false,false,false,false,false,false,false,false]
 var prev_input = [false,false,false,false,false,false,false,false,false,false,false,false]
 var input_lengths = [0,0,0,0,0,0,0,0,0,0,0,0]
+
+
+# computer player
+var target
 
 #for animation.
 var ref = 0
@@ -268,6 +278,7 @@ func _physics_process(_delta):
 	updateDirection()
 	playerEffects()
 	drawPlayer()
+	updateheld()
 	drawhurtbox()
 
 
@@ -615,16 +626,17 @@ func statebasedaction():
 		"roll":
 			if !updatefloorstate():
 				be("jump")
-			if frame == 1:
-				totalrollframes = ROLLFRAMES+8+roll_stale/100
-			var speedmodifier = pow(ROLLFRAMES - abs(frame-(totalrollframes/3)),2)/70
-			motion.x = ROLLSPEED * -d * speedmodifier * float(ROLLFRAMES) / totalrollframes
-			if frame > totalrollframes - 5:
-				motion.x = 0
-				buffer(true)
-				if frame > totalrollframes:
-					roll_stale += 150
-					be("idle")
+			else:
+				if frame == 1:
+					totalrollframes = ROLLFRAMES+8+roll_stale/100
+				var speedmodifier = pow(ROLLFRAMES - abs(frame-(totalrollframes/3)),2)/70
+				motion.x = ROLLSPEED * -d * speedmodifier * float(ROLLFRAMES) / totalrollframes
+				if frame > totalrollframes - 5:
+					motion.x = 0
+					buffer(true)
+					if frame > totalrollframes:
+						roll_stale += 150
+						be("idle")
 		"spotdodge":
 			motion.x = 0
 			if frame == 1:
@@ -790,6 +802,7 @@ func statebasedaction():
 				be("idle")
 				
 				
+	#FLOATING
 	if ((input[7] && floatframe > 0 &&
 	!["ledge", "hitstun", "mildstun", "knockeddown", "respawn", "shield", "shieldstun", "shieldbreak", "dizzy", "sidespecial", "upspecial", "downspecial"].has(state))
 	&& !(state == "hit" && stage == 0)
@@ -809,6 +822,16 @@ func statebasedaction():
 			float_frame = 0
 			floatframe = 0
 			floating = false
+	
+	#RAGE
+	
+	var rage = clamp((damage-50)/50.0, 0, 20)
+	var randox = (randi() %10 - 5) / 5.0
+	var randoy = (randi() %10 - 5) / 5.0
+	rageoffset = Vector2(randox * rage - rage/2, randoy * rage - rage/2)
+	hurtboxoffset = rageoffset
+	SHIELDOFFSET = rageoffset
+	
 	
 	#TEMPORARY FAILSAFE
 	if frame > 60 && !input.has(true) && !["ledge", "jump", "hitstun", "hit", "knockeddown", "respawn", "shieldbreak", "dizzy"].has(state):
@@ -1016,7 +1039,7 @@ func updatefloorstate():
 			be("land")
 	if !is_on_floor() && on_floor == true:
 		on_floor = false
-		if ["run", "idle", "crouch", "land"].has(state):
+		if ["run", "runend", "turnaround", "sideground", "downground", "upground", "neutralground", "idle", "crouch", "land", "roll"].has(state):
 			be("jump")
 	return on_floor
 
@@ -1040,12 +1063,12 @@ func movement():
 		fallcap(false)
 		
 func ledgesnap():
-	if frames_since_ledge > 30:
+	if frames_since_ledge > 30 && !floating:
 		var myx = get_position().x
 		for ledge in w.LEDGES:
-			if abs(myx+64*ledge[1]-ledge[0].x) < 48:
+			if abs(myx+32*ledge[1]-ledge[0].x) < 32:
 				var myy = get_position().y
-				if abs(myy-64-ledge[0].y) < 64:
+				if abs(myy-48-ledge[0].y) < 48:
 					current_ledge = ledge
 					be("ledge")
 					snaptoledge()
@@ -1082,6 +1105,13 @@ func doublejump():
 	in_fast_fall = false
 	double_jump_frame = DOUBLEJUMPFRAMES
 	motion.y = -DOUBLEJUMPFORCE
+	
+func throw(throwx, throwy):
+	if heldobject != null:
+		heldobject.holder = 0
+		heldobject.motion = Vector2(throwx * d, throwy)
+		heldobject.intangibility_frame = 10
+		heldobject = null
 	
 func directionalinput():
 	var di = Vector2(0,0)
@@ -1206,7 +1236,8 @@ func get_input():
 			false,
 		]
 		
-		var target = playernumber%w.NUM_OF_PLAYERS
+		if w.FRAME < 20:
+			target = playernumber%w.NUM_OF_PLAYERS
 		if w.players[target].defeated || target == playernumber-1:
 			target += 1
 			target = target%w.NUM_OF_PLAYERS
@@ -1366,7 +1397,7 @@ func respectparticularedge(ledge):
 
 func hurtbox(sx,sy,ox,oy):
 	hurtboxsize = Vector2(sx,sy)
-	hurtboxoffset = Vector2(ox,oy)
+	hurtboxoffset = Vector2(ox+rageoffset.x*d,oy+rageoffset.y)
 	
 func clearhitboxes():
 	for h in hitboxes:
@@ -1435,10 +1466,7 @@ func playerEffects():
 	
 	visible = !defeated
 	
-	var rage = clamp((damage-50)/50.0, 0, 20)
-	var randox = (randi() %10 - 5) / 5
-	var randoy = (randi() %10 - 5) / 5
-	$Sprite.position = Vector2(randox * rage - rage/2, randoy * rage - rage/2)
+	$Sprite.position = rageoffset
 	
 	if !w.GAMEMODE == "SOCCER":
 		controllercolor = Globals.CONTROLLERCOLORS[controller]
@@ -1465,6 +1493,7 @@ func playerEffects():
 	Mat.set_shader_param("intangibility", intangibility_frame)
 	Mat.set_shader_param("skin", skin)
 	
+	
 
 func be_jump_if_in_midair():
 	if !updatefloorstate():
@@ -1481,6 +1510,12 @@ func snaptoledge():
 
 
 # ALL CHARACTER-SPECIFIC STUFF SHOULD GO HERE!!!!!
+
+func updateheld():
+	if $Sprite.frame < len(HELDCOORDS):
+		heldpos = Vector2(-128 + HELDCOORDS[$Sprite.frame][0], -128 + HELDCOORDS[$Sprite.frame][1]) 
+	else:
+		heldpos = Vector2(-50, -10)
 
 func drawPlayer():
 	pass

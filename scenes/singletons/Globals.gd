@@ -22,7 +22,7 @@ var MUTED = false
 var SHOWHITBOXES = false
 
 var RULECHOICES = {
-	"STAGE": 1,
+	"STAGE": 0,
 	"GAME MODE": 0,
 	"STOCKS": 4,
 	"TIME LIMIT": 0,
@@ -79,6 +79,10 @@ var TEAMMODE = false
 var TEAMATTACK = false
 var STAGE = 0
 
+var TIEBREAKER = 5
+var CPULEVEL = 3
+var SCORETOWIN = 5
+
 
 var STAGEDATA = [
 	{
@@ -132,6 +136,33 @@ var STAGEDATA = [
 			
 		
 		"ballspawn": Vector2(0, 224),
+	},
+	{
+		"name": "THE VOID",
+		
+		"TOPBLASTZONE": -1100,
+		"BOTTOMBLASTZONE": 800,
+		"SIDEBLASTZONE": 3000,
+		"DOUBLEBLASTZONE": 1152,
+		"TRIPLEBLASTZONE": 2048,
+		"cameraxbound": 2500,
+		"camerayupperbound": -800,
+		"cameraylowerbound": 800,
+		
+		"spawnpositions":
+			[
+			Vector2(-384,192),
+			Vector2(384,192),
+			Vector2(-640,192),
+			Vector2(640,192),
+			Vector2(-896,192),
+			Vector2(896,192),
+			Vector2(-1152,192),
+			Vector2(1152,192),
+			],
+			
+		
+		"ballspawn": Vector2(0, 0),
 	}
 ]
 

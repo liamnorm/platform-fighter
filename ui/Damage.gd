@@ -41,6 +41,11 @@ func _process(_delta):
 	
 	Mat = $Portrait.get_material()
 	Mat.set_shader_param("skin", w.players[playernumber-1].skin%Globals.NUM_OF_SKINS)
+	#Mat.set_shader_param("outofgame", w.players[playernumber-1].defeated)
+	if w.players[playernumber-1].defeated:
+		modulate.a = .25
+	else:
+		modulate.a = 1
 	damage = floor(w.players[playernumber-1].damage)
 	$Damage.text = str(damage) + "%"
 	$Damage.set("custom_colors/font_color", getdamagecolor(damage))

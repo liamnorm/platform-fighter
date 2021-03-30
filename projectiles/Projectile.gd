@@ -38,6 +38,7 @@ var LAUNCH_THRESHOLD = 0
 var combo = 0
 var stun_length = 0
 var damage_delt = 0
+var rageoffset = Vector2(0,0)
 
 const is_projectile = true
 
@@ -57,6 +58,7 @@ var w
 
 func _ready():
 	w = get_parent()
+	z_index = 0
 
 
 func _physics_process(_delta):
@@ -72,15 +74,22 @@ func _physics_process(_delta):
 				player_who_last_hit_me = 0
 		
 		projectilemovement()
-		drawprojectile()
-		drawhurtbox()
-			
+	
+	
 		frame += 1
 		state = nextstate
+		
+		invincibility_frame -= 1
+		invincibility_frame = max(invincibility_frame, 0)
+		intangibility_frame -= 1
+		intangibility_frame = max(intangibility_frame, 0)
 
 	impact_frame -= 1
 	if impact_frame < 0:
 		impact_frame = 0
+	
+	drawprojectile()
+	drawhurtbox()
 	
 func start():
 	pass

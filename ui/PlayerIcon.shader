@@ -3,6 +3,7 @@ shader_type canvas_item;
 uniform sampler2D palette_tex; //Palette to reference, this should be a 1-pixel tall texture containing your palette info
 uniform vec4 outline_col : hint_color; //Outline color
 uniform float skin;
+uniform bool outofgame;
 
 void fragment() {
     
@@ -24,6 +25,9 @@ void fragment() {
     a = step(a,.5);//Clamp the a value
     col.rgb = mix(outline_col.xyz, col.rgb, col.a);
     col.a = step(a, col.a);
+	if (col.a == 1. && outofgame) {
+		col.a = 0.25;
+	}
 	
 	float w = 0.0;
 	

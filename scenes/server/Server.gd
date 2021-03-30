@@ -9,9 +9,8 @@ var port = 1909
 
 func _ready():
 	print("HELLO!")
-	if "--server" in OS.get_cmdline_args():
-		print("YOU ARE THE SERVER!!!")
-		ConnectToServer()
+	print("YOU ARE THE SERVER!!!")
+	ConnectToServer()
 
 func ConnectToServer():
 	network.create_client(ip, port)

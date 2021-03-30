@@ -92,5 +92,5 @@ func draweffect():
 				vframes = 2
 				hframes = 4
 				texture = REFLECT
-				LIFESPAN = 40
+				LIFESPAN = 24
 				frame = myframe / 4

@@ -25,7 +25,7 @@ var desc = {
 
 
 var options = {
-	"STAGE":       ["WHATEVS", "FINAL DESTINATION", "SOCCER FIELD"],
+	"STAGE":       ["FINAL DESTINATION", "SOCCER FIELD"],
 	"GAME MODE":   ["STOCK", "TIME", "SOCCER"],
 	"STOCKS":      ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "INFINITE"],
 	"TIME LIMIT":  ["NONE", "1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00", "8:00", "9:00", "10:00"],
@@ -68,46 +68,20 @@ func _process(_delta):
 			Globals.RULECHOICES[opt] += -1 + maxoption
 		Globals.RULECHOICES[opt] = Globals.RULECHOICES[opt] % maxoption
 		
-		
 		var choice = options[opt][Globals.RULECHOICES[opt]]
-		var ind = Globals.RULECHOICES[opt]
 		
 		buttons[Globals.SELECTEDRULE].ruleoption = choice
 		
-		match buttonnames[Globals.SELECTEDRULE]:
-			"STAGE":
-				Globals.STAGE = ind - 1
-				print(Globals.STAGE)
-			"GAME MODE":
-				Globals.GAMEMODE = choice
-				print(choice)
-				thebuttons()
-			"STOCKS":
-				if ind < 10:
-					Globals.STOCKS = ind + 1
-				else:
-					Globals.STOCKS = 0
-				print(Globals.STOCKS)
-			"TIME LIMIT":
-					Globals.TIMELIMIT = (ind) * 60
-					print(Globals.TIMELIMIT)
-			"TIME":
-				Globals.TIME = (ind) * 60
-			"TEAMS":
-				Globals.TEAMMODE = ind == 1
-			"TEAMATTACK":
-				Globals.TEAMATTACK = ind == 1
-			"TIEBREAKER":
-				pass
-			"CPU LEVEL":
-				pass
-			"SCORE TO WIN":
-				pass
+		buttonaction(Globals.SELECTEDRULE)
+		
 	
 	if Input.is_action_just_pressed("special"):
 		back_to_menu()
 			
 	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select") || Input.is_action_just_pressed("attack"):
+			for i in range(len(buttons)):
+				buttonaction(i)
+			
 			advance_to_css()
 	
 	SCREENX = Globals.SCREENX
@@ -152,6 +126,40 @@ func thebuttons():
 		button.visible = true
 		buttons.append(button)
 		add_child(button)
+		
+func buttonaction(rule):
+	
+	var opt = buttonnames[rule]
+	var choice = options[opt][Globals.RULECHOICES[opt]]
+	var ind = Globals.RULECHOICES[opt]
+	
+	match buttonnames[rule]:
+		"STAGE":
+			Globals.STAGE = ind
+		"GAME MODE":
+			Globals.GAMEMODE = choice
+			thebuttons()
+			if choice == "SOCCER":
+				Globals.TEAMMODE = true
+		"STOCKS":
+			if ind < 10:
+				Globals.STOCKS = ind + 1
+			else:
+				Globals.STOCKS = 0
+		"TIME LIMIT":
+				Globals.TIMELIMIT = (ind) * 60
+		"TIME":
+			Globals.TIME = (ind) * 60
+		"TEAMS":
+			Globals.TEAMMODE = ind == 1
+		"TEAMATTACK":
+			Globals.TEAMATTACK = ind == 1
+		"TIEBREAKER":
+			Globals.TIEBREAKER = choice
+		"CPU LEVEL":
+			Globals.CPULEVEL = ind
+		"SCORE TO WIN":
+			Globals.SCORETOWIN = ind
 		
 static func delete_children(node):
 	for n in node.get_children():

@@ -25,6 +25,99 @@ func _ready():
 	
 	SHIELDOFFSET = Vector2(0,8)
 	
+	HELDCOORDS = [
+		#[61, 164],
+		#[55, 154],
+		
+		#[185, 144],
+		#[190, 138],
+		
+		[82, 156],
+		[82, 148],
+		
+		[92, 148],
+		[79, 150],
+		[98, 126],
+		[99, 147],
+
+		#[188, 102],
+		#[199, 135],
+		#[191, 138],
+		#[180, 137],
+		
+		#[57, 172],
+		#[42, 153],
+		#[61, 121],
+		#[72, 159],
+		
+		[83, 167],
+		[86, 148],
+		
+		[90, 148],
+		
+		[159, 143],
+		[128, 172],
+		[101, 123],
+		[126, 90],
+		
+		[105, 109],
+		
+		#roll
+		[126, 141],
+		[158, 75],
+		[118, 71],
+		[78, 103],
+		[69, 144],
+		[113, 174], #handstand
+		[187, 175],
+		[155, 118],
+		[116, 90],
+		[79, 126],
+		[84, 153],
+		[86, 158],
+		[86, 153],
+		[82, 148],
+		
+		#hit
+		[79, 145],
+		[80, 135],
+		[105, 125],
+		[128, 136],
+		[129, 178],
+		[131, 143],
+		[144, 178],
+		
+		#laser
+		[99, 132],
+		[95, 134],
+		[76, 126],
+		[82, 128],
+		[92, 134],
+		
+		#jab
+		[147, 131],
+		[108, 123],
+		[103, 119],
+		[141, 119],
+		
+		#sideground
+		[0, 0],
+		[0, 0],
+		[0, 0],
+		[0, 0],
+		[0, 0],
+		
+		#nair
+		[74, 148],
+		[174, 122],
+		[196, 109],
+		[0, 0],
+		
+		[138, 135],
+		[138, 137],
+		
+	]
+	
 	hurtbox(40,58,0,12)
 	
 	
@@ -308,8 +401,9 @@ func downspecial():
 		bomb.frame = 0
 		bomb.playernumber = playernumber
 		bomb.skin = skin
-		bomb.holder = 0
+		bomb.holder = playernumber
 		bomb.state = "held"
+		heldobject = bomb
 		get_tree().get_root().get_node("World").add_child(bomb)
 		w.projectiles.append(bomb)
 		bomb.start()
@@ -481,6 +575,9 @@ func neutralair():
 	if frame == 1:
 		playsound("VOICE")
 	if frame == 4:
+		throw(500, -600)
+
+	if frame == 4:
 		# nair
 		hitbox([
 			{"del":0, 
@@ -523,6 +620,8 @@ func forwardair():
 	movement()
 	if frame == 1:
 		playsound("VOICE")
+	if frame == 12:
+		throw(2000, -100)
 	if frame == 12:
 		#FORWARD AERIAL.
 		hitbox([
@@ -569,6 +668,8 @@ func backair():
 	if frame == 1:
 		playsound("VOICE")
 	if frame == 10:
+		throw(-2000, -200)
+	if frame == 10:
 		#hitbox(9, Vector2(-110,10), Vector2(0, 60), 10, -145, 1.2, 0, 6, 10
 		hitbox([
 			{"del":0, 
@@ -597,6 +698,8 @@ func upair():
 	movement()
 	if frame == 1:
 		playsound("VOICE")
+	if frame == 3:
+		throw(0, -2000)
 	if frame == 5:
 		#hitbox(9, Vector2(-110,10), Vector2(0, 60), 10, -145, 1.2, 0, 6, 10)
 		hitbox([

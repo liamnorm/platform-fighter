@@ -24,9 +24,11 @@ resource_local_to_scene = true
 shader = ExtResource( 6 )
 shader_param/outline_col = null
 shader_param/skin = 15.0
+shader_param/outofgame = false
 shader_param/palette_tex = ExtResource( 3 )
 
 [node name="Card" type="Node2D"]
+modulate = Color( 1, 1, 1, 0.254902 )
 script = ExtResource( 5 )
 
 [node name="Color" type="ColorRect" parent="."]

@@ -17,7 +17,8 @@ var rumblex = 0
 var rumbley = 0
 var finalposx = 0
 var finalposy = 0
-var smarg = 256
+var smargx = 512
+var smargy = 256
 
 var Parallax
 
@@ -56,25 +57,25 @@ func _process(_delta):
 			if !get_node(node_name).defeated:
 				NUM_OF_ACTIVE_PLAYERS += 1
 				if NUM_OF_ACTIVE_PLAYERS == 1:
-					minx = pxpos - smarg
-					maxx = pxpos + smarg
-					miny = pypos - smarg
-					maxy = pypos + smarg
+					minx = pxpos - smargx
+					maxx = pxpos + smargx
+					miny = pypos - smargy
+					maxy = pypos + smargy
 				else:
-					minx = min(minx, pxpos - smarg)
-					maxx = max(maxx, pxpos + smarg)
-					miny = min(miny, pypos - smarg)
-					maxy = max(maxy, pypos + smarg)
+					minx = min(minx, pxpos - smargx)
+					maxx = max(maxx, pxpos + smargx)
+					miny = min(miny, pypos - smargy)
+					maxy = max(maxy, pypos + smargy)
 					
 		for i in range(len(w.projectiles)):
 			if w.projectiles[i]!=null:
 				if w.projectiles[i].important_to_camera:
 					var pxpos = w.projectiles[i].get_position().x
 					var pypos = w.projectiles[i].get_position().y
-					minx = min(minx, pxpos - smarg)
-					maxx = max(maxx, pxpos + smarg)
-					miny = min(miny, pypos - smarg)
-					maxy = max(maxy, pypos + smarg)
+					minx = min(minx, pxpos - smargx)
+					maxx = max(maxx, pxpos + smargx)
+					miny = min(miny, pypos - smargy)
+					maxy = max(maxy, pypos + smargy)
 					
 		minx = clamp(minx, -XBOUNDS, XBOUNDS)
 		maxx = clamp(maxx, -XBOUNDS, XBOUNDS)
