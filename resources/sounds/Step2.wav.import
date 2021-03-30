@@ -2,12 +2,12 @@
 
 importer="wav"
 type="AudioStreamSample"
-path="res://.import/HIT.wav-2fa364987c586bd8c0d9058ec089e302.sample"
+path="res://.import/Step2.wav-b9c5d3a542b6fe9ece1a95b0623ae883.sample"
 
 [deps]
 
-source_file="res://resources/sounds/HIT.wav"
-dest_files=[ "res://.import/HIT.wav-2fa364987c586bd8c0d9058ec089e302.sample" ]
+source_file="res://resources/sounds/Step2.wav"
+dest_files=[ "res://.import/Step2.wav-b9c5d3a542b6fe9ece1a95b0623ae883.sample" ]
 
 [params]
 

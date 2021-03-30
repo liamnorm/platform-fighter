@@ -147,7 +147,7 @@ func buttonaction(rule):
 			else:
 				Globals.STOCKS = 0
 		"TIME LIMIT":
-				Globals.TIMELIMIT = (ind) * 60
+			Globals.TIME = (ind) * 60
 		"TIME":
 			Globals.TIME = (ind) * 60
 		"TEAMS":

@@ -5,7 +5,7 @@
 [ext_resource path="res://resources/sounds/SQUISHY.wav" type="AudioStream" id=3]
 [ext_resource path="res://resources/shield.png" type="Texture" id=4]
 [ext_resource path="res://resources/sounds/PEW.wav" type="AudioStream" id=5]
-[ext_resource path="res://resources/sounds/DEATH4.wav" type="AudioStream" id=6]
+[ext_resource path="res://resources/sounds/BLASTER.wav" type="AudioStream" id=6]
 [ext_resource path="res://resources/sounds/WALK.wav" type="AudioStream" id=7]
 [ext_resource path="res://characters/todd/spritesheetalpha.png" type="Texture" id=8]
 [ext_resource path="res://characters/spacedog/Spacedog.gd" type="Script" id=9]
@@ -197,12 +197,12 @@ __meta__ = {
 [node name="Sounds" type="Node" parent="."]
 
 [node name="BLASTERSTART" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 6 )
 
 [node name="PEW" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 5 )
 
 [node name="KO" type="AudioStreamPlayer" parent="Sounds"]
-stream = ExtResource( 6 )
 
 [node name="VOICE" type="AudioStreamPlayer" parent="Sounds"]
 

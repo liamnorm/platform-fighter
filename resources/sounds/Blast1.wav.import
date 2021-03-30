@@ -2,12 +2,12 @@
 
 importer="wav"
 type="AudioStreamSample"
-path="res://.import/Hit4.wav-1b91392cd1fac64f344eb20c919ca70a.sample"
+path="res://.import/Blast1.wav-1e6aad0ae1f005cf03187adf2e269e52.sample"
 
 [deps]
 
-source_file="res://resources/sounds/Hit4.wav"
-dest_files=[ "res://.import/Hit4.wav-1b91392cd1fac64f344eb20c919ca70a.sample" ]
+source_file="res://resources/sounds/Blast1.wav"
+dest_files=[ "res://.import/Blast1.wav-1e6aad0ae1f005cf03187adf2e269e52.sample" ]
 
 [params]
 

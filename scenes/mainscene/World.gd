@@ -728,5 +728,5 @@ func background():
 func playsound(sound):
 	if !Globals.MUTED || GAMEENDFRAME > 0:
 		if sound == "HIT":
-			sound = "HIT" + str(randi()%4)
+			sound = "HIT" + str(randi()%5)
 		get_node("Sounds").get_node(sound).play()

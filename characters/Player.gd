@@ -182,6 +182,8 @@ func _physics_process(_delta):
 					else:
 						w.KOFRAME = 120
 						stock -= 1
+					if w.STOCKS < 0:
+						stock = 1
 					if stock < 0:
 						stock = 0
 					if stock > 0:
@@ -297,8 +299,8 @@ func statebasedaction():
 				
 		"run":
 			movement()
-			if frame % 6 == 1:
-				playsound("WALK")
+			if frame % 7 == 4:
+				playsound("WALK" + str(randi()%3))
 			if frame == 1:
 				if d == 1:
 					if input[1] && !input[0]:
@@ -463,7 +465,7 @@ func statebasedaction():
 		
 		"ledge":
 			if frame == 1:
-				playsound("LEDGE")
+				#playsound("LEDGE")
 				current_ledge[2] = playernumber
 			if first_time_at_ledge && frame == 4:
 				intangibility_frame = LEDGE_INTANGIBILITY_FRAMES
