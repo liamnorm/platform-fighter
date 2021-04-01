@@ -5,7 +5,7 @@ onready var BOMB = preload("res://projectiles/bomb/Bomb.tscn")
 
 var new_laser
 
-var direction
+var direction = 0
 
 func _ready():
 	GRAVITY = 70
@@ -587,7 +587,7 @@ func neutralair():
 			"l":-50, 
 			"r":70, 
 			"dam":7, 
-			"dir":-35, 
+			"dir":-25, 
 			"kb":.7, 
 			"ckb":0, 
 			"hs":5, 
@@ -600,7 +600,7 @@ func neutralair():
 			"l":-40, 
 			"r":65, 
 			"dam":3, 
-			"dir":-40, 
+			"dir":-30, 
 			"kb":.7, 
 			"ckb":0, 
 			"hs":2, 

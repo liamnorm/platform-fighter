@@ -31,7 +31,7 @@ var RULECHOICES = {
 	"TEAM ATTACK": 0,
 	"TIEBREAKER": 0,
 	"CPU LEVEL": 2,
-	"SCORE TO WIN": 0,
+	"SCORE TO WIN": 4,
 }
 
 #General stuff
@@ -74,7 +74,7 @@ var NUM_OF_PLAYERS = 2
 var STOCKS = 6
 var TIME = 180
 var TIMELIMIT = 180
-var GAMEMODE = "STOCK"
+var GAMEMODE = "TRAINING"
 var TEAMMODE = false
 var TEAMATTACK = false
 var STAGE = 0
@@ -170,6 +170,55 @@ var STAGEDATA = [
 var SCREENY
 var SCREENX
 
+var playerIDs = []
+var ONLINE = false
+var ISSERVER = false
+var CONNECTED = false
+var INGAME = false
+
+var states = [
+	"idle",
+	"run",
+	"runend",
+	"turnaround",
+	"jumpstart",
+	"jump",
+	"land",
+	"crouch",
+	"neutralspecial",
+	"sidespecial",
+	"upspecial",
+	"downspecial",
+	"neutralground",
+	"sideground",
+	"upground",
+	"downground",
+	"neutralair",
+	"forwardair",
+	"backair",
+	"upair",
+	"downair",
+	"extra",
+	"ledge",
+	"ledgegetup",
+	"shield",
+	"shieldstun",
+	"outofshield",
+	"airdodge",
+	"roll",
+	"spotdodge",
+	"hitstun",
+	"mildstun",
+	"hit",
+	"knockeddown",
+	"getup",
+	"getupattack",
+	"neutralgetup",
+	"softland",
+	"respawn",
+	"shieldbreak",
+	"dizzy",
+]
 
 func _process(_delta):
 	SCREENX = get_viewport().size.x

@@ -44,7 +44,11 @@ func display():
 				if i == playernumber -1:
 					me = i
 				otherplayers += 1
-		var angle = (6.28 / otherplayers) * me
+		var angle
+		if otherplayers > 0:
+			angle = (6.28 / otherplayers) * me
+		else:
+			angle = 0
 		var vector = Vector2(cos(angle), 1.5 * sin(angle)) * (otherplayers-1) * 0.005
 		Globals.chippos[playernumber-1] = circlepos + vector
 	if Globals.chipholder[playernumber-1] > 0:

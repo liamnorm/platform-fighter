@@ -2,9 +2,11 @@ extends Sprite
 
 onready var BLASTZONE = preload("res://resources/blastzone.png")
 onready var IMPACT = preload("res://resources/impact.png")
+onready var HIT = preload("res://resources/hit.png")
 onready var FOXSIDE = preload("res://characters/spacedog/foxside.png")
 onready var EXPLOSION = preload("res://resources/explosion.png")
 onready var REFLECT = preload("res://resources/reflect.png")
+onready var GLIMMER = preload("res://resources/glimmer.png")
 
 var SPEED = 3000
 var LIFESPAN = 15
@@ -25,6 +27,7 @@ func _ready():
 		material.shader = load("res://characters/spacedog/side.shader")
 		material.set_shader_param("skin", skin)
 		material.set_shader_param("palette_tex", load("res://characters/spacedog/palette.png"))
+		
 
 
 func _physics_process(_delta):
@@ -51,11 +54,21 @@ func draweffect():
 			"impact":
 				vframes = 2
 				hframes = 8
-				texture = IMPACT
-				LIFESPAN = 15
-				frame = myframe / 3
-				if frame > 5:
-					frame = 5
+				texture = HIT
+				LIFESPAN = 40
+				frame = myframe / 4 + 2
+				if frame > 13:
+					frame = 13
+			"glimmer":
+				vframes = 1
+				hframes = 8
+				#position = w.players[playernumber-1].position + Vector2(d*-60, -60)
+				scale = Vector2(0.5, 0.5)
+				texture = GLIMMER
+				LIFESPAN = 24
+				frame = myframe / 4
+				if frame > 7:
+					frame = 7
 			"foxside":
 				vframes = 1
 				hframes = 1

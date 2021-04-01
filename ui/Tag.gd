@@ -11,10 +11,13 @@ func _ready():
 
 func _process(_delta):
 	controller = w.players[playernumber-1].controller
-	if controller > 0:
-		$Name.text = "P" + str(w.players[playernumber-1].controller)
+	if w.players[playernumber-1].tag == "":
+		if controller > 0:
+			$Name.text = "P" + str(w.players[playernumber-1].controller)
+		else:
+			$Name.text = "CPU"
 	else:
-		$Name.text = "CPU"
+		$Name.text = w.players[playernumber-1].tag
 	if w.TEAMMODE:
 		if w.players[playernumber-1].team == 0:
 			color = Globals.LEFTCOLOR

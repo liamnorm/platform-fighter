@@ -9,6 +9,7 @@ var yspeed = 0.01
 var pos = Vector2(0,0)
 var heldplayer = 0
 var player_to_hold
+var just_selected = false
 
 var Mat
 
@@ -67,6 +68,7 @@ func display():
 		pos.y * Globals.SCREENY + 32)
 		
 func controls():
+	just_selected = false
 	var input = [false,false,false,false,false,false]
 	var c = str(playernumber-1)
 	if playernumber == 1:
@@ -94,6 +96,7 @@ func controls():
 	if input[3]:
 		pos.y += yspeed
 		
+	#change skin with c & v
 	if input[6]:
 		var myslate =Globals.playercontrollers.find(playernumber)
 		if heldplayer > 0:
@@ -101,6 +104,7 @@ func controls():
 		if myslate >= 0:
 			findnextskin(myslate,1)
 	
+	#change skin with c & v
 	if input[7]:
 		var myslate = Globals.playercontrollers.find(playernumber)
 		if heldplayer > 0:
@@ -108,32 +112,38 @@ func controls():
 		if myslate >= 0:
 			findnextskin(myslate,-1)
 
-
+	#select character by clicing on icon
 	if !Globals.playerselected[heldplayer-1]:
 		if !overlappingslate():
 			if input[4]:
 				if Globals.playerchars[heldplayer-1] >= 0:
 					Globals.playerselected[heldplayer-1] = true
 					Globals.chipholder[heldplayer-1] = 0
+			just_selected = true
 
 	else:
+		#deselect
 		if input[5]:
 			heldplayer = playernumber
 			Globals.chipholder[heldplayer-1] = playernumber
 			Globals.playerselected[heldplayer-1] = false
-		
+		#pick up chip
 		elif input[4]:
 			if canselect():
 				heldplayer = player_to_hold
 				Globals.playerselected[heldplayer-1] = false
 				Globals.chipholder[heldplayer-1] = playernumber
 	
+	#update held char when scrolling over characters
 	if heldplayer > 0:
-		Globals.playerchars[heldplayer-1] = -1
 		if abs(pos.x-.5)<.1 && abs(pos.y-.25)<.2:
-			Globals.playerchars[heldplayer-1] = 0
-			Globals.playerskins[heldplayer-1] = -1
-			findnextskin(heldplayer-1, 1)
+			var prevchar = Globals.playerchars[heldplayer-1]
+			if !prevchar == 0:
+				Globals.playerchars[heldplayer-1] = 0
+				Globals.playerskins[heldplayer-1] = -1
+				findnextskin(heldplayer-1, 1)
+		else:
+			Globals.playerchars[heldplayer-1] = -1
 	
 	pos.x = clamp(pos.x,0,1)
 	pos.y = clamp(pos.y,0,1)
@@ -170,7 +180,7 @@ func controls():
 				findnextskin(Globals.NUM_OF_PLAYERS-1, 1)
 			Globals.NUM_OF_PLAYERS = clamp(Globals.NUM_OF_PLAYERS, 2, 8)
 	else:
-		if input[4] && !Globals.playerselected.has(false):
+		if input[4] && !Globals.playerselected.has(false) && !just_selected:
 			get_parent().start_game()
 
 	Globals.pointpos[playernumber-1] = pos
@@ -182,7 +192,7 @@ func findnextskin(selectedslate, change):
 		if i != selectedslate && Globals.playerselected[i]:
 			otherskins.append(Globals.playerskins[i])
 	var i = 0
-	while (i <= 8 && otherskins.has(sk)) || i == 0:
+	while (i <= Globals.NUM_OF_SKINS && otherskins.has(sk)) || i == 0:
 		sk += change + Globals.NUM_OF_SKINS
 		sk = sk % Globals.NUM_OF_SKINS
 		i += 1

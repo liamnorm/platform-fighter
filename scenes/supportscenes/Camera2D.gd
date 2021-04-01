@@ -50,11 +50,10 @@ func _process(_delta):
 		maxy = 0
 		
 		NUM_OF_ACTIVE_PLAYERS = 0
-		for i in range(w.NUM_OF_PLAYERS):
-			var node_name = "../Player" + str(i+1)
-			var pxpos = get_node(node_name).get_position().x
-			var pypos = get_node(node_name).get_position().y
-			if !get_node(node_name).defeated:
+		for p in w.players:
+			var pxpos = p.get_position().x
+			var pypos = p.get_position().y
+			if !p.defeated:
 				NUM_OF_ACTIVE_PLAYERS += 1
 				if NUM_OF_ACTIVE_PLAYERS == 1:
 					minx = pxpos - smargx

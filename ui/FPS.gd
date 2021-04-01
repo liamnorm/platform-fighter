@@ -24,6 +24,10 @@ func _process(_delta):
 			i += 1
 		
 		thetext = ""
+		
+		if w.ISSERVER:
+			thetext += "SERVER\n"
+			
 		thetext += " " + str(FPS) + " FPS"
 		
 		if w.GAMEMODE == "TIME" ||  w.GAMEMODE == "SOCCER":

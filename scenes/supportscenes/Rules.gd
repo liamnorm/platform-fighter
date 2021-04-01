@@ -38,8 +38,8 @@ var options = {
 }
 
 var moderules = {
-	"STOCK":  ["STOCKS", "TIME LIMIT", "TEAMS", "TEAM ATTACK"],
-	"TIME":   ["TIME", "TEAMS", "TEAM ATTACK"],
+	"STOCK":  ["STOCKS", "TIME LIMIT"],
+	"TIME":   ["TIME"],
 	"SOCCER": ["TIME LIMIT", "SCORE TO WIN"],
 }
 
@@ -57,7 +57,10 @@ func _process(_delta):
 		if Globals.SELECTEDRULE > 0:
 			Globals.SELECTEDRULE -= 1
 	
-	$Description.text = desc[buttonnames[Globals.SELECTEDRULE]]
+	if Globals.ONLINE:
+		$Description.text = "PREFERRED RULES"
+	else:
+		$Description.text = desc[buttonnames[Globals.SELECTEDRULE]]
 			
 	if Input.is_action_just_pressed("left") || Input.is_action_just_pressed("right"):
 		var opt = buttonnames[Globals.SELECTEDRULE]
@@ -79,7 +82,7 @@ func _process(_delta):
 		back_to_menu()
 			
 	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select") || Input.is_action_just_pressed("attack"):
-			for i in range(len(buttons)):
+			for i in range(buttonnames.size()):
 				buttonaction(i)
 			
 			advance_to_css()
@@ -113,8 +116,14 @@ func thebuttons():
 	var bta = moderules[gamemode]
 	for i in bta:
 		buttonnames.append(i)
-	buttonnames.append("CPU LEVEL")
-	buttonnames.append("TIEBREAKER")
+	
+	if !Globals.ONLINE:
+		if !gamemode == "SOCCER":
+			buttonnames.append("TEAMS")
+			buttonnames.append("TEAM ATTACK")
+	
+		buttonnames.append("CPU LEVEL")
+		buttonnames.append("TIEBREAKER")
 		
 	num_of_options = len(buttonnames)
 	

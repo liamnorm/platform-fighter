@@ -12,6 +12,11 @@ var Mat
 
 func _ready():
 	Mat = $Sprite.get_material()
+	if !Globals.ONLINE:
+		if Globals.NUM_OF_PLAYERS < 2:
+			Globals.NUM_OF_PLAYERS = 2
+	else:
+		Globals.NUM_OF_PLAYERS = 1
 	
 	slates = []
 	for i in range(8):
@@ -51,12 +56,12 @@ func _process(_delta):
 	if (Input.is_action_just_pressed("pause") ||
 		Input.is_action_just_pressed("select")
 		) && !Globals.playerselected.has(false):
-		start_game()
+			start_game()
 	if Input.is_action_pressed("special"):
 		Globals.CSSBACKFRAME += 1
 	else:
 		Globals.CSSBACKFRAME = 0
-	if Globals.CSSBACKFRAME > 60:
+	if Globals.CSSBACKFRAME > 45:
 		if Globals.GAMEMODE == "TRAINING":
 			go_back()
 		else:
@@ -74,24 +79,37 @@ func _process(_delta):
 	$Background.margin_right = max(Globals.SCREENX,Globals.SCREENY)
 	$Background.margin_bottom = max(Globals.SCREENX,Globals.SCREENY)
 	
-	$Back.get_material().set_shader_param("progress", Globals.CSSBACKFRAME/60.0)
+	$Back.get_material().set_shader_param("progress", Globals.CSSBACKFRAME/45.0)
 	
 	$ColorRect.margin_left = 0
 	$ColorRect.margin_top = 0
 	$ColorRect.margin_right = Globals.SCREENX
 	$ColorRect.margin_bottom = Globals.SCREENY/2
 	
-	$Add.position.x = Globals.SCREENX - 192
-	$Add.position.y = Globals.SCREENY/2 - 64
+	if !Globals.ONLINE:
 	
-	$Subtract.position.x = Globals.SCREENX - 64
-	$Subtract.position.y = Globals.SCREENY/2 - 64
+		$Add.visible = true
+		$Add.position.x = Globals.SCREENX - 192
+		$Add.position.y = Globals.SCREENY/2 - 64
+		
+		$Subtract.visible = true
+		$Subtract.position.x = Globals.SCREENX - 64
+		$Subtract.position.y = Globals.SCREENY/2 - 64
+	else:
+		$Add.visible = false
+		$Subtract.visible = false
 	
 	Globals.CSSFRAME += 1
 	
 	
 func start_game():
-	var _game = get_tree().change_scene("res://scenes/mainscene/World.tscn")
+	if Globals.ONLINE:
+		var _lobby = get_tree().change_scene("res://scenes/supportscenes/Lobby.tscn")
+	else:
+		var _game = get_tree().change_scene("res://scenes/mainscene/World.tscn")
+	
+func go_to_lobby():
+	var _lobby = get_tree().change_scene("res://scenes/supportscenes/Lobby.tscn")
 
 func go_back():
 	var _menu = get_tree().change_scene("res://scenes/supportscenes/Menu.tscn")

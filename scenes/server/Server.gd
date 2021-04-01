@@ -1,32 +1,15 @@
 extends Node
 
-
-
-var network = NetworkedMultiplayerENet.new()
-var ip = "127.0.0.1"
-
-var port = 1909
+var lobbymade = false
 
 func _ready():
-	print("HELLO!")
-	print("YOU ARE THE SERVER!!!")
-	ConnectToServer()
-
-func ConnectToServer():
-	network.create_client(ip, port)
-	get_tree().set_network_peer(network)
-
-	network.connect("connection_failed", self, "_OnConnectionFailed")
-	network.connect("connection_succeeded", self, "_OnConnectionSucceeded")
-
-func _OnConnectionFailed():
-	print("Failed to connect")
-
-func _OnConnectionSucceeded():
-	print("Successfully connected")
-
-func fetchMovementData(movement, requester):
-	rpc_id(1, "fetchMovementData", movement, requester)
-
-func returnMovementData(m_value, requester):
-	instance_from_id(requester).SetMovementData(m_value)
+	
+	Globals.ONLINE = true
+	Globals.ISSERVER = true
+	lobbymade = false
+	
+func _process(_delta):
+	if !lobbymade:
+		var lobby = preload("res://scenes/supportscenes/Lobby.tscn").instance()
+		get_tree().get_root().add_child(lobby)
+		lobbymade = true

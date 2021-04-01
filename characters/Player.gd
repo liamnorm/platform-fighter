@@ -11,6 +11,7 @@ var character = "SPACEDOG"
 var skin = 0
 var controller = 0
 var team = 0
+var tag = ""
 
 #shader materials
 var Mat
@@ -69,7 +70,7 @@ var stage = 0
 var on_floor = false
 
 #ledge
-var current_ledge = null
+var current_ledge = -1
 var frames_since_ledge = 0
 var first_time_at_ledge = true
 var drop_frame = 0
@@ -88,7 +89,7 @@ var d = 1
 #misc movement stuff
 var double_jump_frame = 0
 var has_double_jump = true
-var jump_direction
+var jump_direction = 0
 var in_fast_fall = false
 var has_airdodge = true
 var shield_size = SHIELDTIME
@@ -154,134 +155,150 @@ func _ready():
 	
 func _physics_process(_delta):
 	
-	var paused = w.PAUSED
-	var framechange = Input.is_action_just_pressed("nextframe")
-	var intro = w.FRAME < 0
-	var slowmo = w.SLOMOFRAME % 2 != 0
-	if ((!paused) || framechange) && !defeated && !intro && !slowmo:
+	if true:
 		
-		x = get_position().x
-		y = get_position().y
-		get_input()
 		
-		$CollisionShape2D.disabled = false
 
-		if impact_frame == 0:
-		
-		
-			if (y > w.BOTTOMBLASTZONE || 
-				(y < w.TOPBLASTZONE && state == "hit") || 
-				abs(x) > w.SIDEBLASTZONE):
-				if w.GAMEMODE == "STOCK":
-					if abs(x) > w.TRIPLEBLASTZONE:
-						stock -= 3
-						w.TRIPLEKOFRAME = 120
-					elif abs(x) > w.DOUBLEBLASTZONE:
-						stock -= 2
-						w.DOUBLEKOFRAME = 120
-					else:
-						w.KOFRAME = 120
-						stock -= 1
-					if w.STOCKS < 0:
-						stock = 1
-					if stock < 0:
-						stock = 0
-					if stock > 0:
+		var paused = w.PAUSED
+		var framechange = Input.is_action_just_pressed("nextframe")
+		var intro = w.FRAME < 0
+		var slowmo = w.SLOMOFRAME % 2 != 0
+		if ((!paused) || framechange) && !defeated && !intro && !slowmo:
+			
+			x = get_position().x
+			y = get_position().y
+			
+
+			get_input()
+			
+			
+			$CollisionShape2D.disabled = false
+
+			if impact_frame == 0:
+			
+			
+				if (y > w.BOTTOMBLASTZONE || 
+					(y < w.TOPBLASTZONE && state == "hit") || 
+					abs(x) > w.SIDEBLASTZONE):
+					if w.GAMEMODE == "STOCK":
+						if abs(x) > w.TRIPLEBLASTZONE:
+							stock -= 3
+							w.TRIPLEKOFRAME = 120
+						elif abs(x) > w.DOUBLEBLASTZONE:
+							stock -= 2
+							w.DOUBLEKOFRAME = 120
+						else:
+							w.KOFRAME = 120
+							stock -= 1
+						if w.STOCKS < 0:
+							stock = 1
+						if stock < 0:
+							stock = 0
+						if stock > 0:
+							respawn(Vector2(0,w.TOPBLASTZONE))
+						else:
+							defeated = true
+							w.ELIMINATIONFRAME = 120
+							w.ELIMINATEDPLAYER = controller
+							var players_left = 0
+							var winner = 0
+							for p in w.players:
+								if !p.defeated:
+									players_left += 1
+									winner = p.playernumber
+							w.DEFEATORDER[playernumber-1] = players_left
+							if players_left < 2:
+								w.GAMEENDFRAME = 1
+								Globals.WINNER = winner
+								Globals.WINNERSKIN = w.players[winner-1].skin
+								Globals.WINNERCHARACTER = w.players[winner-1].character
+								Globals.WINNERCONTROLLER = w.players[winner-1].controller
+					elif w.GAMEMODE == "TIME":
+						if abs(x) > w.TRIPLEBLASTZONE:
+							score -= 3
+							w.players[player_who_last_hit_me-1].score += 3
+							w.TRIPLEKOFRAME = 120
+						elif abs(x) > w.DOUBLEBLASTZONE:
+							score -= 2
+							w.players[player_who_last_hit_me-1].score += 3
+							w.DOUBLEKOFRAME = 120
+						else:
+							score -= 1
+							w.players[player_who_last_hit_me-1].score += 3
+							w.KOFRAME = 120
 						respawn(Vector2(0,w.TOPBLASTZONE))
 					else:
-						defeated = true
-						w.ELIMINATIONFRAME = 120
-						w.ELIMINATEDPLAYER = controller
-						var players_left = 0
-						var winner = 0
-						for p in w.players:
-							if !p.defeated:
-								players_left += 1
-								winner = p.playernumber
-						w.DEFEATORDER[playernumber-1] = players_left
-						if players_left < 2:
-							w.GAMEENDFRAME = 1
-							Globals.WINNER = winner
-							Globals.WINNERSKIN = w.players[winner-1].skin
-							Globals.WINNERCHARACTER = w.players[winner-1].character
-							Globals.WINNERCONTROLLER = w.players[winner-1].controller
-				elif w.GAMEMODE == "TIME":
-					if abs(x) > w.TRIPLEBLASTZONE:
-						score -= 3
-						w.players[player_who_last_hit_me-1].score += 3
-						w.TRIPLEKOFRAME = 120
-					elif abs(x) > w.DOUBLEBLASTZONE:
-						score -= 2
-						w.players[player_who_last_hit_me-1].score += 3
-						w.DOUBLEKOFRAME = 120
-					else:
-						score -= 1
-						w.players[player_who_last_hit_me-1].score += 3
-						w.KOFRAME = 120
-					respawn(Vector2(0,w.TOPBLASTZONE))
-				else:
-					respawn(Vector2(0,w.TOPBLASTZONE))
+						respawn(Vector2(0,w.TOPBLASTZONE))
+					
+					playsound("KO")
 				
-				playsound("KO")
-			
-			if !state == "ledge":
-				motion.y += GRAVITY
-			
-			statebasedaction()
-			
-			motion.x = clamp(motion.x, -TRUEMAXSPEED, TRUEMAXSPEED)
-			motion.y = clamp(motion.y, -TRUEMAXSPEED, TRUEMAXSPEED)
-			
-			if (state == "hit" && stage == 0):
-				var collision = move_and_collide(motion/60.0)
-				if collision:
-					if (collision.collider.get_node_or_null("Collision") != null):
-						if collision.collider.get_node("Collision").one_way_collision:
-							if motion.y > 0:
-								motion.y = -motion.y
-								motion = motion*0.7
-					else:
-						if motion.length() > 500:
-							if !(motion.length() < 5000 && input[6]):
-								motion = motion.bounce(collision.normal)
-								motion = motion*0.7
-			else:
-				motion = move_and_slide(motion, UP)
-			
-			respectedge()
-			
-			
-			#FRAME STUFF
-			frame += 1
-			frames_since_ledge += 1
-			invincibility_frame -= 1
-			invincibility_frame = max(invincibility_frame, 0)
-			intangibility_frame -= 1
-			intangibility_frame = max(intangibility_frame, 0)
-			wavedash_frame -= 1
-			wavedash_frame = clamp(wavedash_frame, 0, WAVEDASHLENGTH)
-			
-			roll_stale -= 1
-			roll_stale = clamp(roll_stale, 0, 2000)
-			
-			if w.FRAME%2 == 1:
-				shield_size += 1
-			shield_size = clamp(shield_size, 0, SHIELDTIME)
-			shield_physical_size = sqrt(shield_size)*5-10
-	
-	impact_frame -= 1
-	if impact_frame < 1:
-		impact_frame = 0
-	else:
-		if state == "hitstun":
-			directionalinput()
+				if !state == "ledge":
+					motion.y += GRAVITY
+				
+				statebasedaction()
+				
+				motion.x = clamp(motion.x, -TRUEMAXSPEED, TRUEMAXSPEED)
+				motion.y = clamp(motion.y, -TRUEMAXSPEED, TRUEMAXSPEED)
+				
+				if (state == "hit" && stage == 0):
+					var collision = move_and_collide(motion/60.0)
+					if collision:
+						if (collision.collider.get_node_or_null("Collision") != null):
+							if collision.collider.get_node("Collision").one_way_collision:
+								if motion.y > 0:
+									motion.y = -motion.y
+									motion = motion*0.7
+						else:
+							if motion.length() > 500:
+								if !(motion.length() < 5000 && input[6]):
+									motion = motion.bounce(collision.normal)
+									motion = motion*0.7
+				else:
+					motion = move_and_slide(motion, UP)
+				
+				respectedge()
+				
+				
+				#FRAME STUFF
+				frame += 1
+				frames_since_ledge += 1
+				invincibility_frame -= 1
+				invincibility_frame = max(invincibility_frame, 0)
+				intangibility_frame -= 1
+				intangibility_frame = max(intangibility_frame, 0)
+				wavedash_frame -= 1
+				wavedash_frame = clamp(wavedash_frame, 0, WAVEDASHLENGTH)
+				
+				roll_stale -= 1
+				roll_stale = clamp(roll_stale, 0, 2000)
+				
+				if w.FRAME%2 == 1:
+					shield_size += 1
+				shield_size = clamp(shield_size, 0, SHIELDTIME)
+				shield_physical_size = sqrt(shield_size)*5-10
 		
+		impact_frame -= 1
+		if impact_frame < 1:
+			impact_frame = 0
+		else:
+			if state == "hitstun":
+				directionalinput()
+		
+	if w.ONLINE && w.ISSERVER:
+		send_state()
+
+
 	#DRAW
 	updateDirection()
 	playerEffects()
 	drawPlayer()
 	updateheld()
 	drawhurtbox()
+	
+	
+	
+remote func _set_position(pos):
+	position = pos
 
 
 func statebasedaction():
@@ -466,7 +483,7 @@ func statebasedaction():
 		"ledge":
 			if frame == 1:
 				#playsound("LEDGE")
-				current_ledge[2] = playernumber
+				w.LEDGES[current_ledge][2] = playernumber
 			if first_time_at_ledge && frame == 4:
 				intangibility_frame = LEDGE_INTANGIBILITY_FRAMES
 				first_time_at_ledge = false
@@ -480,50 +497,50 @@ func statebasedaction():
 			frames_since_ledge = 0
 			snaptoledge()
 			
-			if current_ledge[2] != playernumber:
+			if w.LEDGES[current_ledge][2] != playernumber:
 				motion.y = -JUMPFORCE * 0.5
-				motion.x = current_ledge[1] * -2000
+				motion.x = w.LEDGES[current_ledge][1] * -2000
 				be("jump")
 			
 			elif frame > 15:
 				if input[0]:
-					if current_ledge[1] == 1:
-						current_ledge[2] = 0
+					if w.LEDGES[current_ledge][1] == 1:
+						w.LEDGES[current_ledge][2] = 0
 						be("ledgegetup")
 					else:
-						current_ledge[2] = 0
+						w.LEDGES[current_ledge][2] = 0
 						be("jump")
 				elif input[1]:
-					if current_ledge[1] == -1:
-						current_ledge[2] = 0
+					if w.LEDGES[current_ledge][1] == -1:
+						w.LEDGES[current_ledge][2] = 0
 						be("ledgegetup")
 					else:
-						current_ledge[2] = 0
+						w.LEDGES[current_ledge][2] = 0
 						be("jump")
 				elif input[2]:
 					motion.y = -JUMPFORCE
-					current_ledge[2] = 0
+					w.LEDGES[current_ledge][2] = 0
 					be("jump")
 				elif new_input[3]:
 					in_fast_fall = false
-					current_ledge[2] = 0
+					w.LEDGES[current_ledge][2] = 0
 					be("jump")
 				if frame > LEDGETIME:
-					current_ledge[2] = 0
+					w.LEDGES[current_ledge][2] = 0
 					be("jump")
 		
 		"ledgegetup":
 			
 			motion = Vector2(0,0)
-			var ledge_x = current_ledge[0].x + current_ledge[1] * 0
-			var ledge_y = current_ledge[0].y + 0
+			var ledge_x = w.LEDGES[current_ledge][0].x + w.LEDGES[current_ledge][1] * 0
+			var ledge_y = w.LEDGES[current_ledge][0].y + 0
 			$CollisionShape2D.disabled = true
 			set_position(Vector2(ledge_x, ledge_y))
 			
 			
 			if frame > 18:
-				ledge_x = current_ledge[0].x + current_ledge[1] * 64
-				ledge_y = current_ledge[0].y - 64
+				ledge_x = w.LEDGES[current_ledge][0].x + w.LEDGES[current_ledge][1] * 64
+				ledge_y = w.LEDGES[current_ledge][0].y - 64
 				set_position(Vector2(ledge_x, ledge_y))
 				be("idle")
 
@@ -552,7 +569,7 @@ func statebasedaction():
 					elif !input[6]:
 						be("outofshield")
 				else:
-					if (input[0] || input[1] || input[2] || input[3]) && has_airdodge:
+					if (new_input[0] || new_input[1] || new_input[2] || new_input[3]) && has_airdodge:
 						be("airdodge")
 					elif !input[6]:
 						be("outofshield")
@@ -715,8 +732,8 @@ func statebasedaction():
 					if new_input[2]:
 						be("jump")
 						doublejump()
-					if new_input[3] && motion.y > -500:
-						in_fast_fall = true
+					if new_input[3] && motion.y > -500 && !in_fast_fall:
+						fast_fall()
 					airoptions()
 					ledgesnap()
 					if updatefloorstate():
@@ -746,6 +763,12 @@ func statebasedaction():
 		"getupattack":
 			if frame > 30 || input[2]:
 				be("idle")
+				
+		"neutralgetup":
+			pass
+		
+		"softland":
+			pass
 		
 		"respawn":
 			match stage:
@@ -778,8 +801,8 @@ func statebasedaction():
 						respawn_order = -1
 						invincibility_frame = RESPAWN_INVINCIBILITY_FRAMES
 						be("jump")
-						if input[3]:
-							in_fast_fall = true
+						if input[3] && !in_fast_fall:
+							fast_fall()
 						if input[2]:
 							doublejump()
 						
@@ -1004,7 +1027,7 @@ func airoptions():
 		else:
 			be("neutralair")
 	elif new_input[6]:
-		if (input[0] || input[1] || input[2] || input[3]) && has_airdodge:
+		if (new_input[0] || new_input[1] || new_input[2] || new_input[3]) && has_airdodge:
 			be("airdodge")
 		else:
 			be("shield")
@@ -1054,8 +1077,8 @@ func movement():
 		elif input[1]:
 			motion.x -= AIRACCEL
 		
-		if new_input[3] && motion.y > -500:
-			in_fast_fall = true
+		if new_input[3] && motion.y > -500 && !in_fast_fall:
+			fast_fall()
 			
 		if in_fast_fall && ["jump","upspecial"].has(state):
 			set_collision_layer_bit(1, 0)
@@ -1067,13 +1090,15 @@ func movement():
 func ledgesnap():
 	if frames_since_ledge > 30 && !floating:
 		var myx = get_position().x
+		var i = 0
 		for ledge in w.LEDGES:
 			if abs(myx+32*ledge[1]-ledge[0].x) < 32:
 				var myy = get_position().y
 				if abs(myy-48-ledge[0].y) < 48:
-					current_ledge = ledge
+					current_ledge = i
 					be("ledge")
 					snaptoledge()
+			i += 1
 		
 func fallcap(on_ground):
 	updatefloorstate()
@@ -1107,6 +1132,16 @@ func doublejump():
 	in_fast_fall = false
 	double_jump_frame = DOUBLEJUMPFRAMES
 	motion.y = -DOUBLEJUMPFORCE
+	
+func fast_fall():
+	in_fast_fall = true
+	var effect = EFFECT.instance()
+	effect.position = get_position() + Vector2(d*-60, -20)
+	effect.d = d
+	effect.myframe = 0
+	effect.playernumber = playernumber
+	effect.effecttype = "glimmer"
+	w.add_child(effect)
 	
 func throw(throwx, throwy):
 	if heldobject != null:
@@ -1213,166 +1248,152 @@ func drawhurtbox():
 
 
 func get_input():
-	prev_input = input
-	if controller == 0:
-		#for i in range(6):
-			#input_lengths[i]+= 1
-			#if i==1:
-			#	input[1] = !input[0]
-			#if (input_lengths[i] > randi()%50 + 30):
-				#input[i] = !input[i]
-				#input_lengths[i] = 0
-		
-		input = [
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-			false,
-		]
-		
-		if w.FRAME < 20:
-			target = playernumber%w.NUM_OF_PLAYERS
-		if w.players[target].defeated || target == playernumber-1:
-			target += 1
-			target = target%w.NUM_OF_PLAYERS
-		var enemyx = w.players[target].get_position().x
-		var enemyy = w.players[target].get_position().y
-		
-		if w.GAMEMODE == "SOCCER":
-			enemyx = w.projectiles[0].get_position().x
-			enemyy = w.projectiles[0].get_position().y
-		
-		var offstage = false
-		if w.LEDGES.size() > 1:
-			offstage = x < w.LEDGES[0][0].x ||  x > w.LEDGES[1][0].x || y > w.LEDGES[0][0].y
-		
-		#input[6] = true
-		if !w.GAMEMODE == "TRAINING":
-			#offense
-			if !offstage:
-				input[0] = input[0] || x < enemyx - 128
-				input[1] = input[1] || x > enemyx + 128
-				input[2] = (input[2] || y > enemyy - 128 || frame%60 < 20) && ! frame%60 < 10
-				input[3] = input[3] || y < enemyy
-				
-				if !is_on_floor():
-					if x < enemyx:
-						if enemyy < y:
-							input[10] = true
+	if !(w.ISSERVER || (w.ONLINE && !name == str(get_tree().get_network_unique_id()))):
+		if controller == 0:
+			#for i in range(6):
+				#input_lengths[i]+= 1
+				#if i==1:
+				#	input[1] = !input[0]
+				#if (input_lengths[i] > randi()%50 + 30):
+					#input[i] = !input[i]
+					#input_lengths[i] = 0
+			
+			input = [
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+			]
+			
+			if w.FRAME < 20:
+				target = playernumber%w.NUM_OF_PLAYERS
+			if w.players[target].defeated || target == playernumber-1:
+				target += 1
+				target = target%w.NUM_OF_PLAYERS
+			var enemyx = w.players[target].get_position().x
+			var enemyy = w.players[target].get_position().y
+			
+			if w.GAMEMODE == "SOCCER":
+				enemyx = w.projectiles[0].get_position().x
+				enemyy = w.projectiles[0].get_position().y
+			
+			var offstage = false
+			if w.LEDGES.size() > 1:
+				offstage = x < w.LEDGES[0][0].x ||  x > w.LEDGES[1][0].x || y > w.LEDGES[0][0].y
+			
+			#input[6] = true
+			if !w.GAMEMODE == "TRAINING":
+				#offense
+				if !offstage:
+					input[0] = input[0] || x < enemyx - 128
+					input[1] = input[1] || x > enemyx + 128
+					input[2] = (input[2] || y > enemyy - 128 || frame%60 < 20) && ! frame%60 < 10
+					input[3] = input[3] || y < enemyy
+					
+					if !is_on_floor():
+						if x < enemyx:
+							if enemyy < y:
+								input[10] = true
+							else:
+								input[8] = true
 						else:
-							input[8] = true
-					else:
-						if enemyy < y:
-							input[10] = true
-						else:
-							input[9] = true
-							
-				if (abs(x - enemyx) < 64 && abs(y - enemyy) < 64) || state == "upspecial":
-					input[2] = true
-					input[4] = true
-					input[1] = false
-					input[0] = false
-				
-				if abs(x - enemyx) > 192 && randi()%16 == 0:
-					input[0] = false
-					input[1] = false
-					input[2] = false
-					input[3] = false
-					input[4] = true
-							
-							
-				#defense
-				for p in w.players:
-					if (p.position - position).length() < 128:
-						if ["neutralair", "fordwardair", "backair", "upair", "downair"].has(p.state):
-							input[0] = false
-							input[1] = false
-							input[2] = false
-							input[3] = false
-							input[6] = true
-		
-		
-		#recovery
-		if offstage:
-			
-			var tl = 0
-			if x > 0:
-				tl = 1
-			var tlp = w.LEDGES[tl][0]
-			input[0] = x < tlp.x
-			input[1] = x > tlp.x
-			
-			
-			if  y > tlp.y + 64:
-				var slope = abs((x-tlp.x)/(y-tlp.y))
-				if has_double_jump:
-					#double jump
-					input[2] = true
-				elif ((slope > 0.9 && slope < 1.1) || abs(x-tlp.x) < 64) && !has_double_jump || state == "upspecial":
-					#upspecial if diagonal or under ledge
-					if abs(x-tlp.x) < 64:
+							if enemyy < y:
+								input[10] = true
+							else:
+								input[9] = true
+								
+					if (abs(x - enemyx) < 64 && abs(y - enemyy) < 64) || state == "upspecial":
+						input[2] = true
+						input[4] = true
+						input[1] = false
+						input[0] = false
+					
+					if abs(x - enemyx) > 192 && randi()%16 == 0:
 						input[0] = false
 						input[1] = false
-					input[2] = true
-					input[4] = true
-			else:
-				#sidespecial
-				if state == "jump" && abs(x-tlp.x) > 256:
-					input[4] = true
-					input[2] = false
-#		input = w.players[0].input
-#		var temp = input[0]
-#		input[0] = input[1]
-#		input[1] = temp
+						input[2] = false
+						input[3] = false
+						input[4] = true
+								
+								
+					#defense
+					for p in w.players:
+						if (p.position - position).length() < 128:
+							if ["neutralair", "fordwardair", "backair", "upair", "downair"].has(p.state):
+								input[0] = false
+								input[1] = false
+								input[2] = false
+								input[3] = false
+								input[6] = true
+			
+			
+			#recovery
+			if offstage:
+				
+				var tl = 0
+				if x > 0:
+					tl = 1
+				var tlp = w.LEDGES[tl][0]
+				input[0] = x < tlp.x
+				input[1] = x > tlp.x
+				
+				
+				if  y > tlp.y + 64:
+					var slope = abs((x-tlp.x)/(y-tlp.y))
+					if has_double_jump:
+						#double jump
+						input[2] = true
+					elif ((slope > 0.9 && slope < 1.1) || abs(x-tlp.x) < 64) && !has_double_jump || state == "upspecial":
+						#upspecial if diagonal or under ledge
+						if abs(x-tlp.x) < 64:
+							input[0] = false
+							input[1] = false
+						input[2] = true
+						input[4] = true
+				else:
+					#sidespecial
+					if state == "jump" && abs(x-tlp.x) > 256:
+						input[4] = true
+						input[2] = false
+	#		input = w.players[0].input
+	#		var temp = input[0]
+	#		input[0] = input[1]
+	#		input[1] = temp
 
 
-#CPU STUFF
-
-
-
-	elif controller == 1:
-		input = [
-			Input.is_action_pressed("right"),
-			Input.is_action_pressed("left"),
-			Input.is_action_pressed("jump"),
-			Input.is_action_pressed("down"),
-			Input.is_action_pressed("special"),
-			Input.is_action_pressed("attack"),
-			Input.is_action_pressed("shield"),
-			Input.is_action_pressed("extra"),
-			Input.is_action_pressed("rightattack"),
-			Input.is_action_pressed("leftattack"),
-			Input.is_action_pressed("upattack"),
-			Input.is_action_pressed("downattack"),
-		]
-		
-	elif controller > 1:
-		var c = str(controller-1)
-		input = [
-			Input.is_action_pressed("right" + c),
-			Input.is_action_pressed("left" + c),
-			Input.is_action_pressed("jump" + c),
-			Input.is_action_pressed("down" + c),
-			Input.is_action_pressed("special" + c),
-			Input.is_action_pressed("attack" + c),
-			Input.is_action_pressed("shield" + c),
-			Input.is_action_pressed("extra" + c),
-			Input.is_action_pressed("rightattack" + c),
-			Input.is_action_pressed("leftattack" + c),
-			Input.is_action_pressed("upattack" + c),
-			Input.is_action_pressed("downattack" + c),
-		]
+		elif controller > 0:
+			var c = str(controller-1)
+			if controller == 1:
+				c = ""
+			input = [
+				Input.is_action_pressed("right" + c),
+				Input.is_action_pressed("left" + c),
+				Input.is_action_pressed("jump" + c),
+				Input.is_action_pressed("down" + c),
+				Input.is_action_pressed("special" + c),
+				Input.is_action_pressed("attack" + c),
+				Input.is_action_pressed("shield" + c),
+				Input.is_action_pressed("extra" + c),
+				Input.is_action_pressed("rightattack" + c),
+				Input.is_action_pressed("leftattack" + c),
+				Input.is_action_pressed("upattack" + c),
+				Input.is_action_pressed("downattack" + c),
+			]
+			
+		if w.ONLINE && name == str(get_tree().get_network_unique_id()):
+			rpc_unreliable_id(1, "_get_input", input)
 		
 	for i in range(len(input)):
 		new_input[i] = input[i] && !prev_input[i]
+	prev_input = input
 
 
 func respectedge():
@@ -1502,10 +1523,10 @@ func be_jump_if_in_midair():
 		be("jump")
 		
 func snaptoledge():
-	d = current_ledge[1]
+	d = w.LEDGES[current_ledge][1]
 	motion = Vector2(0,0)
-	var ledge_x = current_ledge[0].x + current_ledge[1] * 0
-	var ledge_y = current_ledge[0].y + 0
+	var ledge_x = w.LEDGES[current_ledge][0].x + w.LEDGES[current_ledge][1] * 0
+	var ledge_y = w.LEDGES[current_ledge][0].y + 0
 	$CollisionShape2D.disabled = true
 	set_position(Vector2(ledge_x, ledge_y))
 
@@ -1567,3 +1588,57 @@ func extra():
 func playsound(sound):
 	if !Globals.MUTED || w.GAMEENDFRAME > 0:
 		get_node("Sounds").get_node(sound).play()
+
+
+
+func send_state():
+	var sentstate = [
+		floor(position.x),
+		floor(position.y),
+		d,
+		Globals.states.find(state),
+		stage,
+		frame,
+		damage,
+		stock,
+		intangibility_frame,
+		invincibility_frame,
+		double_jump_frame,
+		on_floor,
+		combo,
+		float_frame,
+		shield_size,
+		current_ledge,
+		floor(motion.x),
+		floor(motion.y),
+		input
+		]
+	rpc_unreliable("_get_position", sentstate)
+
+remote func _get_position(ss):
+	position = Vector2(ss[0], ss[1])
+	d = ss[2]
+	state = Globals.states[ss[3]]
+	nextstate = Globals.states[ss[3]]
+	stage = ss[4]
+	frame = ss[5]
+	damage = ss[6]
+	stock = ss[7]
+	intangibility_frame = ss[8]
+	invincibility_frame = ss[9]
+	double_jump_frame = ss[10]
+	on_floor = ss[11]
+	combo = ss[12]
+	float_frame = ss[13]
+	shield_size = ss[14]
+	current_ledge = ss[15]
+	motion = Vector2(ss[16], ss[17])
+	
+	if !name == str(get_tree().get_network_unique_id()):
+		input = ss[18]
+	
+	drawPlayer()
+	
+remote func _get_input(sentinput):
+	if str(get_tree().get_rpc_sender_id()) == name:
+		input = sentinput

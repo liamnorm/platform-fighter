@@ -32,14 +32,21 @@ func _process(_delta):
 			
 	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select") || Input.is_action_just_pressed("attack"):
 		if buttonnames[Globals.SELECTEDMENUBUTTON] == "ONLINE":
-			advance_to_lobby()
+			Globals.ONLINE = true
+			Globals.ISSERVER = false
+			Globals.NUM_OF_PLAYERS = 1
+			advance_to_rules()
 		elif buttonnames[Globals.SELECTEDMENUBUTTON] == "SETTINGS":
 			advance_to_settings()
 		elif buttonnames[Globals.SELECTEDMENUBUTTON] == "TRAINING":
 			Globals.GAMEMODE = "TRAINING"
 			Globals.TEAMMODE = false
+			Globals.ONLINE = false
+			Globals.ISSERVER = false
 			advance_to_css()
 		else:
+			Globals.ONLINE = false
+			Globals.ISSERVER = false
 			advance_to_rules()
 	
 	SCREENX = Globals.SCREENX

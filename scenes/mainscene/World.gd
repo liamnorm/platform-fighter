@@ -16,6 +16,8 @@ var SHOWHITBOXES = false
 var TEAMATTACK = false
 var TEAMMODE = false
 var STAGE = 0
+var ONLINE = false
+var ISSERVER = false
 
 
 var LEDGES = []
@@ -48,8 +50,8 @@ var COMBO = 0
 var spawnpositions
 
 
-var players
-var projectiles
+var players = []
+var projectiles = []
 
 var iq = []
 
@@ -61,6 +63,8 @@ func _ready():
 	NUM_OF_PLAYERS = Globals.NUM_OF_PLAYERS
 	TEAMMODE = Globals.TEAMMODE
 	STAGE = Globals.STAGE
+	ONLINE = Globals.ONLINE
+	ISSERVER = Globals.ISSERVER
 	
 	
 	var stage = null
@@ -82,7 +86,8 @@ func _ready():
 	TRIPLEBLASTZONE = Globals.STAGEDATA[STAGE]["TRIPLEBLASTZONE"]
 	
 	SHOWHITBOXES = false
-	PAUSED = false
+	if !ONLINE:
+		PAUSED = false
 	if GAMEMODE == "TRAINING":
 		FRAME = 0
 	else:
@@ -101,46 +106,48 @@ func _ready():
 	LEFTSCORE = 0
 	RIGHTSCORE = 0
 	
-	delete_children(self)
-	players = []
-	projectiles = []
+	if !ONLINE:
 	
-	
-	var pos = []
-	for i in NUM_OF_PLAYERS:
-		pos.append(Globals.STAGEDATA[STAGE]["spawnpositions"][i])
+		delete_children(self)
+		players = []
+		projectiles = []
+		
+		
+		var pos = []
+		for i in NUM_OF_PLAYERS:
+			pos.append(Globals.STAGEDATA[STAGE]["spawnpositions"][i])
 
 
-	spawnpositions = [] 
-	var indexList = range(NUM_OF_PLAYERS)
-	for _i in range(NUM_OF_PLAYERS):
-		var x = randi()%indexList.size()
-		spawnpositions.append(pos[indexList[x]])
-		indexList.remove(x)
+		spawnpositions = [] 
+		var indexList = range(NUM_OF_PLAYERS)
+		for _i in range(NUM_OF_PLAYERS):
+			var x = randi()%indexList.size()
+			spawnpositions.append(pos[indexList[x]])
+			indexList.remove(x)
 
-	
-	for i in range(NUM_OF_PLAYERS):
-		var character = Globals.playerchars[i]
-		var characterdict = {-1: SPACEDOG, 0: SPACEDOG, 1:TODD}
-		players.append(characterdict[character].instance())
 		
-		add_child(players[i])
-	
-		resetplayer(i)
-	
+		for i in range(NUM_OF_PLAYERS):
+			var character = Globals.playerchars[i]
+			var characterdict = {-1: SPACEDOG, 0: SPACEDOG, 1:TODD}
+			players.append(characterdict[character].instance())
+			
+			add_child(players[i])
 		
-		var damage_card = DAMAGE.instance()
-		damage_card.playernumber = i+1
-		damage_card.character = players[i].character
-		$CanvasLayer.add_child(damage_card)
+			resetplayer(i)
 		
-		var tag = TAG.instance()
-		tag.playernumber = i+1
-		tag.controller =  players[i].controller
-		add_child(tag)
-	
-	if GAMEMODE == "SOCCER":
-		spawnball()
+			
+			var damage_card = DAMAGE.instance()
+			damage_card.playernumber = i+1
+			damage_card.character = players[i].character
+			$CanvasLayer.add_child(damage_card)
+			
+			var tag = TAG.instance()
+			tag.playernumber = i+1
+			tag.controller =  players[i].controller
+			add_child(tag)
+		
+		if GAMEMODE == "SOCCER":
+			spawnball()
 	
 
 static func delete_children(node):
@@ -167,38 +174,46 @@ func resetplayer(i):
 
 func _process(_delta):
 	
+	if ONLINE && !ISSERVER && (!Globals.CONNECTED || !Globals.INGAME):
+		print("DISCONNECTED")
+		get_tree().network_peer = null
+		go_to_menu()
+	
 	if GAMEENDFRAME == 0:
-		if Input.is_action_just_pressed("pause"):
-			PAUSED = !PAUSED
+		
+		
+		if !ONLINE:
+			if Input.is_action_just_pressed("pause"):
+				PAUSED = !PAUSED
 			
-		if Input.is_action_just_pressed("select"):
-			SHOWHITBOXES = !SHOWHITBOXES
+			if Input.is_action_just_pressed("select"):
+				SHOWHITBOXES = !SHOWHITBOXES
+
+			if Input.is_action_just_pressed("swap"):
+				if players[0].controller == 1:
+					players[0].controller = 0
+					players[1].controller = 1
+				else:
+					players[0].controller = 1
+					players[1].controller = 0
 		
-		if Input.is_action_just_pressed("swap"):
-			if players[0].controller == 1:
-				players[0].controller = 0
-				players[1].controller = 1
-			else:
-				players[0].controller = 1
-				players[1].controller = 0
-		
-		if (Input.is_action_just_pressed("reset")):
-			for i in range(NUM_OF_PLAYERS):
-				resetplayer(i)
-			for p in projectiles:
-				if p != null:
-					p.respawn(p.spawnposition)
+			if (Input.is_action_just_pressed("reset")):
+				for i in range(NUM_OF_PLAYERS):
+					resetplayer(i)
+				for p in projectiles:
+					if p != null:
+						p.respawn(p.spawnposition)
 				
-		if (Input.is_action_just_pressed("pause") &&
-			Input.is_action_pressed("attack") &&
-			Input.is_action_pressed("shield")):
-			go_to_menu()
+			if (Input.is_action_just_pressed("pause") &&
+				Input.is_action_pressed("attack") &&
+				Input.is_action_pressed("shield")):
+				go_to_menu()
 	
 	if IMPACTFRAME > 0:
 		IMPACTFRAME -= 1
 		
-		
-	if NUM_OF_PLAYERS > 1:
+	
+	if players.size() > 1:
 		COMBO = players[1].combo
 	
 	bottommenu()
@@ -224,26 +239,36 @@ func _process(_delta):
 			LEFTSCOREFRAME -= 1
 			
 		if GAMEENDFRAME == 0:
-			if GAMEMODE == "TIME" && FRAME > TIME*60:
-				var winner = 0
-				var maxscore = 0
-				for i in range(NUM_OF_PLAYERS):
-					if players[i].score > maxscore:
-						winner = i+1
-						maxscore = players[i].score
-				GAMEENDFRAME = 1
-				Globals.WINNER = winner
-				if Globals.WINNER != 0:
-					Globals.WINNERCHARACTER = players[winner-1].character
-					Globals.WINNERSKIN = players[winner-1].skin
-					Globals.WINNERCONTROLLER = players[winner-1].controller
-		
-			if GAMEMODE == "SOCCER" && FRAME > TIME*60:
-				GAMEENDFRAME = 1
-				if LEFTSCORE > RIGHTSCORE:
-					Globals.WINNER = 1
-				else:
-					Globals.WINNER = 2
+			if TIME > 0 && FRAME > TIME * 60:
+				if GAMEMODE == "TIME":
+					var winner = 0
+					var maxscore = 0
+					for i in range(NUM_OF_PLAYERS):
+						if players[i].score > maxscore:
+							winner = i+1
+							maxscore = players[i].score
+					GAMEENDFRAME = 1
+					Globals.WINNER = winner
+					if Globals.WINNER != 0:
+						Globals.WINNERCHARACTER = players[winner-1].character
+						Globals.WINNERSKIN = players[winner-1].skin
+						Globals.WINNERCONTROLLER = players[winner-1].controller
+			
+				elif GAMEMODE == "SOCCER":
+					GAMEENDFRAME = 1
+					if LEFTSCORE > RIGHTSCORE:
+						Globals.WINNER = 1
+					else:
+						Globals.WINNER = 2
+				
+				elif GAMEMODE == "STOCK":
+					var winner = 0
+					#TODO winner of stock match
+					Globals.WINNER = winner
+					if Globals.WINNER != 0:
+						Globals.WINNERCHARACTER = players[winner-1].character
+						Globals.WINNERSKIN = players[winner-1].skin
+						Globals.WINNERCONTROLLER = players[winner-1].controller
 				
 		if GAMEENDFRAME > 0:
 			GAMEENDFRAME += 1
@@ -257,13 +282,14 @@ func _process(_delta):
 		
 func go_to_menu():
 	var _menu = get_tree().change_scene("res://scenes/supportscenes/Menu.tscn")
+	queue_free()
 		
 func results():
 	var _results = get_tree().change_scene("res://scenes/supportscenes/Results.tscn")
 	
 func spaceoutplayers():
-	for i in range(NUM_OF_PLAYERS):
-		for j in range(i+1,NUM_OF_PLAYERS):
+	for i in range(players.size()):
+		for j in range(i+1,players.size()):
 			var ps = [players[i], players[j]]
 			var pushymoves = ["idle", "run", "runend", "turnaround", "shield", "crouch", "land", "jumpstart", "knockeddown"]
 			if (
@@ -294,9 +320,9 @@ func spaceoutplayers():
 func interactions():
 	
 	iq = []
-	for i in range(NUM_OF_PLAYERS):
+	for i in range(players.size()):
 		#player detecting player
-		for j in range(NUM_OF_PLAYERS):
+		for j in range(players.size()):
 			if j != i:
 				var ps = [players[i], players[j]]
 				for h in ps[1].hitboxes:
@@ -454,7 +480,7 @@ func impact(ps, h, b):
 	effect.d = h.d
 	effect.myframe = 0
 	effect.playernumber = ps[0].playernumber
-	effect.effecttype = "explosion"
+	effect.effecttype = "impact"
 	effect.scale = Vector2(1,1) + Vector2(h.damage[b], h.damage[b]) / 10.0
 	if ps[0].combo < 2:
 		effect.modulate = Color(1,1,1,1)
@@ -631,7 +657,7 @@ func bottommenu():
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "RIGHT SCORES!"
 		#$CanvasLayer/Message.text += "\n" + str(LEFTSCORE) + "-" + str(RIGHTSCORE)
-	elif (GAMEMODE == "TIME" || GAMEMODE == "SOCCER") && FRAME > TIME*60-300:
+	elif TIME > 0 && FRAME > TIME*60-300:
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = str((TIME*60-FRAME)/60+1)
 		if GAMEENDFRAME > 0:
@@ -645,10 +671,10 @@ func background():
 	var SCREENX = Globals.SCREENX
 	var SCREENY = Globals.SCREENY
 	
-	$Stage/Background/Background.margin_left = 0
-	$Stage/Background/Background.margin_top = 0
-	$Stage/Background/Background.margin_right = max(SCREENX,SCREENY)/4
-	$Stage/Background/Background.margin_bottom = max(SCREENX,SCREENY)/4
+	$Stage/Background/Background.margin_left = -$Camera2D.rumblex
+	$Stage/Background/Background.margin_top = -$Camera2D.rumbley
+	$Stage/Background/Background.margin_right = max(SCREENX,SCREENY)/4 -$Camera2D.rumblex
+	$Stage/Background/Background.margin_bottom = max(SCREENX,SCREENY)/4  -$Camera2D.rumbley
 	
 	var bottom = BOTTOMBLASTZONE
 	var top = TOPBLASTZONE
