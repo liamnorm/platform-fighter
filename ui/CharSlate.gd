@@ -56,6 +56,12 @@ func display():
 		$P.text = "P" + str(Globals.playercontrollers[playernumber-1])
 	else:
 		$P.text = ""
+		
+	$Name.margin_left = 62
+	$Name.margin_top = size.y - 58
+	$Name.margin_bottom = size.y - 4
+	$Name.margin_right = size.x - 16
+
 	
 	$LabelBack.margin_bottom = size.y
 	$LabelBack.margin_right = size.x

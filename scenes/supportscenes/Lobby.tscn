@@ -17,7 +17,7 @@ __meta__ = {
 [node name="Label" type="Label" parent="."]
 margin_left = 311.124
 margin_top = 202.182
-margin_right = 394.124
+margin_right = 803.124
 margin_bottom = 230.182
 custom_fonts/font = ExtResource( 1 )
 text = "this doesnt work yet so go back (X)"

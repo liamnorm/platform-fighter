@@ -11,6 +11,9 @@ var pointers = []
 var Mat
 
 func _ready():
+	
+	Globals.MENU = "CSS"
+	
 	Mat = $Sprite.get_material()
 	if !Globals.ONLINE:
 		if Globals.NUM_OF_PLAYERS < 2:
@@ -63,9 +66,9 @@ func _process(_delta):
 		Globals.CSSBACKFRAME = 0
 	if Globals.CSSBACKFRAME > 45:
 		if Globals.GAMEMODE == "TRAINING":
-			go_back()
+			go_to_menu()
 		else:
-			go_back_to_rules()
+			go_to_rules()
 
 
 	$Num_of_players.text = str(Globals.NUM_OF_PLAYERS) + " PLAYERS"
@@ -104,15 +107,20 @@ func _process(_delta):
 	
 func start_game():
 	if Globals.ONLINE:
-		var _lobby = get_tree().change_scene("res://scenes/supportscenes/Lobby.tscn")
+		go_to_lobby()
 	else:
 		var _game = get_tree().change_scene("res://scenes/mainscene/World.tscn")
+		queue_free()
 	
 func go_to_lobby():
 	var _lobby = get_tree().change_scene("res://scenes/supportscenes/Lobby.tscn")
 
-func go_back():
-	var _menu = get_tree().change_scene("res://scenes/supportscenes/Menu.tscn")
+func go_to_menu():
+	var mainmenu = load("res://scenes/supportscenes/MainMenu.tscn").instance()
+	get_parent().add_child(mainmenu)
+	queue_free()
 	
-func go_back_to_rules():
-	var _rules = get_tree().change_scene("res://scenes/supportscenes/Rules.tscn")
+func go_to_rules():
+	var rules = load("res://scenes/supportscenes/Rules.tscn").instance()
+	get_parent().add_child(rules)
+	queue_free()

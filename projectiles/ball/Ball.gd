@@ -23,11 +23,18 @@ func projectilemovement():
 				w.RIGHTSCOREFRAME = 120
 				motion = Vector2(0,0)
 				damage = 0
+				
+				if w.RIGHTSCORE > w.SCORETOWIN:
+					w.GAMEENDFRAME = 1
+					Globals.WINNER = 2
 			elif x > w.TRIPLEBLASTZONE:
 				w.LEFTSCORE += 1
 				w.LEFTSCOREFRAME = 120
 				motion = Vector2(0,0)
 				damage = 0
+				if w.LEFTSCORE > w.SCORETOWIN:
+					w.GAMEENDFRAME = 1
+					Globals.WINNER = 1
 			else:
 				pass
 		respawn(Vector2(0,w.TOPBLASTZONE))

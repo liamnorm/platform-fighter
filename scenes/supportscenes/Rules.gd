@@ -44,6 +44,10 @@ var moderules = {
 }
 
 func _ready():
+	
+	Globals.MENU = "RULES"
+	Globals.SELECTEDRULE = 0
+	
 	thebuttons()
 	lookgood()
 
@@ -79,13 +83,13 @@ func _process(_delta):
 		
 	
 	if Input.is_action_just_pressed("special"):
-		back_to_menu()
+		go_to_menu()
 			
 	if Input.is_action_just_pressed("pause") || Input.is_action_just_pressed("select") || Input.is_action_just_pressed("attack"):
 			for i in range(buttonnames.size()):
 				buttonaction(i)
 			
-			advance_to_css()
+			go_to_css()
 	
 	SCREENX = Globals.SCREENX
 	SCREENY = Globals.SCREENY
@@ -179,11 +183,13 @@ static func delete_children(node):
 func start_game():
 	var _game = get_tree().change_scene("res://scenes/mainscene/World.tscn")
 	
-func advance_to_css():
-	var _css = get_tree().change_scene("res://scenes/supportscenes/CSS.tscn")
+func go_to_css():
+	var css = load("res://scenes/supportscenes/CSS.tscn").instance()
+	get_parent().add_child(css)
+	queue_free()
+
 	
-func advance_to_sss():
-	var _sss = get_tree().change_scene("res://scenes/supportscenes/SSS.tscn")
-	
-func back_to_menu():
-	var _menu = get_tree().change_scene("res://scenes/supportscenes/Menu.tscn")
+func go_to_menu():
+	var menu = load("res://scenes/supportscenes/MainMenu.tscn").instance()
+	get_parent().add_child(menu)
+	queue_free()

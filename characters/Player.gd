@@ -29,7 +29,7 @@ const RESPAWN_IDLE_FRAMES = 180
 const LEDGE_INTANGIBILITY_FRAMES = 45
 const is_projectile = false
 const TRUEMAXSPEED = 10000
-const FLOATTIME = 360
+const FLOATTIME = 60
 
 #character-dependent stuff that should basically act as constants
 #jumping
@@ -545,10 +545,11 @@ func statebasedaction():
 				be("idle")
 
 		"shield":
-			if frame == 1:
+			if frame == 2:
 				playsound("SHIELDOPEN")
 			movement()
-			if frame < 20:
+			if floatframe > 0:
+				floatframe -= 1
 				motion.y = 0
 			if motion.y > MAXFALLSPEED:
 				motion.y = MAXFALLSPEED
@@ -734,6 +735,8 @@ func statebasedaction():
 						doublejump()
 					if new_input[3] && motion.y > -500 && !in_fast_fall:
 						fast_fall()
+					if input[6]:
+						be("shield")
 					airoptions()
 					ledgesnap()
 					if updatefloorstate():
@@ -1363,6 +1366,12 @@ func get_input():
 					if state == "jump" && abs(x-tlp.x) > 256:
 						input[4] = true
 						input[2] = false
+						
+			if state == "ledge":
+				if w.LEDGES[current_ledge][1] == 1:
+					input[0] = true
+				else:
+					input[1] = true
 	#		input = w.players[0].input
 	#		var temp = input[0]
 	#		input[0] = input[1]

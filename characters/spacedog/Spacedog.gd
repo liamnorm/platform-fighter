@@ -149,7 +149,7 @@ func neutralspecial():
 				laser.frame = 0
 				laser.playernumber = playernumber
 				laser.skin = skin
-				get_tree().get_root().get_node("World").add_child(laser)
+				w.add_child(laser)
 				w.projectiles.append(laser)
 				laser.start()
 				
@@ -278,7 +278,7 @@ func upspecial():
 			if frame == 1:
 				direction = Vector2(0,-1)
 			
-			if frame %3 == 0 && frame > 6:
+			if frame %3 == 0 && frame > 12:
 				#hitbox(1, Vector2(-48,-48), Vector2(48, 48), 1, -100, 0, 0, 1, 3)
 				var s = 40
 				hitbox([
@@ -404,32 +404,15 @@ func downspecial():
 		bomb.holder = playernumber
 		bomb.state = "held"
 		heldobject = bomb
-		get_tree().get_root().get_node("World").add_child(bomb)
+		w.add_child(bomb)
 		w.projectiles.append(bomb)
 		bomb.start()
+		stage = 2
 	if frame > 40:
 		if (on_floor):
 			be("idle")
 		else:
 			be("jump")
-
-func unuseddownspecial():
-	in_fast_fall = false
-	match stage:
-		0:
-			motion.y = lerp(motion.y, pow(frame-10, 2)/1.0, 0.9)
-			fallcap(on_floor)
-			
-			if !input[4]:
-				buffer(on_floor)
-				if (on_floor):
-					be("idle")
-				else:
-					be("jump")
-		1:
-			pass
-		2:
-			pass
 
 func neutralground():
 	movement()
@@ -450,7 +433,7 @@ func neutralground():
 					"dam":1, 
 					"dir":15, 
 					"kb":0.05, 
-					"ckb":100, 
+					"ckb":20, 
 					"hs":1, 
 					"ss":1}
 					])
@@ -475,9 +458,9 @@ func neutralground():
 					"l":20, 
 					"r":120, 
 					"dam":5, 
-					"dir":-45, 
-					"kb":1, 
-					"ckb":0, 
+					"dir":-35, 
+					"kb":.3, 
+					"ckb":500, 
 					"hs":3, 
 					"ss":8}
 					])
@@ -509,6 +492,7 @@ func sideground():
 			"hs":5, 
 			"ss":9}
 			])
+		stage = 2
 	if frame > 24:
 		buffer(true)
 	if frame > 29:
@@ -549,6 +533,7 @@ func upground():
 			"hs":2, 
 			"ss":4}
 			])
+		stage = 2
 	
 	if frame > 14:
 		buffer(true)
@@ -606,6 +591,7 @@ func neutralair():
 			"hs":2, 
 			"ss":4}
 			])
+		stage = 2
 		#hitbox(10, Vector2(-50,-15), Vector2(70, 60), 4, -60, 1, 0, 5, 8)
 	if frame > 20:
 		buffer(false)
@@ -651,9 +637,7 @@ func forwardair():
 			"hs":7, 
 			"ss":12}
 			])
-	if frame == 16:
-		pass
-		#hitbox(3, Vector2(-20,-5), Vector2(85, 64), 4, 80, 1, 0, 4, 5)
+		stage = 2
 	if frame > 30:
 		buffer(false)
 	if frame > 43:
@@ -685,6 +669,7 @@ func backair():
 			"hs":6, 
 			"ss":10}
 			])
+		stage = 2
 	if frame > 20:
 		buffer(false)
 	if frame > 30:
@@ -729,6 +714,7 @@ func upair():
 			"hs":4, 
 			"ss":7}
 			])
+		stage = 2
 	if frame > 14:
 		buffer(false)
 	if frame > 24:
@@ -758,6 +744,7 @@ func downair():
 			"hs":1, 
 			"ss":1}
 			])
+		stage = 2
 	if frame > 30:
 		buffer(false)
 	if frame > 39:

@@ -135,7 +135,7 @@ func controls():
 				Globals.chipholder[heldplayer-1] = playernumber
 	
 	#update held char when scrolling over characters
-	if heldplayer > 0:
+	if !Globals.playerselected[heldplayer-1]:
 		if abs(pos.x-.5)<.1 && abs(pos.y-.25)<.2:
 			var prevchar = Globals.playerchars[heldplayer-1]
 			if !prevchar == 0:

@@ -16,6 +16,7 @@ var SHOWHITBOXES = false
 var TEAMATTACK = false
 var TEAMMODE = false
 var STAGE = 0
+var SCORETOWIN = 5
 var ONLINE = false
 var ISSERVER = false
 
@@ -65,6 +66,7 @@ func _ready():
 	STAGE = Globals.STAGE
 	ONLINE = Globals.ONLINE
 	ISSERVER = Globals.ISSERVER
+	SCORETOWIN = Globals.SCORETOWIN
 	
 	
 	var stage = null
@@ -434,6 +436,7 @@ func behurt(ps,h,b):
 	ps[0].damage += h.damage[b]
 	if h.hitstun[b]:
 		combocounter(ps)
+		impact(ps, h, b)
 		ps[0].state = "hitstun"
 		if ps[1].d == 1:
 			ps[0].launch_direction = h.hitdirection[b]
@@ -460,7 +463,6 @@ func behurt(ps,h,b):
 	
 	if (ps[0].launch_knockback > ps[0].LAUNCH_THRESHOLD && b == 0):
 		pass
-	impact(ps, h, b)
 	
 	if h.stun[b] > 0:
 		visualstun(ps, h, b)
@@ -482,10 +484,12 @@ func impact(ps, h, b):
 	effect.playernumber = ps[0].playernumber
 	effect.effecttype = "impact"
 	effect.scale = Vector2(1,1) + Vector2(h.damage[b], h.damage[b]) / 10.0
-	if ps[0].combo < 2:
-		effect.modulate = Color(1,1,1,1)
-	else:
+	if ps[0].combo > 1:
 		effect.modulate = Color(1,0,1,1)
+	elif ["neutralground", "sideground", "upground", "downground", "neutralair", "forwardair", "backair", "upair", "downair", "neutralspecial", "sidespecial", "upspecial", "downspecial", "shieldstun"].has(ps[0].state) && ps[0].stage > 0:
+		effect.modulate = Color(0,1,1,1)
+	else:
+		effect.modulate = Color(1,1,1,1)
 	add_child(effect)
 	
 func combocounter(ps):
@@ -742,11 +746,11 @@ func background():
 		$CanvasLayer/Score.visible = false
 		$CanvasLayer/Time.visible = true
 		$CanvasLayer/Time.text = thetext
-		if NUM_OF_PLAYERS == 2:
+		if players.size() > 1:
 			if GAMEMODE == "STOCK":
 				$CanvasLayer/Score.text = str(players[0].stock) + "-" + str(players[1].stock)
 				$CanvasLayer/Score.visible = true
-				$CanvasLayer/Time.visible = true
+				$CanvasLayer/Time.visible = FRAME > 0
 				$CanvasLayer/Time.text = thetext
 				
 				

@@ -1,5 +1,6 @@
 extends Node
 
+var MENU = "MAIN"
 
 #Character select
 var playerskins = [0,1,2,3,4,5,6,7,8]
@@ -18,7 +19,8 @@ var CSSBACKFRAME = 0
 #Menu stuff / options
 var SELECTEDMENUBUTTON = 0
 var SELECTEDRULE = 0
-var MUTED = false
+var SELECTEDROOM = 0
+var MUTED = true
 var SHOWHITBOXES = false
 
 var RULECHOICES = {
@@ -71,7 +73,7 @@ var WINNERSKIN = 0
 
 #specific to World
 var NUM_OF_PLAYERS = 2
-var STOCKS = 6
+var STOCKS = 5
 var TIME = 180
 var TIMELIMIT = 180
 var GAMEMODE = "TRAINING"
@@ -170,11 +172,11 @@ var STAGEDATA = [
 var SCREENY
 var SCREENX
 
-var playerIDs = []
 var ONLINE = false
 var ISSERVER = false
 var CONNECTED = false
 var INGAME = false
+var ROOMS = {}
 
 var states = [
 	"idle",
