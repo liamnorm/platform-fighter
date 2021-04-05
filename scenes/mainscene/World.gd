@@ -58,16 +58,16 @@ var iq = []
 
 func _ready():
 	
-	GAMEMODE = Globals.GAMEMODE
-	TIME = Globals.TIME
-	STOCKS = Globals.STOCKS
-	NUM_OF_PLAYERS = Globals.NUM_OF_PLAYERS
-	TEAMMODE = Globals.TEAMMODE
-	STAGE = Globals.STAGE
+	if !ONLINE:
+		GAMEMODE = Globals.GAMEMODE
+		TIME = Globals.TIME
+		STOCKS = Globals.STOCKS
+		NUM_OF_PLAYERS = Globals.NUM_OF_PLAYERS
+		TEAMMODE = Globals.TEAMMODE
+		STAGE = Globals.STAGE
+		SCORETOWIN = Globals.SCORETOWIN
 	ONLINE = Globals.ONLINE
 	ISSERVER = Globals.ISSERVER
-	SCORETOWIN = Globals.SCORETOWIN
-	
 	
 	var stage = null
 	match STAGE:
@@ -122,8 +122,19 @@ func _ready():
 
 		spawnpositions = [] 
 		var indexList = range(NUM_OF_PLAYERS)
-		for _i in range(NUM_OF_PLAYERS):
-			var x = randi()%indexList.size()
+		for p in range(NUM_OF_PLAYERS):
+			var x = 0
+			if TEAMMODE:
+				var d = 1
+				if Globals.playerteams[p] == 1:
+					d = -1
+				x = randi()%indexList.size()
+				var j = 0
+				while pos[indexList[x]].x * d > 0 && j < 100:
+					x = randi()%indexList.size()
+					j += 1
+			else:
+				x = randi()%indexList.size()
 			spawnpositions.append(pos[indexList[x]])
 			indexList.remove(x)
 
@@ -176,10 +187,28 @@ func resetplayer(i):
 
 func _process(_delta):
 	
-	if ONLINE && !ISSERVER && (!Globals.CONNECTED || !Globals.INGAME):
-		print("DISCONNECTED")
-		get_tree().network_peer = null
-		go_to_menu()
+	if ISSERVER:
+		modulate.a = .5
+		$Camera2D.current = false
+	
+	if ONLINE && !ISSERVER:
+		
+		if get_tree().get_root().get_node_or_null("Lobby") == null:
+			Globals.INGAME = false
+			Globals.CONNECTED = false
+		
+		else:
+			var player_info = get_tree().get_root().get_node("Lobby").player_info
+			for p in players:
+				if !p.is_network_master():
+					if !player_info.has(p.playerid):
+						Globals.INGAME = false
+		
+		
+		if (!Globals.CONNECTED || !Globals.INGAME):
+			print("I'VE DISCONNECTED")
+			get_tree().network_peer = null
+			go_to_menu()
 	
 	if GAMEENDFRAME == 0:
 		
@@ -218,8 +247,9 @@ func _process(_delta):
 	if players.size() > 1:
 		COMBO = players[1].combo
 	
-	bottommenu()
-	background()
+	if !ISSERVER:
+		bottommenu()
+		background()
 	
 	
 	var paused = PAUSED
@@ -241,36 +271,29 @@ func _process(_delta):
 			LEFTSCOREFRAME -= 1
 			
 		if GAMEENDFRAME == 0:
-			if TIME > 0 && FRAME > TIME * 60:
+			
+			var players_left = players.size()
+			for p in players:
+				if p.defeated:
+					players_left -= 1
+			if players_left < 2:
+				GAMEENDFRAME = 1
+				Globals.RESULTDATA = getresultdata()
+			
+			elif TIME > 0 && FRAME > TIME * 60:
 				if GAMEMODE == "TIME":
-					var winner = 0
-					var maxscore = 0
-					for i in range(NUM_OF_PLAYERS):
-						if players[i].score > maxscore:
-							winner = i+1
-							maxscore = players[i].score
-					GAMEENDFRAME = 1
-					Globals.WINNER = winner
-					if Globals.WINNER != 0:
-						Globals.WINNERCHARACTER = players[winner-1].character
-						Globals.WINNERSKIN = players[winner-1].skin
-						Globals.WINNERCONTROLLER = players[winner-1].controller
+					Globals.RESULTDATA = getresultdata()
 			
 				elif GAMEMODE == "SOCCER":
 					GAMEENDFRAME = 1
-					if LEFTSCORE > RIGHTSCORE:
-						Globals.WINNER = 1
-					else:
-						Globals.WINNER = 2
+					Globals.LEFTSCORE = LEFTSCORE
+					Globals.RIGHTSCORE = RIGHTSCORE
+					Globals.RESULTDATA = getresultdata()
 				
 				elif GAMEMODE == "STOCK":
-					var winner = 0
-					#TODO winner of stock match
-					Globals.WINNER = winner
-					if Globals.WINNER != 0:
-						Globals.WINNERCHARACTER = players[winner-1].character
-						Globals.WINNERSKIN = players[winner-1].skin
-						Globals.WINNERCONTROLLER = players[winner-1].controller
+					GAMEENDFRAME = 1
+					Globals.RESULTDATA = getresultdata()
+					
 				
 		if GAMEENDFRAME > 0:
 			GAMEENDFRAME += 1
@@ -283,6 +306,7 @@ func _process(_delta):
 		interactions()
 		
 func go_to_menu():
+	Globals.MENU = "CSS"
 	var _menu = get_tree().change_scene("res://scenes/supportscenes/Menu.tscn")
 	queue_free()
 		
@@ -290,9 +314,16 @@ func results():
 	var _results = get_tree().change_scene("res://scenes/supportscenes/Results.tscn")
 	
 func spaceoutplayers():
-	for i in range(players.size()):
-		for j in range(i+1,players.size()):
-			var ps = [players[i], players[j]]
+	var pushythings = []
+	for p in players:
+		pushythings.append(p)
+	for p in projectiles:
+		if p != null:
+			if p.pushable:
+				pushythings.append(p)
+	for i in range(pushythings.size()):
+		for j in range(i+1,pushythings.size()):
+			var ps = [pushythings[i], pushythings[j]]
 			var pushymoves = ["idle", "run", "runend", "turnaround", "shield", "crouch", "land", "jumpstart", "knockeddown"]
 			if (
 			#running into idle player: both move.
@@ -301,7 +332,7 @@ func spaceoutplayers():
 			
 				var pos0 = ps[0].get_position() + ps[0].SHIELDOFFSET
 				var pos1 = ps[1].get_position() + ps[1].SHIELDOFFSET
-				if (pos0-pos1).length() < 128:
+				if (pos0-pos1).length() < ps[0].pushradius + ps[1].pushradius:
 					var averagexmotion = (ps[0].motion.x+ps[1].motion.x)/2
 					var xdiff = pos0.x-pos1.x
 					ps[0].motion.x = averagexmotion
@@ -363,13 +394,14 @@ func interactions():
 
 
 func checkforoverlap(ps,h,b,player_on_projectile = false):
-	if (!(ps[0].intangibility_frame > 0) &&
-	!(h.players_to_ignore.has(ps[0].playernumber)) && 
-	(h.startframe[b] < FRAME) && 
+	if (!(ps[0].intangibility_frame > 0) &&  #thing attacked must not be intangible
+	!(ps[1].state == "ledge") && 
+	!(h.players_to_ignore.has(ps[0].playernumber)) &&   #thing attacked must not already attacked by this hitbox
+	(h.startframe[b] < FRAME) && #hitbox must be out
 	(h.startframe[b] + h.boxlengths[b]>= FRAME) &&
-	((!player_on_projectile) || (ps[0].playernumber != ps[1].playernumber))):
-		if (!(TEAMMODE && TEAMATTACK && (ps[0].team == ps[1].team)) &&
-		!(ps[0].holder > 0)):
+	((!player_on_projectile) || (ps[0].playernumber != ps[1].playernumber))): #players can't attack their own projectiles
+		if (!(TEAMMODE && TEAMATTACK && (ps[0].team == ps[1].team)) && #teammates can't attack each other with TEAMMATTACK off
+		!(ps[0].holder > 0)): #thing can't be held by a player
 			var them = ps[1].get_position()
 			var me = ps[0].get_position() + Vector2(ps[0].hurtboxoffset.x * ps[0].d, ps[0].hurtboxoffset.y)
 			var htl = h.topleft[b]
@@ -478,7 +510,8 @@ func visualstun(ps, h, b):
 	
 func impact(ps, h, b):
 	var effect = EFFECT.instance()
-	effect.position = h.get_parent().get_position() + (h.topleft[b]/2 + h.bottomright[b]/2) * Vector2(h.get_parent().d, 0)
+	var hboxpos = h.get_parent().get_position() + (h.topleft[b]/2 + h.bottomright[b]/2) * Vector2(h.get_parent().d, 0)
+	effect.position = (hboxpos + ps[0].get_position())/2
 	effect.d = h.d
 	effect.myframe = 0
 	effect.playernumber = ps[0].playernumber
@@ -619,7 +652,7 @@ func bottommenu():
 	elif ELIMINATIONFRAME > 0:
 		$CanvasLayer/Message.visible = true
 		if ELIMINATEDPLAYER > 0:
-			$CanvasLayer/Message.text = "PLAYER " + str(ELIMINATEDPLAYER) + "\nDEFEATED"
+			$CanvasLayer/Message.text = "PLAYER " + str(players[ELIMINATEDPLAYER-1].controller) + "\nDEFEATED"
 		else:
 			$CanvasLayer/Message.text = "COMPUTER \nPLAYER \nDEFEATED"
 		if ELIMINATIONFRAME%10 < 6:
@@ -661,7 +694,7 @@ func bottommenu():
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "RIGHT SCORES!"
 		#$CanvasLayer/Message.text += "\n" + str(LEFTSCORE) + "-" + str(RIGHTSCORE)
-	elif TIME > 0 && FRAME > TIME*60-300:
+	elif TIME > 0 && FRAME > TIME*60-300 && !(GAMEMODE == "TRAINING"):
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = str((TIME*60-FRAME)/60+1)
 		if GAMEENDFRAME > 0:
@@ -746,17 +779,33 @@ func background():
 		$CanvasLayer/Score.visible = false
 		$CanvasLayer/Time.visible = true
 		$CanvasLayer/Time.text = thetext
-		if players.size() > 1:
-			if GAMEMODE == "STOCK":
-				$CanvasLayer/Score.text = str(players[0].stock) + "-" + str(players[1].stock)
-				$CanvasLayer/Score.visible = true
-				$CanvasLayer/Time.visible = FRAME > 0
-				$CanvasLayer/Time.text = thetext
+		if players.size() == 2:
+			$CanvasLayer/Score.text = str(players[0].stock) + "-" + str(players[1].stock)
+			$CanvasLayer/Score.visible = true
+		$CanvasLayer/Time.visible = FRAME > 0
+		$CanvasLayer/Time.text = thetext
 				
 				
 				
 func playsound(sound):
-	if !Globals.MUTED || GAMEENDFRAME > 0:
+	if !(Globals.MUTED || GAMEENDFRAME > 0):
 		if sound == "HIT":
 			sound = "HIT" + str(randi()%5)
 		get_node("Sounds").get_node(sound).play()
+		
+func getresultdata():
+	var results = []
+	for p in players:
+		var pdata = {}
+		pdata.playernumber = p.playernumber
+		pdata.tag = p.tag
+		pdata.skin = p.skin
+		pdata.controller = p.controller
+		pdata.character = p.character
+		pdata.team = p.team
+		pdata.stock = p.stock
+		pdata.score = p.score
+		pdata.defeattime = p.defeattime
+
+		results.append(pdata)
+	return results

@@ -1,7 +1,7 @@
 extends Node
 
 
-var maxvol = -80
+var maxvol = 0
 var minvol = -80
 var volchange = 80
 
@@ -14,7 +14,7 @@ func _ready():
 		var css = preload("res://scenes/supportscenes/CSS.tscn").instance()
 		add_child(css)
 	
-	$MainMenu.volume_db = 0
+	$MainMenu.volume_db = -80
 	$RuleMenu.volume_db = -80
 	$CharacterMenu.volume_db = -80
 	

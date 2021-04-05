@@ -20,14 +20,14 @@ var CSSBACKFRAME = 0
 var SELECTEDMENUBUTTON = 0
 var SELECTEDRULE = 0
 var SELECTEDROOM = 0
-var MUTED = true
+var MUTED = false
 var SHOWHITBOXES = false
 
 var RULECHOICES = {
 	"STAGE": 0,
 	"GAME MODE": 0,
-	"STOCKS": 4,
-	"TIME LIMIT": 0,
+	"STOCKS": 0,
+	"TIME LIMIT": 5,
 	"TIME": 3,
 	"TEAMS": 0,
 	"TEAM ATTACK": 0,
@@ -68,6 +68,7 @@ var WINNER = 0
 var WINNERCHARACTER = ""
 var WINNERCONTROLLER = 0
 var WINNERSKIN = 0
+var RESULTDATA
 
 
 

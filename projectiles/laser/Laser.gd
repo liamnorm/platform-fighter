@@ -31,7 +31,7 @@ func projectilemovement():
 			])
 			
 	$CollisionShape2D.disabled = true
-	intangibility_frame = 2
+	intangibility_frame = 1000
 	
 	if motion.length()>MAXSPEED:
 		motion = motion.normalized() * MAXSPEED
@@ -63,3 +63,4 @@ func start():
 	hurtboxsize = Vector2(110,10)
 	hurtboxoffset = Vector2(0,0)
 	damage_delt = 2.0
+	intangibility_frame = 1000

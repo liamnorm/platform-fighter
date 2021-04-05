@@ -23,6 +23,7 @@ uniform vec4 outline_col : hint_color; //Outline color
 uniform float skin;
 uniform int invincibility;
 uniform int intangibility;
+uniform bool charging;
 
 void fragment() {
     
@@ -51,6 +52,9 @@ void fragment() {
 		vec2 position = POINT_COORD;
 		w = sin((position.x+TIME/2.0) * 16.0)/50.0 + 0.35;
 	}
+	if (charging) {
+		w = float(int(TIME*30.) % 5)*0.05;
+	}
 	col += vec4(w,w,w,0);
 	
 	if (intangibility > 0 && col.a > 0.0) {
@@ -69,6 +73,7 @@ shader_param/outline_col = Color( 0, 0, 0, 1 )
 shader_param/skin = 0.0
 shader_param/invincibility = 0
 shader_param/intangibility = 0
+shader_param/charging = false
 shader_param/palette_tex = ExtResource( 8 )
 
 [sub_resource type="RectangleShape2D" id=3]
@@ -174,7 +179,7 @@ script = ExtResource( 9 )
 material = SubResource( 2 )
 position = Vector2( 0, 8 )
 texture = ExtResource( 10 )
-vframes = 19
+vframes = 21
 hframes = 8
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

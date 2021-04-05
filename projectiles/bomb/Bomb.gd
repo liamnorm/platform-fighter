@@ -9,6 +9,7 @@ var Mat
 var prevcollision = false
 
 func _ready():
+	holdable = true
 	w = get_parent()
 
 func projectilemovement():

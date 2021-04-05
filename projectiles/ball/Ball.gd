@@ -106,20 +106,6 @@ func start():
 	Mat.set_shader_param("skin", skin)
 	
 func drawprojectile():
-#	if state == "hitstun":
-#		$Sprite.rotation = motion.angle()
-#		var stretch = 1 - (launch_knockback/1000)
-#		stretch = clamp(stretch, 0.8, 1)
-#		$Sprite.scale = Vector2(stretch,1/stretch)
-#	elif state == "hit" && stun_length > 0 && frame != 0:
-#		$Sprite.rotation = motion.angle()
-#		var stretch = 1 + ((launch_knockback/1000) * (float(stun_length-frame)/stun_length))
-#		stretch = clamp(stretch, 1, 1.5)
-#		$Sprite.scale = Vector2(stretch,1/stretch)
-#	else:
-#		$Sprite.rotation += motion.length()/1000
-#		$Sprite.scale = Vector2(1,1)
-#		$Sprite.rotation = motion.angle()
 	$Sprite.rotation += motion.length()/1000
 	$Sprite.scale = Vector2(1,1)
 	

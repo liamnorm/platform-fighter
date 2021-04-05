@@ -14,6 +14,7 @@ var hitboxes = []
 var state = "idle"
 var nextstate = "idle"
 var projectiletype = "laser"
+var pushable = false
 var important_to_camera = true
 var spawnposition = Vector2(0,-512)
 var bounceoffshield = true
@@ -39,6 +40,9 @@ var combo = 0
 var stun_length = 0
 var damage_delt = 0
 var rageoffset = Vector2(0,0)
+var SHIELDOFFSET = Vector2(0,0)
+var ACCEL = 256
+var pushradius = 0
 
 const is_projectile = true
 

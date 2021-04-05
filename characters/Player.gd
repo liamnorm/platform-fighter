@@ -12,6 +12,7 @@ var skin = 0
 var controller = 0
 var team = 0
 var tag = ""
+var playerid = 0 #for server
 
 #shader materials
 var Mat
@@ -107,8 +108,13 @@ var floating = false
 var totalrollframes = ROLLFRAMES
 var totalspotdodgeframes = 0
 var rageoffset = Vector2(0,0)
-var holder = 0
+const holder = 0
 const holdable = false
+var charging = false
+var charge_frame = 0
+var turning = false
+var turnaround_frame = 0
+var pushradius = 64
 
 #stale moves
 var roll_stale = 0
@@ -130,9 +136,10 @@ var heldpos = Vector2(0,0)
 var heldobject = null
 
 #scorekeeping
-var stock = 3
+var stock = 5
 var spawnposition = Vector2(0,-512)
 var defeated = false
+var defeattime = 0
 var combo = 0
 var score = 0
 
@@ -145,7 +152,7 @@ var input_lengths = [0,0,0,0,0,0,0,0,0,0,0,0]
 
 
 # computer player
-var target
+var target = 0
 
 #for animation.
 var ref = 0
@@ -198,21 +205,23 @@ func _physics_process(_delta):
 							respawn(Vector2(0,w.TOPBLASTZONE))
 						else:
 							defeated = true
-							w.ELIMINATIONFRAME = 120
-							w.ELIMINATEDPLAYER = controller
-							var players_left = 0
-							var winner = 0
-							for p in w.players:
-								if !p.defeated:
-									players_left += 1
-									winner = p.playernumber
-							w.DEFEATORDER[playernumber-1] = players_left
-							if players_left < 2:
-								w.GAMEENDFRAME = 1
-								Globals.WINNER = winner
-								Globals.WINNERSKIN = w.players[winner-1].skin
-								Globals.WINNERCHARACTER = w.players[winner-1].character
-								Globals.WINNERCONTROLLER = w.players[winner-1].controller
+							defeattime = w.FRAME
+							if w.GAMEENDFRAME == 0:
+								w.ELIMINATIONFRAME = 120
+								w.ELIMINATEDPLAYER = playernumber
+#								var players_left = 0
+#								var winner = 0
+#								for p in w.players:
+#									if !p.defeated:
+#										players_left += 1
+#										winner = p.playernumber
+#								w.DEFEATORDER[playernumber-1] = players_left
+#								if players_left < 2:
+#									w.GAMEENDFRAME = 1
+#									Globals.WINNER = winner
+#									Globals.WINNERSKIN = w.players[winner-1].skin
+#									Globals.WINNERCHARACTER = w.players[winner-1].character
+#									Globals.WINNERCONTROLLER = w.players[winner-1].controller
 					elif w.GAMEMODE == "TIME":
 						if abs(x) > w.TRIPLEBLASTZONE:
 							score -= 3
@@ -234,6 +243,18 @@ func _physics_process(_delta):
 				
 				if !state == "ledge":
 					motion.y += GRAVITY
+					
+				if charging:
+					charge_frame += 1
+				else:
+					charge_frame = 0
+				charging = false
+				
+				if turning:
+					turnaround_frame += 1
+				else:
+					turnaround_frame = 0
+				turning = false
 				
 				statebasedaction()
 				
@@ -321,12 +342,12 @@ func statebasedaction():
 			if frame == 1:
 				if d == 1:
 					if input[1] && !input[0]:
-						d = -1
+						turn(-1)
 						frame = 0
 						motion.x = -MAXGROUNDSPEED
 				else:
 					if input[0] && !input[1]:
-						d = 1
+						turn(1)
 						frame = 0
 						motion.x = MAXGROUNDSPEED
 			elif (input[0] && d == 1 && !input[1]) || (input[1] && d == -1 && !input[0]):
@@ -337,9 +358,9 @@ func statebasedaction():
 				else:
 					motion.x += d * ACCEL
 				if input[0]:
-					d = 1
+					turn(1)
 				else:
-					d = -1
+					turn(-1)
 			else:
 				if !(input[0] || input[1]):
 					be("runend")
@@ -755,17 +776,19 @@ func statebasedaction():
 						if input[0] || input[1]:
 							be("roll")
 						if frame > 300 || input[2] || input[6]:
+							intangibility_frame = 2
 							be("getup")
 						if input[4] || input[5]:
 							be("getupattack")
 					else:
 						be("jump")
 		"getup":
-			if frame > 10 || input[2]:
+			if frame == 1:
+				intangibility_frame = 20
+			if frame > 22:
 				be("idle")
 		"getupattack":
-			if frame > 30 || input[2]:
-				be("idle")
+			getupattack()
 				
 		"neutralgetup":
 			pass
@@ -857,6 +880,14 @@ func statebasedaction():
 	var randox = (randi() %10 - 5) / 5.0
 	var randoy = (randi() %10 - 5) / 5.0
 	rageoffset = Vector2(randox * rage - rage/2, randoy * rage - rage/2)
+	if charging:
+		var chargeoffset = 0
+		if charge_frame % 2 == 0:
+			chargeoffset = charge_frame
+		else:
+			chargeoffset = -charge_frame
+		chargeoffset = clamp(chargeoffset, -3, 3)
+		rageoffset.x += chargeoffset
 	hurtboxoffset = rageoffset
 	SHIELDOFFSET = rageoffset
 	
@@ -879,16 +910,16 @@ func be(get):
 				nextstate = "jump"
 			else:
 				nextstate = bufferedstate
-			if buffereddirection == "right":
-				if !bufferedstate == "roll":
-					d = 1
-				else:
-					d = -1
-			if buffereddirection == "left":
-				if !bufferedstate == "roll":
-					d = -1
-				else:
-					d = 1
+				if buffereddirection == "right":
+					if !bufferedstate == "roll":
+						d = 1
+					else:
+						d = -1
+				if buffereddirection == "left":
+					if !bufferedstate == "roll":
+						d = -1
+					else:
+						d = 1
 		else:
 			nextstate = get
 		frame = 0
@@ -918,7 +949,7 @@ func be(get):
 		if nextstate == "airdodge":
 			intangibility_frame = AIRDODGEFRAMES
 		
-		if !(["jump", "jumpstart", "airdodge", "hit", "forwardair", "backair", "upair", "downair", "neutralair"].has(nextstate)):
+		if !(["run", "runend", "jump", "jumpstart", "airdodge", "hit", "forwardair", "backair", "upair", "downair", "neutralair"].has(nextstate)):
 			if input[0] || input[8]:
 				if !nextstate == "roll":
 					d = 1
@@ -1276,7 +1307,7 @@ func get_input():
 				false,
 			]
 			
-			if w.FRAME < 20:
+			if w.FRAME < 20 || target == null:
 				target = playernumber%w.NUM_OF_PLAYERS
 			if w.players[target].defeated || target == playernumber-1:
 				target += 1
@@ -1372,10 +1403,13 @@ func get_input():
 					input[0] = true
 				else:
 					input[1] = true
+			if state == "knockeddown":
+				input[2] = true
 	#		input = w.players[0].input
 	#		var temp = input[0]
 	#		input[0] = input[1]
 	#		input[1] = temp
+	#CPU STUFF!
 
 
 		elif controller > 0:
@@ -1397,8 +1431,15 @@ func get_input():
 				Input.is_action_pressed("downattack" + c),
 			]
 			
+		#for when the stick flicks
+		if prev_input[0]:
+			input[1] = false
+		if prev_input[1]:
+			input[0] = false
+			
 		if w.ONLINE && name == str(get_tree().get_network_unique_id()):
 			rpc_unreliable_id(1, "_get_input", input)
+			pass
 		
 	for i in range(len(input)):
 		new_input[i] = input[i] && !prev_input[i]
@@ -1524,6 +1565,7 @@ func playerEffects():
 	Mat.set_shader_param("invincibility", invincibility_frame)
 	Mat.set_shader_param("intangibility", intangibility_frame)
 	Mat.set_shader_param("skin", skin)
+	Mat.set_shader_param("charging", charging)
 	
 	
 
@@ -1531,12 +1573,19 @@ func be_jump_if_in_midair():
 	if !updatefloorstate():
 		be("jump")
 		
+func turn(dir):
+	if !d == dir:
+		turning = true
+	if turnaround_frame > 2:
+		d = dir
+	
 func snaptoledge():
 	d = w.LEDGES[current_ledge][1]
 	motion = Vector2(0,0)
 	var ledge_x = w.LEDGES[current_ledge][0].x + w.LEDGES[current_ledge][1] * 0
 	var ledge_y = w.LEDGES[current_ledge][0].y + 0
 	$CollisionShape2D.disabled = true
+	clearhitboxes()
 	set_position(Vector2(ledge_x, ledge_y))
 
 
@@ -1594,8 +1643,14 @@ func downair():
 func extra():
 	movement()
 	
+func getupattack():
+	movement()
+	
+func ledgeattack():
+	movement()
+	
 func playsound(sound):
-	if !Globals.MUTED || w.GAMEENDFRAME > 0:
+	if !(Globals.MUTED || w.GAMEENDFRAME > 0):
 		get_node("Sounds").get_node(sound).play()
 
 
@@ -1623,6 +1678,7 @@ func send_state():
 		input
 		]
 	rpc_unreliable("_get_position", sentstate)
+	pass
 
 remote func _get_position(ss):
 	position = Vector2(ss[0], ss[1])

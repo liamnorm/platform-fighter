@@ -546,13 +546,7 @@ func upground():
 	be_jump_if_in_midair()
 
 func downground():
-	movement()
-	if frame > 3:
-		if input[0] || input[1]:
-			be("run")
-		else:
-			be("idle")
-	be_jump_if_in_midair()
+	getupattack()
 
 func neutralair():
 	landing_lag = 4
@@ -606,9 +600,12 @@ func forwardair():
 	movement()
 	if frame == 1:
 		playsound("VOICE")
+	elif frame == 12 && (input[5] || input[8] || input[9]):
+		frame -= 1
+		charging = true
+		landing_lag = 12
 	if frame == 12:
 		throw(2000, -100)
-	if frame == 12:
 		#FORWARD AERIAL.
 		hitbox([
 			{"del":3, 
@@ -638,7 +635,7 @@ func forwardair():
 			"ss":12}
 			])
 		stage = 2
-	if frame > 30:
+	elif frame > 30:
 		buffer(false)
 	if frame > 43:
 		if updatefloorstate():
@@ -651,9 +648,12 @@ func backair():
 	movement()
 	if frame == 1:
 		playsound("VOICE")
+	elif frame == 3 && (input[5] || input[8] || input[9]):
+		frame -= 1
+		charging = true
+		landing_lag = 14
 	if frame == 10:
 		throw(-2000, -200)
-	if frame == 10:
 		#hitbox(9, Vector2(-110,10), Vector2(0, 60), 10, -145, 1.2, 0, 6, 10
 		hitbox([
 			{"del":0, 
@@ -752,6 +752,41 @@ func downair():
 			be("land")
 		else:
 			be("jump")
+
+func getupattack():
+	
+	if frame == 14:
+		hitbox([
+			{"del":0, 
+			"len":2, 
+			"t":0, 
+			"b":70, 
+			"l":-110, 
+			"r":-50, 
+			"dam":4, 
+			"dir":-155, 
+			"kb":.3, 
+			"ckb":400,
+			"hs":8, 
+			"ss":6}
+			])
+	if frame == 20:
+		hitbox([
+			{"del":0, 
+			"len":2, 
+			"t":0, 
+			"b":70, 
+			"l":40, 
+			"r":120, 
+			"dam":4, 
+			"dir":-45, 
+			"kb":.3, 
+			"ckb":350,
+			"hs":7, 
+			"ss":6}
+			])
+	if frame > 30:
+		be("idle")
 
 
 func drawPlayer():
@@ -888,6 +923,10 @@ func drawPlayer():
 				beFrame(ref+2+(frame-5)/4)
 			else:
 				beFrame(1)
+				
+		"downground":
+			ref = 152
+			beFrame(ref+(frame/3))
 		
 		"neutralair":
 			ref = 49
@@ -1012,3 +1051,15 @@ func drawPlayer():
 			ref = 131
 			var s = [0, 1, 3, 4, 6, 7, 1, 2, 4, 5, 7, 0, 2, 3, 5, 6]
 			beFrame(ref+(s[(frame/3)%16]))
+		"getup":
+			ref = 146
+			beFrame(ref+((frame-1)/4))
+		"getupattack":
+			ref = 152
+			beFrame(ref+(frame/3))
+			
+
+
+
+
+

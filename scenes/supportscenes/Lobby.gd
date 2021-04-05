@@ -5,7 +5,7 @@ var port = 1909
 var max_players = 100
 
 var player_info = {}
-var my_info = ["BOB", -1, 0, 0, 3, 0, 5, 180, 5]
+var my_info = ["BOB", -1, 0, 0, 3, 0, 5, 180, 5, 0]
 
 var roomsused = []
 var players_done = {}
@@ -45,6 +45,8 @@ func _ready():
 	c = get_tree().connect("connected_to_server", self, "_connected_ok")
 	c = get_tree().connect("connection_failed", self, "_connected_fail")
 	c = get_tree().connect("server_disconnected", self, "_server_disconnected")
+	c = c
+	#had to include this to get the debugger to shut up
 
 	if Globals.ISSERVER:
 		CreateServer()
@@ -69,7 +71,8 @@ func _process(_delta):
 					if !p == 1:
 						var proom = player_info[p][1]
 						var pnumber = player_info[p][2]
-						Globals.ROOMS[proom][pnumber] = p
+						if proom > -1:
+							Globals.ROOMS[proom][pnumber] = p
 				
 				#button presses
 				if pressframe >= PRESSFRAMES:
@@ -83,6 +86,12 @@ func _process(_delta):
 					
 					if Input.is_action_just_pressed("attack"):
 						my_info[1] = Globals.SELECTEDROOM
+						var peopleinroom = 0
+						for p in player_info:
+							if player_info[p].size() > 1:
+								if player_info[p][1] == Globals.SELECTEDROOM:
+									peopleinroom += 1
+						my_info[3] = peopleinroom
 						var id = get_tree().get_rpc_sender_id()
 						rpc_id(id, "register_player", my_info)
 						print(my_info)
@@ -100,6 +109,14 @@ func _process(_delta):
 				
 				pressframe += 1
 				pressframe = clamp(pressframe, 0, PRESSFRAMES)
+				
+			else:
+				#check if other player left
+#				var room = str(my_info[1])
+#				for p in get_tree().get_root().get_node(room).players:
+#					if !player_info.has(p.playerid):
+#						Globals.INGAME = false
+				pass
 		else:
 			if Input.is_action_just_pressed("special"):
 				go_back()
@@ -191,21 +208,20 @@ func checkforfullrooms():
 	if peopleinroom == 2 && !roomsused.has(room):
 		print("STARTING ROOM...")
 		roomsused.append(room)
-		rpc_id(player_ids[0], "pre_configure_game")
-		rpc_id(player_ids[1], "pre_configure_game")
+		rpc_id(player_ids[0], "pre_configure_game", room)
+		rpc_id(player_ids[1], "pre_configure_game", room)
 		server_pre_configure(room)
 	
 
 #CLIENT DOES THIS
-remote func pre_configure_game():
+remote func pre_configure_game(room):
 	
+	if room == my_info[1]:
 		assert(get_tree().get_rpc_sender_id() == 1)
 		print("A GAME STARTED AND I'M IN THE ROOM!")
 		var selfPeerID = get_tree().get_network_unique_id()
 
 		# Load world
-		var room = my_info[1]
-		print(room)
 		var world = load("res://scenes/mainscene/World.tscn").instance()
 		world.set_name(str(room))
 		get_node("/root").add_child(world)
@@ -214,14 +230,25 @@ remote func pre_configure_game():
 		
 		world.PAUSED = true
 		
+		var h = null
+		if my_info[3] == room:
+			h = my_info
+		for p in player_info:
+			if player_info[p].size()>1:
+				if player_info[p][1] == room:
+					if player_info[p][3] == 0: #are they the first one in? use their rules
+						h = player_info[p]
+		assert(h != null)
 		world.NUM_OF_PLAYERS = 2
-		world.STOCKS = 6
-		world.TIME = 180
 		world.GAMEMODE = "STOCK"
 		world.TEAMMODE = false
 		world.TEAMATTACK = false
-		world.STAGE = 0
-		world.SCORETOWIN = 5
+		var gamemodes = ["STOCK", "TIME", "SOCCER"]
+		world.GAMEMODE = gamemodes[h[5]]
+		world.STOCKS = h[6]
+		world.TIME = h[7]
+		world.SCORETOWIN = h[8]
+		world.STAGE = h[9]
 
 		# Load my player
 		var my_player = preload("res://characters/spacedog/Spacedog.tscn").instance()
@@ -233,6 +260,7 @@ remote func pre_configure_game():
 		my_player.tag = my_info[0]
 		my_player.controller = 1
 		my_player.character = "SPACEDOG"
+		my_player.playerid = selfPeerID
 		
 		world.players.append(my_player)
 
@@ -248,6 +276,7 @@ remote func pre_configure_game():
 				player.tag = player_info[p][0]
 				player.controller = 2
 				player.character = "SPACEDOG"
+				player.playerid = p
 			
 				world.players.append(player)
 		
@@ -269,7 +298,8 @@ remote func pre_configure_game():
 		
 		my_info[2] = 2
 		#playing the game
-		rpc_id(selfPeerID, "register_player", my_info)
+		var id = get_tree().get_rpc_sender_id()
+		rpc_id(id, "register_player", my_info)
 		
 		Globals.INGAME = true
 
@@ -284,8 +314,50 @@ func server_pre_configure(room):
 		get_node("/root").add_child(world)
 		world.players = []
 		world.projectiles = []
+		world.visible = false
 		
+		
+		var hostid = null
+		for p in player_info:
+			if player_info[p].size()>1:
+				if player_info[p][1] == room:
+					if player_info[p][3] == 0:
+						hostid = p
+		assert(hostid != null)
+		var h = player_info[hostid]
 		world.NUM_OF_PLAYERS = 2
+		world.GAMEMODE = "STOCK"
+		world.TEAMMODE = false
+		world.TEAMATTACK = false
+		var gamemodes = ["STOCK", "TIME", "SOCCER"]
+		world.GAMEMODE = gamemodes[h[5]]
+		world.STOCKS = h[6]
+		world.TIME = h[7]
+		world.SCORETOWIN = h[8]
+		world.STAGE = h[9]
+		
+		var pos = []
+		for i in world.NUM_OF_PLAYERS:
+			pos.append(Globals.STAGEDATA[world.STAGE]["spawnpositions"][i])
+
+
+		var spawnpositions = [] 
+		var indexList = range(world.NUM_OF_PLAYERS)
+		for p in range(world.NUM_OF_PLAYERS):
+			var x = 0
+			if world.TEAMMODE:
+				var d = 1
+				if Globals.playerteams[p] == 1:
+					d = -1
+				x = randi()%indexList.size()
+				var j = 0
+				while pos[indexList[x]].x * d > 0 && j < 100:
+					x = randi()%indexList.size()
+					j += 1
+			else:
+				x = randi()%indexList.size()
+			spawnpositions.append(pos[indexList[x]])
+			indexList.remove(x)
 		
 
 		# Load players
@@ -294,11 +366,12 @@ func server_pre_configure(room):
 			player.set_name(str(p))
 			player.set_network_master(p)
 			get_node("/root/" + str(room) + "/").add_child(player)
-			player.respawn(Vector2(0,-256), true)
+			player.respawn(spawnpositions[player_info[p][3]], true)
 			player.skin = player_info[p][4]
 			player.tag = player_info[p][0]
 			player.controller = 0
 			player.character = "SPACEDOG"
+			player.playerid = p
 			
 			world.players.append(player)
 
@@ -326,12 +399,13 @@ remote func post_configure_game(room):
 		get_tree().get_root().get_node(str(room)).PAUSED = false
 
 func set_up_my_info():
-	my_info = ["BOB", -1, 0, 0, 3, 0, 5, 180, 5]
+	my_info = ["BOB", -1, 0, 0, 3, 0, 5, 180, 5, 0]
 	my_info[4] = Globals.playerskins[0]
 	my_info[5] = ["STOCK", "TIME", "SOCCER"].find(Globals.GAMEMODE)
 	my_info[6] = Globals.STOCKS
 	my_info[7] = Globals.TIME
 	my_info[8] = Globals.SCORETOWIN
+	my_info[9] = Globals.STAGE
 	print(my_info)
 
 func set_up_options():
