@@ -64,7 +64,6 @@ func _process(_delta):
 					Globals.ROOMS.append([])
 					for _p in range(8):
 						Globals.ROOMS[r].append(null)
-				
 				if my_info[1] > -1:
 					Globals.ROOMS[my_info[1]][my_info[2]] = get_tree().get_network_unique_id()
 				for p in player_info:
@@ -96,6 +95,7 @@ func _process(_delta):
 						rpc_id(id, "register_player", my_info)
 						print(my_info)
 						pressframe = 0
+						print(Globals.ROOMS)
 						
 					if Input.is_action_just_pressed("special"):
 						if my_info[1] == -1:
@@ -198,19 +198,19 @@ remote func register_player(info):
 	print(player_info)
 	
 func checkforfullrooms():
-	var room = 0
-	var player_ids = []
-	var peopleinroom = 0
-	for p in player_info:
-		if player_info[p][1] == room:
-			player_ids.append(p)
-			peopleinroom += 1
-	if peopleinroom == 2 && !roomsused.has(room):
-		print("STARTING ROOM...")
-		roomsused.append(room)
-		rpc_id(player_ids[0], "pre_configure_game", room)
-		rpc_id(player_ids[1], "pre_configure_game", room)
-		server_pre_configure(room)
+	for room in range(roomsshown):
+		var player_ids = []
+		var peopleinroom = 0
+		for p in player_info:
+			if player_info[p][1] == room:
+				player_ids.append(p)
+				peopleinroom += 1
+		if peopleinroom == 2 && !roomsused.has(room):
+			print("STARTING ROOM...")
+			roomsused.append(room)
+			rpc_id(player_ids[0], "pre_configure_game", room)
+			rpc_id(player_ids[1], "pre_configure_game", room)
+			server_pre_configure(room)
 	
 
 #CLIENT DOES THIS

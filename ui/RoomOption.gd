@@ -38,7 +38,7 @@ func lookgood():
 		$Name1.text = ""
 		if Globals.ROOMS[buttonnumber][0] != null:
 			var hostname = Globals.ROOMS[buttonnumber][0]
-			if get_parent().player_info.has(hostname):
+			if get_parent().player_info.has(hostname) || get_tree().get_network_unique_id() == hostname:
 				if hostname == get_tree().get_network_unique_id():
 					$Name1.text = get_parent().my_info[0]
 					Mat.set_shader_param("skin", get_parent().my_info[4])

@@ -82,7 +82,6 @@ func go_to_rules():
 	queue_free()
 	
 func go_to_settings():
-#	var settings = load("res://scenes/supportscenes/Settings.tscn").instance()
-#	get_parent().add_child(settings)
-#	queue_free()
-	pass
+	var settings = load("res://scenes/supportscenes/Settings.tscn").instance()
+	get_parent().add_child(settings)
+	queue_free()

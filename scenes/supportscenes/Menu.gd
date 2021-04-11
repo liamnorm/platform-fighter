@@ -17,6 +17,7 @@ func _ready():
 	$MainMenu.volume_db = -80
 	$RuleMenu.volume_db = -80
 	$CharacterMenu.volume_db = -80
+	$SettingsMenu.volume_db = -80
 	
 func delete_children():
 	for n in self.get_children():
@@ -29,6 +30,7 @@ func _process(_delta):
 	$MainMenu.volume_db = changevolume($MainMenu.volume_db, "MAIN")
 	$RuleMenu.volume_db = changevolume($RuleMenu.volume_db, "RULES")
 	$CharacterMenu.volume_db = changevolume($CharacterMenu.volume_db, "CSS")
+	$SettingsMenu.volume_db = changevolume($SettingsMenu.volume_db, "SETTINGS")
 	
 	
 func changevolume(vol, menu):

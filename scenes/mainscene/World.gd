@@ -271,6 +271,7 @@ func _process(_delta):
 			LEFTSCOREFRAME -= 1
 			
 		if GAMEENDFRAME == 0:
+			get_node("Sounds").get_node("Music").stream_paused = false
 			
 			var players_left = players.size()
 			for p in players:
@@ -296,6 +297,7 @@ func _process(_delta):
 					
 				
 		if GAMEENDFRAME > 0:
+			get_node("Sounds").get_node("Music").stream_paused = true
 			GAMEENDFRAME += 1
 			SLOMOFRAME += 1
 			if GAMEENDFRAME > 120:

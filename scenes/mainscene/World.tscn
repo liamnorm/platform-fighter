@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
 [ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=2]
@@ -13,6 +13,7 @@
 [ext_resource path="res://ui/fonts/biggerfontoutline.tres" type="DynamicFont" id=11]
 [ext_resource path="res://resources/sounds/REFLECT2.wav" type="AudioStream" id=12]
 [ext_resource path="res://resources/sounds/Hit4.wav" type="AudioStream" id=13]
+[ext_resource path="res://resources/sounds/music/Training.wav" type="AudioStream" id=14]
 
 [sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
@@ -209,6 +210,10 @@ stream = ExtResource( 10 )
 
 [node name="HIT4" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 13 )
+
+[node name="Music" type="AudioStreamPlayer" parent="Sounds"]
+stream = ExtResource( 14 )
+autoplay = true
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true

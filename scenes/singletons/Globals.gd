@@ -21,6 +21,8 @@ var SELECTEDMENUBUTTON = 0
 var SELECTEDRULE = 0
 var SELECTEDROOM = 0
 var MUTED = false
+var BEES = false
+var SETTINGS = "NORMAL"
 var SHOWHITBOXES = false
 
 var RULECHOICES = {
@@ -34,6 +36,10 @@ var RULECHOICES = {
 	"TIEBREAKER": 0,
 	"CPU LEVEL": 2,
 	"SCORE TO WIN": 4,
+	
+	"MUSIC": 0,
+	"BEES": 1,
+	"SETTINGS": 0,
 }
 
 #General stuff
@@ -177,7 +183,7 @@ var ONLINE = false
 var ISSERVER = false
 var CONNECTED = false
 var INGAME = false
-var ROOMS = {}
+var ROOMS = []
 
 var states = [
 	"idle",

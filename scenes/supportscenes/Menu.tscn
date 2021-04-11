@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://resources/sounds/music/Menu Character.wav" type="AudioStream" id=1]
 [ext_resource path="res://scenes/supportscenes/Menu.gd" type="Script" id=2]
 [ext_resource path="res://resources/sounds/music/Menu Rules.wav" type="AudioStream" id=3]
 [ext_resource path="res://resources/sounds/music/Menu Main.wav" type="AudioStream" id=4]
+[ext_resource path="res://resources/sounds/music/Menu Settings.wav" type="AudioStream" id=5]
 
 [node name="Menu" type="Node"]
 script = ExtResource( 2 )
@@ -20,5 +21,10 @@ autoplay = true
 
 [node name="CharacterMenu" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 1 )
+volume_db = -80.0
+autoplay = true
+
+[node name="SettingsMenu" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 5 )
 volume_db = -80.0
 autoplay = true
