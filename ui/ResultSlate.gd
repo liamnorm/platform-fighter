@@ -27,8 +27,8 @@ func display():
 	SCREENX = Globals.SCREENX
 	SCREENY = Globals.SCREENY
 	P = Globals.NUM_OF_PLAYERS
-	size = Vector2(SCREENX/P, SCREENY/2)
-	position = Vector2((playernumber-1) * size.x, SCREENY / 2)
+	size = Vector2(SCREENX/P, SCREENY/4)
+	position = Vector2((playernumber-1) * size.x, SCREENY * .75)
 	$Background.margin_right = size.x - 0
 	$Background.margin_bottom = size.y - 0
 	if !Globals.TEAMMODE:

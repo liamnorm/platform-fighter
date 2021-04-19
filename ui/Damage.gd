@@ -22,7 +22,7 @@ func _process(_delta):
 	
 	SCREENX = Globals.SCREENX
 	SCREENY = Globals.SCREENY
-	P = Globals.NUM_OF_PLAYERS
+	P = w.NUM_OF_PLAYERS
 
 	size = Vector2(SCREENX/P, 128)
 	position = Vector2((playernumber-1) * size.x, SCREENY - 128)
@@ -33,6 +33,22 @@ func _process(_delta):
 			position.x = 0
 		else:
 			position.x = SCREENX - size.x
+			
+	elif Globals.TEAMMODE:
+		var myteam = w.players[playernumber-1].team
+		var teammates = 0
+		var teamplace = 0
+		for p in w.players:
+			if p.team == myteam:
+				teammates += 1
+				if p == w.players[playernumber-1]:
+					teamplace = teammates
+		if myteam == 0:
+			position.x = (((SCREENX/2)-256)/teammates) * (teamplace-1)
+			size.x = ((SCREENX/2)-256)/teammates
+		else:
+			position.x = SCREENX/2 + 256 + ((((SCREENX/2)-256)/teammates) * (teamplace-1))
+			size.x = ((SCREENX/2)-256)/teammates
 	
 	$Color.margin_right = size.x - 0
 	$Color.margin_bottom = size.y - 0

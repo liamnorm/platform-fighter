@@ -272,7 +272,12 @@ func _process(_delta):
 			
 		if GAMEENDFRAME == 0:
 			get_node("Sounds").get_node("Music").stream_paused = false
-			
+			if Globals.MUTED:
+				get_node("Sounds").get_node("Music").volume_db = -80
+			else:
+				get_node("Sounds").get_node("Music").volume_db = 0
+				
+				
 			var players_left = players.size()
 			for p in players:
 				if p.defeated:
@@ -606,7 +611,7 @@ func bottommenu():
 		$CanvasLayer/BottomBarFront.margin_left = 0
 		$CanvasLayer/BottomBarFront.margin_right = SCREENX
 	else:
-		if NUM_OF_PLAYERS == 2:
+		if NUM_OF_PLAYERS == 2 || TEAMMODE:
 			$CanvasLayer/BottomBarFront.margin_left = SCREENX/2 - 256
 			$CanvasLayer/BottomBarFront.margin_right = SCREENX/2 + 256
 			$CanvasLayer/BottomBarFront.visible = true

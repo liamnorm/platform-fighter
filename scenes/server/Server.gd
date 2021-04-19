@@ -6,6 +6,7 @@ func _ready():
 	
 	Globals.ONLINE = true
 	Globals.ISSERVER = true
+	Globals.MUTED = true
 	lobbymade = false
 	
 func _process(_delta):
