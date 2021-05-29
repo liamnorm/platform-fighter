@@ -486,7 +486,7 @@ func behurt(ps,h,b):
 		if !ps[0].is_projectile:
 			ps[0].has_airdodge = true
 			ps[0].floatframe = ps[0].FLOATTIME
-			ps[1].has_double_jump = true
+			#ps[1].has_double_jump = true
 		ps[0].motion = Vector2(0,0)
 		ps[0].hitter_motion = ps[1].motion * .1
 		ps[0].player_who_last_hit_me = ps[1].playernumber
