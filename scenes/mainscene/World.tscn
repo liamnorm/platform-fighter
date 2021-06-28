@@ -1,6 +1,5 @@
 [gd_scene load_steps=20 format=2]
 
-[ext_resource path="res://ui/fonts/font.tres" type="DynamicFont" id=1]
 [ext_resource path="res://ui/fonts/smallerfont.tres" type="DynamicFont" id=2]
 [ext_resource path="res://scenes/supportscenes/Camera2D.gd" type="Script" id=3]
 [ext_resource path="res://ui/FPS.gd" type="Script" id=4]
@@ -14,6 +13,7 @@
 [ext_resource path="res://resources/sounds/REFLECT2.wav" type="AudioStream" id=12]
 [ext_resource path="res://resources/sounds/Hit4.wav" type="AudioStream" id=13]
 [ext_resource path="res://resources/sounds/music/Training.wav" type="AudioStream" id=14]
+[ext_resource path="res://ui/PauseMenuOption.tscn" type="PackedScene" id=15]
 
 [sub_resource type="Shader" id=1]
 code = "shader_type canvas_item;
@@ -61,19 +61,18 @@ code = "shader_type canvas_item;
 void fragment(){
 	vec2 choppyUV = vec2(floor(UV.x*256.)/256., floor(UV.y*256.)/256.);
 	vec4 col;
-	vec4 inside = vec4(0,0,0,1);
+	vec4 inside = vec4(1,1,1,1);
 	vec4 white = vec4(1,1,1,1);
 	vec4 black = vec4(0,0,0,1);
 	vec4 empty = vec4(1,1,1,0);
 	col = inside;
-			col.a = 0.8;
-			col.a += float(
-				int(
-					((int(choppyUV.x*32.+TIME*4.)%2)+
-					(int(choppyUV.y*32.+TIME*4.)%2)
-					)%2)
-					
-					)*.45;
+	col.a = 0.9;
+	col.a += float(
+		int(
+			((int(choppyUV.x*32.+TIME*4.)%2)+
+			(int(choppyUV.y*32.+TIME*4.)%2)
+			)%2)
+		)*.45;
 	COLOR = col;
 }
 "
@@ -125,20 +124,8 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Pause" type="RichTextLabel" parent="CanvasLayer"]
-margin_left = 48.0
-margin_top = 812.0
-margin_right = 384.0
-margin_bottom = 869.0
-custom_fonts/normal_font = ExtResource( 1 )
-text = "PAUSED"
-scroll_active = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="PauseEffect" type="ColorRect" parent="CanvasLayer"]
-modulate = Color( 0, 0, 0, 0.298039 )
+modulate = Color( 0.545098, 0.545098, 0.545098, 0.298039 )
 material = SubResource( 4 )
 margin_right = 1440.0
 margin_bottom = 768.0
@@ -147,6 +134,8 @@ __meta__ = {
 }
 
 [node name="Message" type="Label" parent="CanvasLayer"]
+anchor_left = 0.000981331
+anchor_right = 0.000981331
 margin_right = 1440.0
 margin_bottom = 768.0
 custom_fonts/font = ExtResource( 11 )
@@ -181,6 +170,12 @@ align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Resume" parent="CanvasLayer" instance=ExtResource( 15 )]
+position = Vector2( 718.991, 491.602 )
+
+[node name="Quit" parent="CanvasLayer" instance=ExtResource( 15 )]
+position = Vector2( 718.991, 559.932 )
 
 [node name="Sounds" type="Node" parent="."]
 

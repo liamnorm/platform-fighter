@@ -277,6 +277,15 @@ func upspecial():
 			motion = Vector2(0,0)
 			if frame == 1:
 				direction = Vector2(0,-1)
+				
+				var effect = EFFECT.instance()
+				effect.position = get_position()
+				effect.d = d
+				effect.myframe = 0
+				effect.playernumber = playernumber
+				effect.skin = skin
+				effect.effecttype = "fire"
+				w.add_child(effect)
 			
 			if frame %3 == 0 && frame > 12:
 				#hitbox(1, Vector2(-48,-48), Vector2(48, 48), 1, -100, 0, 0, 1, 3)

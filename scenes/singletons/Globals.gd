@@ -18,9 +18,10 @@ var CSSBACKFRAME = 0
 
 #Menu stuff / options
 var SELECTEDMENUBUTTON = 0
+var SELECTEDPAUSEMENUBUTTON = 0
 var SELECTEDRULE = 0
 var SELECTEDROOM = 0
-var MUTED = false
+var MUTED = true
 var BEES = false
 var SETTINGS = "NORMAL"
 var SHOWHITBOXES = false

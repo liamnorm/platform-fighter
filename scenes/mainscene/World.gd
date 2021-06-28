@@ -34,6 +34,7 @@ var LEFTSCORE = 0
 
 var FRAME = 0
 var PAUSED = false
+var PLAYERPAUSING = 0
 var IMPACTFRAME = 0
 var GAMEENDFRAME = 0
 var SLOMOFRAME = 0
@@ -49,6 +50,9 @@ var CSSBACKFRAME = 0
 var COMBO = 0
 
 var spawnpositions
+
+var buttons
+var buttonnames
 
 
 var players = []
@@ -162,6 +166,16 @@ func _ready():
 		if GAMEMODE == "SOCCER":
 			spawnball()
 	
+	
+	buttons = [$CanvasLayer/Resume, 
+	$CanvasLayer/Quit]
+	buttonnames = ["RESUME", "QUIT"]
+
+	
+	for i in range(2):
+		buttons[i].get_node("Text").text = buttonnames[i]
+		buttons[i].buttonnumber = i
+		buttons[i].visible = PAUSED
 
 static func delete_children(node):
 	for n in node.get_children():
@@ -214,8 +228,41 @@ func _process(_delta):
 		
 		
 		if !ONLINE:
-			if Input.is_action_just_pressed("pause"):
-				PAUSED = !PAUSED
+			
+			if !PAUSED:
+				var pressing_pause = -1
+				for p in range(8):
+					var c = str(p)
+					if c == "0":
+						c = ""
+					if Input.is_action_just_pressed("pause" + c):
+						pressing_pause = p
+				if pressing_pause > -1:
+					if FRAME > 0:
+						PAUSED = true
+						Globals.SELECTEDPAUSEMENUBUTTON = 0
+						PLAYERPAUSING = pressing_pause + 1
+			
+			else:
+				var c = str(PLAYERPAUSING - 1)
+				if c == "0":
+					c = ""
+				if Input.is_action_just_pressed("pause" + c):
+					PAUSED = false
+					PLAYERPAUSING = -1
+					
+				if Input.is_action_just_pressed("jump" + c):
+					Globals.SELECTEDPAUSEMENUBUTTON = 0
+					
+				if Input.is_action_just_pressed("down" + c):
+					Globals.SELECTEDPAUSEMENUBUTTON = 1
+				
+				if Input.is_action_just_pressed("attack" + c):
+					if Globals.SELECTEDPAUSEMENUBUTTON == 1:
+						go_to_menu()
+					else:
+						PAUSED = false
+						PLAYERPAUSING = -1
 			
 			if Input.is_action_just_pressed("select"):
 				SHOWHITBOXES = !SHOWHITBOXES
@@ -619,15 +666,8 @@ func bottommenu():
 			$CanvasLayer/BottomBarFront.visible = false
 	$CanvasLayer/BottomBarFront.margin_top = SCREENY - 128
 	$CanvasLayer/BottomBarFront.margin_bottom = SCREENY
+
 	
-	
-	var margin = 20
-	$CanvasLayer/Pause.margin_left = 0 + margin
-	$CanvasLayer/Pause.margin_right = SCREENX + 128 - margin
-	$CanvasLayer/Pause.margin_top = SCREENY - 128 + margin
-	$CanvasLayer/Pause.margin_bottom = SCREENY + 128 - margin
-	
-	$CanvasLayer/Pause.visible = PAUSED
 	$CanvasLayer/PauseEffect.visible = PAUSED
 	if PAUSED:
 		$CanvasLayer/PauseEffect.margin_left = 0
@@ -656,7 +696,7 @@ func bottommenu():
 		$CanvasLayer/Message.set("custom_colors/font_color", Color(1,1,1,1))
 		$CanvasLayer/Message.visible = true
 		$CanvasLayer/Message.text = "GAME!"
-	elif ELIMINATIONFRAME > 0:
+	elif ELIMINATIONFRAME > 0 && ELIMINATIONFRAME < 119:
 		$CanvasLayer/Message.visible = true
 		if ELIMINATEDPLAYER > 0:
 			$CanvasLayer/Message.text = "PLAYER " + str(players[ELIMINATEDPLAYER-1].controller) + "\nDEFEATED"
@@ -709,6 +749,14 @@ func bottommenu():
 			$CanvasLayer/Message.text = "GAME!"
 	else:
 		$CanvasLayer/Message.visible = false
+	
+	if PAUSED:
+		$CanvasLayer/Message.visible = false
+	
+	
+	for i in range(2):
+		buttons[i].position.x = SCREENX/2
+		buttons[i].position.y = SCREENY - 16 - ((2-i) * 48)
 
 func background():
 	
@@ -786,12 +834,15 @@ func background():
 		$CanvasLayer/Score.visible = false
 		$CanvasLayer/Time.visible = true
 		$CanvasLayer/Time.text = thetext
-		if players.size() == 2:
+		if players.size() == 2 && !GAMEMODE == "TRAINING":
 			$CanvasLayer/Score.text = str(players[0].stock) + "-" + str(players[1].stock)
 			$CanvasLayer/Score.visible = true
 		$CanvasLayer/Time.visible = FRAME > 0
 		$CanvasLayer/Time.text = thetext
 				
+	
+	if PAUSED:
+		$CanvasLayer/Score.visible = false
 				
 				
 func playsound(sound):

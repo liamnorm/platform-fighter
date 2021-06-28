@@ -865,6 +865,8 @@ func statebasedaction():
 	else:
 		floating = false
 	if floating:
+		if state == "hit":
+			be("jump")
 		in_fast_fall = false
 		motion.y = 0
 		floatframe -= 1
@@ -1166,6 +1168,14 @@ func doublejump():
 	in_fast_fall = false
 	double_jump_frame = DOUBLEJUMPFRAMES
 	motion.y = -DOUBLEJUMPFORCE
+	
+	var effect = EFFECT.instance()
+	effect.position = get_position() + Vector2(0, 60)
+	effect.d = d
+	effect.myframe = 0
+	effect.playernumber = playernumber
+	effect.effecttype = "doublejump"
+	w.add_child(effect)
 	
 func fast_fall():
 	in_fast_fall = true

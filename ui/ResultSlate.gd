@@ -15,7 +15,7 @@ func start(i):
 		p = Globals.RESULTDATA[i-1]
 	else:
 		queue_free()
-	Mat = $TextureRect.get_material()
+	Mat = $Portrait.get_material()
 
 func _ready():
 	pass
@@ -40,9 +40,9 @@ func display():
 			$Background.color = Globals.RIGHTCOLOR
 	$Background.color.a = 0.7
 	
-	$TextureRect.margin_left = size.x/2 - 256
-	$TextureRect.margin_bottom = size.y
-	$TextureRect.margin_top = size.y - SCREENY/2
+#	$TextureRect.margin_left = size.x/2 - 256
+#	$TextureRect.margin_bottom = size.y
+#	$TextureRect.margin_top = size.y - SCREENY/2
 
 	
 	$Label.margin_left = 16
@@ -82,11 +82,11 @@ func display():
 func updatetexture():
 	if Globals.playerchars[playernumber-1] >= 0:
 		var c = Globals.characterdirectories[0]
-		$TextureRect.texture = load("res://characters/" + c + "/cssportrait.png")
+		#$TextureRect.texture = load("res://characters/" + c + "/cssportrait.png")
 		Mat.set_shader_param("palette_tex",load("res://characters/" + c + "/palette.png"))
-		$TextureRect.visible = true
+		$Portrait.visible = true
 		$Label.visible = true
 	else:
-		$TextureRect.visible = false
+		$Portait.visible = false
 		$Label.visible = false
 	

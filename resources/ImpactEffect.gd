@@ -7,6 +7,8 @@ onready var FOXSIDE = preload("res://characters/spacedog/foxside.png")
 onready var EXPLOSION = preload("res://resources/explosion.png")
 onready var REFLECT = preload("res://resources/reflect.png")
 onready var GLIMMER = preload("res://resources/glimmer.png")
+onready var DOUBLEJUMP = preload("res://resources/jumpeffect.png")
+onready var FIRE = preload("res://resources/constantfire.png")
 
 var SPEED = 3000
 var LIFESPAN = 15
@@ -69,6 +71,14 @@ func draweffect():
 				frame = myframe / 4
 				if frame > 7:
 					frame = 7
+			"doublejump":
+				vframes = 1
+				hframes = 8
+				LIFESPAN = 24
+				texture = DOUBLEJUMP
+				frame = myframe / 4
+				if frame > 7:
+					frame = 7
 			"foxside":
 				vframes = 1
 				hframes = 1
@@ -101,6 +111,15 @@ func draweffect():
 				texture = EXPLOSION
 				LIFESPAN = 40
 				frame = myframe / 4
+			"fire":
+				vframes = 1
+				hframes = 6
+				texture = FIRE
+				LIFESPAN = 80
+				frame = (myframe / 4) % 6
+				if  w.players[playernumber-1].state != "upspecial":
+					queue_free()
+				position = w.players[playernumber-1].get_position()
 			"reflect":
 				vframes = 2
 				hframes = 4
