@@ -179,8 +179,8 @@ script = ExtResource( 9 )
 material = SubResource( 2 )
 position = Vector2( 0, 8 )
 texture = ExtResource( 10 )
-vframes = 21
 hframes = 8
+vframes = 21
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
@@ -208,9 +208,11 @@ __meta__ = {
 
 [node name="BLASTERSTART" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 14 )
+volume_db = -15.0
 
 [node name="PEW" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 5 )
+volume_db = -20.0
 
 [node name="KO" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 6 )
@@ -219,6 +221,7 @@ stream = ExtResource( 6 )
 
 [node name="SHIELDOPEN" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 1 )
+volume_db = -15.0
 
 [node name="WALK0" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 7 )
@@ -231,6 +234,7 @@ stream = ExtResource( 12 )
 
 [node name="SQUISHY" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 3 )
+volume_db = -10.0
 
 [node name="LEDGE" type="AudioStreamPlayer" parent="Sounds"]
 stream = ExtResource( 11 )

@@ -208,7 +208,10 @@ func _physics_process(_delta):
 							defeattime = w.FRAME
 							if w.GAMEENDFRAME == 0:
 								w.ELIMINATIONFRAME = 120
-								w.ELIMINATEDPLAYER = playernumber
+								if controller == 0:
+									w.ELIMINATEDPLAYER = playernumber
+								else:
+									w.ELIMINATEDPLAYER = 0
 #								var players_left = 0
 #								var winner = 0
 #								for p in w.players:
@@ -1423,23 +1426,38 @@ func get_input():
 
 
 		elif controller > 0:
-			var c = str(controller-1)
-			if controller == 1:
-				c = ""
 			input = [
-				Input.is_action_pressed("right" + c),
-				Input.is_action_pressed("left" + c),
-				Input.is_action_pressed("jump" + c),
-				Input.is_action_pressed("down" + c),
-				Input.is_action_pressed("special" + c),
-				Input.is_action_pressed("attack" + c),
-				Input.is_action_pressed("shield" + c),
-				Input.is_action_pressed("extra" + c),
-				Input.is_action_pressed("rightattack" + c),
-				Input.is_action_pressed("leftattack" + c),
-				Input.is_action_pressed("upattack" + c),
-				Input.is_action_pressed("downattack" + c),
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
 			]
+			if controller <= 3:
+				var c = str(controller-1)
+				if controller == 1:
+					c = ""
+				input = [
+					Input.is_action_pressed("right" + c),
+					Input.is_action_pressed("left" + c),
+					Input.is_action_pressed("jump" + c),
+					Input.is_action_pressed("down" + c),
+					Input.is_action_pressed("special" + c),
+					Input.is_action_pressed("attack" + c),
+					Input.is_action_pressed("shield" + c),
+					Input.is_action_pressed("extra" + c),
+					Input.is_action_pressed("rightattack" + c),
+					Input.is_action_pressed("leftattack" + c),
+					Input.is_action_pressed("upattack" + c),
+					Input.is_action_pressed("downattack" + c),
+				]
 			
 		#for when the stick flicks
 		if prev_input[0]:

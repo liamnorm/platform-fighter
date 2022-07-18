@@ -69,20 +69,21 @@ func display():
 		
 func controls():
 	just_selected = false
-	var input = [false,false,false,false,false,false]
-	var c = str(playernumber-1)
-	if playernumber == 1:
-		c = ""
-	input = [
-		Input.is_action_pressed("right" + c),
-		Input.is_action_pressed("left" + c),
-		Input.is_action_pressed("jump" + c),
-		Input.is_action_pressed("down"+ c),
-		Input.is_action_just_pressed("attack" + c),
-		Input.is_action_just_pressed("special" + c),
-		Input.is_action_just_pressed("shield" + c),
-		Input.is_action_just_pressed("extra" + c)
-	]
+	var input = [false,false,false,false,false,false,false,false]
+	if playernumber <= 3: #hardcoded number of player inputs
+		var c = str(playernumber-1)
+		if playernumber == 1:
+			c = ""
+		input = [
+			Input.is_action_pressed("right" + c),
+			Input.is_action_pressed("left" + c),
+			Input.is_action_pressed("jump" + c),
+			Input.is_action_pressed("down"+ c),
+			Input.is_action_just_pressed("attack" + c),
+			Input.is_action_just_pressed("special" + c),
+			Input.is_action_just_pressed("shield" + c),
+			Input.is_action_just_pressed("extra" + c)
+		]
 	
 	if input[0]:
 		pos.x += xspeed

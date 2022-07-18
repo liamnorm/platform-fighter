@@ -312,8 +312,12 @@ func upspecial():
 			var down = "down" + c
 			var right = "right" + c
 			var left = "left" + c
-			var vert = Input.get_action_strength(down) - Input.get_action_strength(up)
-			var hor = Input.get_action_strength(right) - Input.get_action_strength(left)
+			var vert = 0 
+			if controller > 0: 
+				vert = Input.get_action_strength(down) - Input.get_action_strength(up)
+			var hor = 0
+			if controller > 0:
+				hor = Input.get_action_strength(right) - Input.get_action_strength(left)
 			if vert != 0 || hor != 0:
 				direction = Vector2(hor, vert)
 				direction *= 1/direction.length()

@@ -11,8 +11,11 @@ var Mat
 
 func start(i):
 	playernumber = i
-	if i <= Globals.RESULTDATA.size():
-		p = Globals.RESULTDATA[i-1]
+	if is_instance_valid((Globals.RESULTDATA)):
+		if i <= Globals.RESULTDATA.size():
+			p = Globals.RESULTDATA[i-1]
+		else:
+			queue_free()
 	else:
 		queue_free()
 	Mat = $Portrait.get_material()

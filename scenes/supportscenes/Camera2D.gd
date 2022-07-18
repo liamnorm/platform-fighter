@@ -67,7 +67,7 @@ func _process(_delta):
 					maxy = max(maxy, pypos + smargy)
 					
 		for i in range(len(w.projectiles)):
-			if w.projectiles[i]!=null:
+			if is_instance_valid(w.projectiles[i]):
 				if w.projectiles[i].important_to_camera:
 					var pxpos = w.projectiles[i].get_position().x
 					var pypos = w.projectiles[i].get_position().y

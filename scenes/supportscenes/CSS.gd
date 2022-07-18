@@ -14,6 +14,8 @@ func _ready():
 	
 	Globals.MENU = "CSS"
 	
+	print("CSS")
+	
 	Mat = $Sprite.get_material()
 	if !Globals.ONLINE:
 		if Globals.NUM_OF_PLAYERS < 2:

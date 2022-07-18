@@ -235,8 +235,9 @@ func _process(_delta):
 					var c = str(p)
 					if c == "0":
 						c = ""
-					if Input.is_action_just_pressed("pause" + c):
-						pressing_pause = p
+					if p <= 3: # Hardcoded number of player inputs :(
+						if Input.is_action_just_pressed("pause" + c):
+							pressing_pause = p
 				if pressing_pause > -1:
 					if FRAME > 0:
 						PAUSED = true
@@ -373,8 +374,9 @@ func spaceoutplayers():
 		pushythings.append(p)
 	for p in projectiles:
 		if p != null:
-			if p.pushable:
-				pushythings.append(p)
+			#if p.pushable:
+				#pushythings.append(p)
+			pass
 	for i in range(pushythings.size()):
 		for j in range(i+1,pushythings.size()):
 			var ps = [pushythings[i], pushythings[j]]
@@ -419,7 +421,7 @@ func interactions():
 						
 		#player detecting projectile
 		for p in projectiles:
-			if p != null:
+			if is_instance_valid(p):
 				var ps = [players[i], p]
 				for h in ps[1].hitboxes:
 					for b in range(len(h.topleft)):
@@ -427,7 +429,7 @@ func interactions():
 	
 		#projectile detecting player
 		for p in projectiles:
-			if p != null:
+			if is_instance_valid(p):
 				var ps = [p, players[i]]
 				for h in ps[1].hitboxes:
 					for b in range(len(h.topleft)):
